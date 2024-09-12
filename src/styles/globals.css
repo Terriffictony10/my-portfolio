@@ -2,26 +2,109 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+
+@font-face {
+  font-family: 'MyCustomFont';
+  src: url('./cyberfont.otf') format('opentype'); /* Specify OTF format */
+  font-weight: normal;
+  font-style: normal;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+
+*{
+  margin: 0;
+  padding: 0;
+}
+body{
+  min-height: 100vh;
+  background-image: url(background-image.jpg);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  font-family: 'MyCustomFont';
+  color: #FD5E53;
+}
+
+nav{
+  background-color: rgba(253, 94, 83, 0.2);
+  backdrop-filter: blur(5px);
+  box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.1);
+}
+
+nav ul{
+  width: 100%;
+  list-style: none;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+nav li{
+  height: 120px;
+}
+nav a{
+  height: 100%;
+  padding: 0 30px;
+  display: flex;
+  align-items: center;
+  color: black;
+  font-size: 1.5rem;
+}
+.big{
+  font-size: 2.8rem ;
+  color: black;
+}
+.menu{
+  display: none;
+  z-index: 10;
+}
+
+.centered{
+  display: flex;
+  justify-content: center; /* Horizontally centers the X */
+  align-items: center;
+  background-color: black;
+  backdrop-filter: blur(0px)!important;
+}
+nav a:hover{
+  background-color: rgba(253, 94, 83, 0.35);
+  backdrop-filter: blur(5px);
+}
+nav li:first-child{
+  margin-right: auto;
+}
+.sidebar{
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: 250px;
+  z-index: 999;
+  background-color: rgba(253, 94, 83, 0.2);
+  backdrop-filter: blur(5px);
+  box-shadow: -10px 0 10px rgba(0, 0, 0, 0.1);
+  display: none;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+.sidebar li{
+  height: 50 px;
+  width: 100%;
+}
+.sidebar a{
+  width: 100%;
+}
+
+@media(max-width: 800px){
+  .hideOnMobile{
+    display: none;
+  }
+  .menu{
+    display: block!important;
   }
 }
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+@media(max-width: 400px){
+  .sidebar{
+    width: 100%;
   }
 }
