@@ -23,10 +23,12 @@ body{
   background-position: center;
   font-family: 'MyCustomFont';
   color: #FD5E53;
+  display: flex;
+  flex-direction: column;
 }
 
 nav{
-  background-color: rgba(253, 94, 83, 0.2);
+  background-color: rgba(55, 56, 61, 0.2);
   backdrop-filter: blur(5px);
   box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.1);
 }
@@ -46,12 +48,12 @@ nav a{
   padding: 0 30px;
   display: flex;
   align-items: center;
-  color: black;
+  color: white;
   font-size: 1.5rem;
 }
 .big{
-  font-size: 2.8rem ;
-  color: black;
+  font-size: 2.6rem ;
+  color: white;
 }
 .menu{
   display: none;
@@ -66,7 +68,7 @@ nav a{
   backdrop-filter: blur(0px)!important;
 }
 nav a:hover{
-  background-color: rgba(253, 94, 83, 0.35);
+  background-color: rgba(55, 56, 61, 0.35);
   backdrop-filter: blur(5px);
 }
 nav li:first-child{
@@ -79,7 +81,7 @@ nav li:first-child{
   height: 100vh;
   width: 250px;
   z-index: 999;
-  background-color: rgba(253, 94, 83, 0.2);
+  background-color: rgba(55, 56, 61, 0.5);
   backdrop-filter: blur(5px);
   box-shadow: -10px 0 10px rgba(0, 0, 0, 0.1);
   display: none;
@@ -95,6 +97,22 @@ nav li:first-child{
   width: 100%;
 }
 
+.crowdsaleBody{
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 50px;
+}
+.Crowdsale{
+  height: 500px;
+  width: 1200px;
+  background-color: rgba(55, 56, 61, 0.5);
+  backdrop-filter: blur(5px);
+  box-shadow: -10px 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 30px;
+}
+
 @media(max-width: 800px){
   .hideOnMobile{
     display: none;
@@ -106,5 +124,6 @@ nav li:first-child{
 @media(max-width: 400px){
   .sidebar{
     width: 100%;
+    backdrop-filter: blur(5px);
   }
 }

@@ -30,19 +30,24 @@ export default function Home() {
     };
   }, []);
 
+  const navigateToCrowdsale = () => {
+    window.location.href = '/Crowdsale';
+  };
+
   return (
+    <div>
     <div>
       <title>Decentratatlity</title>
       <nav>
         <ul className="sidebar">
           <li onClick={hideSidebar}>
             <a href="#" className="centered">
-              <svg xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="15 -960 960 960" width="48px" fill="#FD5E53">
+              <svg xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="15 -960 960 960" width="48px" fill="white">
                 <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
               </svg>
             </a>
           </li>
-          <li><a href="#">Crowdsale</a></li>
+          <li onClick={navigateToCrowdsale}><a href="#">Crowdsale</a></li>
           <li><a href="#">DAO</a></li>
           <li><a href="#">About</a></li>
           <li><a href="#">Project</a></li>
@@ -50,20 +55,25 @@ export default function Home() {
         </ul>
         <ul>
           <li><a href="#" className="big">Decentratality</a></li>
-          <li className="hideOnMobile"><a href="#">Crowdsale</a></li>
+          <li className="hideOnMobile" onClick={navigateToCrowdsale}><a href="#">Crowdsale</a></li>
           <li className="hideOnMobile"><a href="#">DAO</a></li>
           <li className="hideOnMobile"><a href="#">About</a></li>
           <li className="hideOnMobile"><a href="#">Project</a></li>
           <li className="hideOnMobile"><a href="#">Demo</a></li>
           <li onClick={showSidebar} className="menu">
             <a href="#">
-              <svg xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 -960 960 960" width="48px" fill="#FD5E53">
+              <svg xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 -960 960 960" width="48px" fill="white">
                 <path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z" />
               </svg>
             </a>
           </li>
         </ul>
       </nav>
+    </div>
+
+    <div>
+
+    </div>
     </div>
   );
 }
