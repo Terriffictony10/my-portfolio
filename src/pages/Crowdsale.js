@@ -37,6 +37,9 @@ export default function Home() {
     window.location.href = '/';
   };
 
+  const navigateToNFT = () => {
+    window.location.href = '/NFT';
+  };
   return (
     <div>
     <div>
@@ -50,7 +53,8 @@ export default function Home() {
               </svg>
             </a>
           </li>
-          <li><a href="#">Crowdsale</a></li>
+          <li onClick={navigateToCrowdsale}><a href="#">Crowdsale</a></li>
+          <li onClick={navigateToNFT}><a href="#">NFT</a></li>
           <li><a href="#">DAO</a></li>
           <li><a href="#">About</a></li>
           <li><a href="#">Project</a></li>
@@ -59,6 +63,7 @@ export default function Home() {
         <ul>
           <li><a href="#" className="big" onClick={navigateToIndex}>Decentratality</a></li>
           <li className="hideOnMobile" onClick={navigateToCrowdsale}><a href="#">Crowdsale</a></li>
+          <li className="hideOnMobile" onClick={navigateToNFT}><a href="#">NFT</a></li>
           <li className="hideOnMobile"><a href="#">DAO</a></li>
           <li className="hideOnMobile"><a href="#">About</a></li>
           <li className="hideOnMobile"><a href="#">Project</a></li>
@@ -76,6 +81,7 @@ export default function Home() {
 
     <div className="crowdsaleBody">
       <div className="Crowdsale">
+
       </div>
     </div>
     </div>

@@ -52,7 +52,7 @@ nav a{
   font-size: 1.5rem;
 }
 .big{
-  font-size: 2.6rem ;
+  font-size: 1.8rem ;
   color: white;
 }
 .menu{
@@ -126,4 +126,8 @@ nav li:first-child{
     width: 100%;
     backdrop-filter: blur(5px);
   }
+  .big{
+  font-size: 2.0rem ;
+  color: white;
+}
 }
