@@ -1,4 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { Container } from 'react-bootstrap';
+import { ethers } from 'ethers'
+
+import CrowdsaleBody from "../components/crowdsaleBody.js"
 
 export default function Home() {
   const showSidebar = () => {
@@ -40,6 +44,7 @@ export default function Home() {
   const navigateToNFT = () => {
     window.location.href = '/NFT';
   };
+
   return (
     <div>
     <div>
@@ -80,8 +85,8 @@ export default function Home() {
     </div>
 
     <div className="crowdsaleBody">
-      <div className="Crowdsale">
-
+      <div className="Crowdsale-glass">
+        <CrowdsaleBody className="Crowdsale"/>
       </div>
     </div>
     </div>

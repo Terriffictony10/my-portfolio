@@ -20,8 +20,8 @@ async function main() {
   	const recipient = accounts[4]
 
 
-	const Token = await hre.ethers.getContractFactory("Token")
-	const token = await Token.deploy('Decentratality', SYMBOL, MAX_SUPPLY)
+	const Token = await hre.ethers.getContractFactory("Decentratality")
+	const token = await Token.deploy()
 	
 	
 
@@ -30,8 +30,8 @@ async function main() {
 	
 
 	const Crowdsale = await hre.ethers.getContractFactory('Crowdsale')
+
 	const crowdsale = await Crowdsale.deploy(token.target, PRICE, ethers.parseUnits(MAX_SUPPLY, 'ether'))
-	
 
 	console.log(`Crowdsale deployed to: ${crowdsale.target}\n`)
 

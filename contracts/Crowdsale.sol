@@ -1,11 +1,11 @@
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "./Token.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract Crowdsale {
 	address public owner;
-	Token public token;
+	ERC20 public token;
 	uint256 public price;
 	uint256 public maxTokens;
 	uint256 public tokensSold;
@@ -15,7 +15,7 @@ contract Crowdsale {
 
 
 	constructor(
-		Token _token,
+		ERC20 _token,
 		uint256 _price,
 		uint256 _maxTokens
 		) {

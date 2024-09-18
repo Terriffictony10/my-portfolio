@@ -23,6 +23,8 @@ body{
   background-position: center;
   font-family: 'MyCustomFont';
   color: #FD5E53;
+}
+.body{
   display: flex;
   flex-direction: column;
 }
@@ -98,20 +100,95 @@ nav li:first-child{
 }
 
 .crowdsaleBody{
-  flex: 1;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding-top: 50px;
+  padding: 90px 0px 0px 0px;
+
 }
-.Crowdsale{
+.Crowdsale-glass{
   height: 500px;
   width: 1200px;
   background-color: rgba(55, 56, 61, 0.5);
   backdrop-filter: blur(5px);
   box-shadow: -10px 0 10px rgba(0, 0, 0, 0.1);
   border-radius: 30px;
+  position: relative;
 }
+.Crowdsale{
+  height: 500px;
+  width: 1200px;
+  color: white;
+  font-size: 1.0rem;
+  position: absolute;
+}
+.crowdsaleUi{
+  background-image: url("buyBackground.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 500px;
+  height: 452px;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Fixed typo */
+  justify-content: center; /* Fixed typo */
+  position: relative;
+  padding: 0px 0px 0px 0px;
+  border-radius: 30px;
+}
+.crowdsaleUi::before{
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+.content {
+  z-index: 2; /* Ensure content is above the overlay */
+}
+
+.text-body{
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 900px 0px 0px;
+}
+.video{
+  width: 65vh;
+  transform: rotate(180deg);
+  
+  display: flex;
+  justify-content: flex-end; 
+  align-items: flex-end;
+
+}
+.video-specs{
+  border-radius: 3.1rem;
+  filter: blur(2px);
+  opacity: 0.7;
+}
+.page-text{
+  padding: 30px 30px 30px 30px;
+  font-size: 1.0rem ;
+  position: absolute;
+  transform: rotate(180deg);
+  color: white;
+  text-shadow: 5px 5px 4px rgba(0, 0, 0, 0.9);
+}
+
+
+/* Ensure the video background container has the right size */
+
+
 
 @media(max-width: 800px){
   .hideOnMobile{

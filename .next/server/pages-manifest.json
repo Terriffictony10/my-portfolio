@@ -1,8 +1,6 @@
 {
   "/_app": "pages/_app.js",
-  "/_document": "pages/_document.js",
   "/_error": "pages/_error.js",
-  "/": "pages/index.js",
-  "/Crowdsale": "pages/Crowdsale.js",
-  "/NFT": "pages/NFT.js"
+  "/_document": "pages/_document.js",
+  "/Crowdsale": "pages/Crowdsale.js"
 }

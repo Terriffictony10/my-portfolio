@@ -14,12 +14,13 @@ describe("Crowdsale", () => {
 
 		const Crowdsale = await ethers.getContractFactory("Crowdsale")
 
-		const Token = await ethers.getContractFactory("Token")
-		token = await Token.deploy("Decentratality", 'DHPT', '1000000')
+		const Token = await ethers.getContractFactory("Decentratality")
+		token = await Token.deploy()
 
 		accounts = await ethers.getSigners()
 		deployer = accounts[0]
 		user1 = accounts[1]
+		await token.approve(deployer.address, tokens(1000000))
 		
 		crowdsale = await Crowdsale.deploy(token.target, ether(1), '1000000')
 		
