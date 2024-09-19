@@ -10,7 +10,7 @@ const tokens = (n) => {
 const ether = tokens
 
 describe('Decentratality', () => {
-  let decentratality, accounts, deployer, receiver, exchange, decentratalityServiceFactory, user1, restaurant
+  let decentratality, accounts, deployer, receiver, exchange, decentratalityServiceFactory, user1, restaurant, customer
 
   beforeEach(async () => {
     const Token = await ethers.getContractFactory('Decentratality')
@@ -23,6 +23,7 @@ describe('Decentratality', () => {
     receiver = accounts[1]
     exchange = accounts[2]
     user1 = accounts[3]
+    customer = accounts[4];
   })
 
   describe('Deployment', () => {
@@ -335,8 +336,19 @@ it('rejects hiring an employee for a non-existent job', async () => {
             transaction = await posContract.addMenuItem(itemCost, itemName);
             result = await transaction.wait();
 
+            event = result.logs.find(log => 
+                log.topics[0] === ethers.id("menuItemAdded(string,uint256,uint256)")
+            );
+
+            decodedEvent = ethers.AbiCoder.defaultAbiCoder().decode(
+                ['string', 'uint256', 'uint256'], 
+                event.data
+            );
+
+            const index = decodedEvent[1]
+
             // Remove the menu item
-            transaction = await posContract.removeMenuItem(1);
+            transaction = await posContract.removeMenuItem(1, index);
             result = await transaction.wait();
 
             // Verify the menu item has been removed
@@ -360,10 +372,113 @@ it('rejects hiring an employee for a non-existent job', async () => {
 
     describe('Failure', () => {
         it('reverts when removing a non-existent menu item', async () => {
-            await expect(posContract.removeMenuItem(999)).to.be.reverted;
+            await expect(posContract.removeMenuItem(999, 1)).to.be.reverted;
         });
     });
 });
+describe('POS Ticket Payment', () => {
+    let pos, posId, posContract, transaction, result, event, decodedEvent;
+    const itemName1 = "Burger";
+    const itemCost1 = ethers.parseUnits('5', 'ether'); // 5 ether for a burger
+    const itemName2 = "Pizza";
+    const itemCost2 = ethers.parseUnits('7', 'ether'); // 7 ether for a pizza
+    let customer, totalCost;
+
+    beforeEach(async () => {
+        // Create the restaurant and POS first
+        transaction = await decentratalityServiceFactory.createRestaurant('Montecito', ether(100), { value: ether(100) });
+        result = await transaction.wait();
+
+        event = result.logs.find(log => 
+            log.topics[0] === ethers.id("RestaurantCreated(address,uint256,address)")
+        );
+
+        decodedEvent = ethers.AbiCoder.defaultAbiCoder().decode(
+            ['address', 'uint256', 'address'], 
+            event.data
+        );
+
+        restaurant = decodedEvent[0];
+        restaurantId = decodedEvent[1];
+        restaurantOwner = decodedEvent[2];
+        restaurantContract = new ethers.Contract(restaurant, restaurantABI, deployer);
+
+        // Create the POS
+        transaction = await restaurantContract.createPOS('POS #1', { value: ether(50) });
+        result = await transaction.wait();
+
+        event = result.logs.find(log => 
+            log.topics[0] === ethers.id("POSCreated(address,uint256,address)")
+        );
+
+        decodedEvent = ethers.AbiCoder.defaultAbiCoder().decode(
+            ['address', 'uint256', 'address'], 
+            event.data
+        );
+
+        pos = decodedEvent[0];
+        posId = decodedEvent[1];
+        const posABI = require('../src/abis/POS.json').abi;
+        posContract = new ethers.Contract(pos, posABI, deployer);
+
+        customer = accounts[4]; // Assign customer account
+
+        // Add some menu items
+        await posContract.addMenuItem(itemCost1, itemName1);
+        await posContract.addMenuItem(itemCost2, itemName2);
+
+        totalCost = itemCost1 + itemCost2; // ethers.js v6 BigInt arithmetic
+    });
+
+    it('should allow a customer to pay for a ticket after adding orders', async () => {
+        // Create a ticket
+        await posContract.createTicket(customer.address, 'Order 1');
+        
+        // Get ticket ID
+        const ticketId = await posContract.nextTicketId();
+
+        // Add orders to the ticket
+        const orders = [
+            { cost: itemCost1, name: itemName1 },
+            { cost: itemCost2, name: itemName2 }
+        ];
+        await posContract.addTicketOrders(ticketId, orders);
+
+        // Pay for the ticket
+        await expect(() => 
+            posContract.connect(customer).payTicket(ticketId, customer.address, { value: totalCost })
+        ).to.changeEtherBalance(customer, -totalCost);
+
+        // Ensure the ticket is marked as paid
+        const ticket = await posContract.tickets(ticketId);
+        expect(ticket.paid).to.equal(true);
+    });
+
+    it('should fail if the customer does not provide enough Ether', async () => {
+        // Create a ticket
+        await posContract.createTicket(customer.address, 'Order 2');
+        
+        // Get ticket ID
+        const ticketId = await posContract.nextTicketId();
+
+        // Add orders to the ticket
+        const orders = [
+            { cost: itemCost1, name: itemName1 },
+            { cost: itemCost2, name: itemName2 }
+        ];
+        await posContract.addTicketOrders(ticketId, orders);
+        // Try to pay with insufficient Ether
+        await expect(
+            posContract.connect(customer).payTicket(ticketId, customer.address, { value: itemCost1 }) // Less than totalCost
+        ).to.be.revertedWith('insufficient balance input');
+    });
+});
+
+
+
+
+
+
 
 
 
