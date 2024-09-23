@@ -470,8 +470,109 @@ describe('POS Ticket Payment', () => {
         // Try to pay with insufficient Ether
         await expect(
             posContract.connect(customer).payTicket(ticketId, customer.address, { value: itemCost1 }) // Less than totalCost
-        ).to.be.revertedWith('insufficient balance input');
+        ).to.be.revertedWith('Insufficient balance input');
     });
+});
+    describe('Restaurant Service Management and POS Payment', () => {
+    let pos1, pos2, posId1, posId2, posContract1, posContract2, customer1, customer2, restaurantInitialBalance, restaurantFinalBalance;
+
+    const itemName1 = "Burger";
+    const itemCost1 = ethers.parseUnits('5', 'ether'); // 5 ether for a burger
+    const itemName2 = "Pizza";
+    const itemCost2 = ethers.parseUnits('7', 'ether'); // 7 ether for a pizza
+
+    beforeEach(async () => {
+        // Create the restaurant and two POS terminals
+        let transaction = await decentratalityServiceFactory.createRestaurant('Montecito', ether(100), { value: ether(100) });
+        let result = await transaction.wait();
+
+        let event = result.logs.find(log =>
+            log.topics[0] === ethers.id("RestaurantCreated(address,uint256,address)")
+        );
+
+        let decodedEvent = ethers.AbiCoder.defaultAbiCoder().decode(
+            ['address', 'uint256', 'address'],
+            event.data
+        );
+
+        restaurant = decodedEvent[0];
+        restaurantContract = new ethers.Contract(restaurant, restaurantABI, deployer);
+
+        // Create two POS systems
+        transaction = await restaurantContract.createPOS('POS #1');
+        result = await transaction.wait();
+
+        event = result.logs.find(log =>
+            log.topics[0] === ethers.id("POSCreated(address,uint256,address)")
+        );
+
+        decodedEvent = ethers.AbiCoder.defaultAbiCoder().decode(
+            ['address', 'uint256', 'address'],
+            event.data
+        );
+
+        pos1 = decodedEvent[0];
+        posId1 = decodedEvent[1];
+        const posABI = require('../src/abis/POS.json').abi;
+        posContract1 = new ethers.Contract(pos1, posABI, deployer);
+
+        transaction = await restaurantContract.createPOS('POS #2');
+        result = await transaction.wait();
+
+        event = result.logs.find(log =>
+            log.topics[0] === ethers.id("POSCreated(address,uint256,address)")
+        );
+
+        decodedEvent = ethers.AbiCoder.defaultAbiCoder().decode(
+            ['address', 'uint256', 'address'],
+            event.data
+        );
+
+        pos2 = decodedEvent[0];
+        posId2 = decodedEvent[1];
+        posContract2 = new ethers.Contract(pos2, posABI, deployer);
+
+        customer1 = accounts[4];
+        customer2 = accounts[5];
+
+        // Add menu items to both POS systems
+        await posContract1.addMenuItem(itemCost1, itemName1);
+        await posContract2.addMenuItem(itemCost2, itemName2);
+
+        // Record initial balance of the restaurant
+        restaurantInitialBalance = await ethers.provider.getBalance(restaurant);
+    });
+
+   it('should toggle service state and settle payments when service ends', async () => {
+    // Start the service
+    await restaurantContract.startService();
+    let serviceStatus = await restaurantContract.service();
+    expect(serviceStatus).to.equal(true);
+
+    // Create tickets and make payments on POS systems
+    await posContract1.createTicket(customer1.address, 'Order 1');
+    await posContract1.addTicketOrders(1, [{ cost: itemCost1, name: itemName1 }]);
+    await posContract1.connect(customer1).payTicket(1, customer1.address, { value: itemCost1 });
+
+    await posContract2.createTicket(customer2.address, 'Order 2');
+    await posContract2.addTicketOrders(1, [{ cost: itemCost2, name: itemName2 }]);
+    await posContract2.connect(customer2).payTicket(1, customer2.address, { value: itemCost2 });
+
+    // End the service
+    // Connect to the POS contracts with the correct owner (deployer)
+
+    await restaurantContract.endService();
+
+    serviceStatus = await restaurantContract.service();
+    expect(serviceStatus).to.equal(false);
+
+    // Check that both POS balances have been transferred to the restaurant
+    restaurantFinalBalance = await ethers.provider.getBalance(restaurant);
+
+    const expectedBalanceIncrease = itemCost1 + itemCost2; // Total payment from both POS systems
+    expect(restaurantFinalBalance).to.equal(restaurantInitialBalance + expectedBalanceIncrease);
+});
+
 });
 
 

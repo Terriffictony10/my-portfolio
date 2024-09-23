@@ -39,6 +39,10 @@ export default function Home() {
   const navigateToNFT = () => {
     window.location.href = '/NFT';
   };
+  const navigateToDemo = () => {
+    window.location.href = '/Demo';
+  };
+
 
   return (
     <div>
@@ -58,7 +62,7 @@ export default function Home() {
           <li><a href="#">DAO</a></li>
           <li><a href="#">About</a></li>
           <li><a href="#">Project</a></li>
-          <li><a href="#">Demo</a></li>
+          <li onClick={navigateToDemo}><a href="#">Demo</a></li>
         </ul>
         <ul>
           <li><a href="#" className="big" onClick={navigateToIndex}>Decentratality</a></li>
@@ -67,7 +71,7 @@ export default function Home() {
           <li className="hideOnMobile"><a href="#">DAO</a></li>
           <li className="hideOnMobile"><a href="#">About</a></li>
           <li className="hideOnMobile"><a href="#">Project</a></li>
-          <li className="hideOnMobile"><a href="#">Demo</a></li>
+          <li className="hideOnMobile" onClick={navigateToDemo}><a href="#">Demo</a></li>
           <li onClick={showSidebar} className="menu">
             <a href="#">
               <svg xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 -960 960 960" width="48px" fill="white">

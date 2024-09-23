@@ -14,7 +14,10 @@ contract Restaurant is Ownable{
     uint256 jobId; // wage in cents
     string name;
     address employeeAddress;
+    uint256 clockStamp;
+    uint256 employeePension;
 	}
+
 
 	event POSCreated(
         POS pos, 
@@ -32,6 +35,13 @@ contract Restaurant is Ownable{
         uint256 timestamp,
         Employee employee
     );
+
+    bool public service; 
+
+    uint256 public employeePension;
+    uint256 public serviceStart;
+    uint256 public serviceStop;
+
     uint256 public nextJobId;
     uint256 public nextPOSId;
     uint256 public nextEmployeeId;
@@ -40,6 +50,7 @@ contract Restaurant is Ownable{
 	uint256[] public jobIds; // array to keep track of all job IDs
 
 	mapping(uint256 => Employee) public employees;
+    uint256[] public employeeIds;
 
 	mapping(uint256 => POS) public POSMapping;
 	uint256[] public POSIds; // array to keep track of all job IDs
@@ -51,6 +62,9 @@ contract Restaurant is Ownable{
 		name = _name;
 	}
 	
+  
+
+
 	receive() external payable {
 		
 	}
@@ -70,7 +84,7 @@ contract Restaurant is Ownable{
     nextPOSId++;
 
     // Create the new Restaurant contract
-    POS pos = new POS(_name, msg.sender);
+    POS pos = new POS(_name, owner(), address(this));
 
     // Map the newly created restaurant contract to the nextRestaurantId
     POSMapping[nextPOSId] = pos;
@@ -111,8 +125,35 @@ contract Restaurant is Ownable{
     function hireEmployee(uint256 _jobId, string memory _name, address employeeAddress) public onlyOwner{
     require(jobs[_jobId].hourlyWage != 0, "Job does not exist");
     nextEmployeeId++;
-    employees[nextEmployeeId] = Employee(_jobId, _name, employeeAddress);
+    employees[nextEmployeeId] = Employee(_jobId, _name, employeeAddress, 0, 0);
+    employeeIds.push(nextEmployeeId);
     emit EmployeeHired(nextEmployeeId, block.timestamp, employees[nextEmployeeId]);
+	}
+	function startService() public onlyOwner {
+		service = true;
+        serviceStart = block.timestamp;
+	}
+    function clockIn(uint256 _id) public {
+        require(employees[_id].clockStamp == 0, "youre already clocked in");
+        employees[_id].clockStamp = block.timestamp;
+    }
+    function clockOut(uint256 _id) public {
+        require(!(employees[_id].clockStamp == 0), "you must have been clocked in first to clock out");
+        uint256 x = (jobs[employees[_id].jobId].hourlyWage * ((block.timestamp - employees[_id].clockStamp) / 3600));
+        employeePension += x;
+        employees[_id].employeePension += x;
+    }
+	function endService() public onlyOwner {
+		service = false;
+		for(uint256 i = 0; i < POSIds.length; i++){
+		POS pos = POSMapping[POSIds[i]];
+        pos.payRestaurant();
+		}
+        for(uint256 i = 0; i < employeeIds.length; i++){
+            require(!(employees[employeeIds[i]].employeePension == 0));
+            (bool sent, ) = employees[employeeIds[i]].employeeAddress.call{value: employees[employeeIds[i]].employeePension}("");
+            require(sent);
+        }
 	}
 
 }
