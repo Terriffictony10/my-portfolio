@@ -1,113 +1,71 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
-import "./POS.sol";
 import "hardhat/console.sol";
+import "./POS.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-contract Restaurant is Ownable{
 
-	struct Job {
-    uint256 hourlyWage; // wage in cents
-    string jobName;
-	}
+contract Restaurant is Ownable {
+    struct Job {
+        uint256 hourlyWageInWei; // Wage is now in wei
+        string jobName;
+    }
 
-	struct Employee {
-    uint256 jobId; // wage in cents
-    string name;
-    address employeeAddress;
-    uint256 clockStamp;
-    uint256 employeePension;
-	}
+    struct Employee {
+        uint256 jobId; 
+        string name;
+        address employeeAddress;
+        uint256 clockStamp;
+        uint256 employeePension;
+    }
 
+    event POSCreated(POS pos, uint256 id, address owner);
+    event JobAdded(uint256 id, uint256 timestamp, Job job);
+    event EmployeeHired(uint256 id, uint256 timestamp, Employee employee);
 
-	event POSCreated(
-        POS pos, 
-        uint256 id, 
-        address owner
-    );
-
-	event JobAdded( 
-        uint256 id,
-        uint256 timestamp,
-        Job job
-    );
-    event EmployeeHired( 
-        uint256 id,
-        uint256 timestamp,
-        Employee employee
-    );
-
-    bool public service; 
-
-    uint256 public employeePension;
+    bool public service;
     uint256 public serviceStart;
     uint256 public serviceStop;
-
     uint256 public nextJobId;
     uint256 public nextPOSId;
     uint256 public nextEmployeeId;
-	string public name;
-	mapping(uint256 => Job) public jobs; // maps an ID to a Restaurant (which includes the wage and name)
-	uint256[] public jobIds; // array to keep track of all job IDs
+    string public name;
 
-	mapping(uint256 => Employee) public employees;
+    mapping(uint256 => Job) public jobs;
+    uint256[] public jobIds;
+    mapping(uint256 => Employee) public employees;
     uint256[] public employeeIds;
+    mapping(uint256 => POS) public POSMapping;
+    uint256[] public POSIds;
 
-	mapping(uint256 => POS) public POSMapping;
-	uint256[] public POSIds; // array to keep track of all job IDs
+    constructor(string memory _name, address _owner) Ownable(_owner) {
+        name = _name;
+    }
 
-	constructor(
-		string memory _name, 
-		address _owner
-	) Ownable(_owner){
-		name = _name;
-	}
-	
-  
+    receive() external payable {}
 
-
-	receive() external payable {
-		
-	}
-
-	function createPOS(
-        string memory _name
-    ) public payable returns(uint256, POS){
-
-    for (uint256 i = 0; i < POSIds.length; i++) {
+    function createPOS(string memory _name) public payable returns (uint256, POS) {
+        for (uint256 i = 0; i < POSIds.length; i++) {
             uint256 posId = POSIds[i];
             require(
                 keccak256(bytes(POSMapping[posId].name())) != keccak256(bytes(_name)),
-                "Job with the same name and ID already exists."
+                "POS with the same name and ID already exists."
             );
         }
-    // Increment the nextRestaurantId for the newly created restaurant
-    nextPOSId++;
-
-    // Create the new Restaurant contract
-    POS pos = new POS(_name, owner(), address(this));
-
-    // Map the newly created restaurant contract to the nextRestaurantId
-    POSMapping[nextPOSId] = pos;
-
-    POSIds.push(nextPOSId);
-
-    // Emit an event with the address and the ID of the new restaurant
-    emit POSCreated(pos, nextPOSId, pos.owner());
-
-    // Return the newly created restaurant contract
-    return (nextPOSId, pos);
+        nextPOSId++;
+        POS pos = new POS(_name, owner(), address(this));
+        POSMapping[nextPOSId] = pos;
+        POSIds.push(nextPOSId);
+        emit POSCreated(pos, nextPOSId, pos.owner());
+        return (nextPOSId, pos);
     }
 
-	function payOwner(uint256 _amount) public {
-		// Require that the contract has enough Ether to perform the transaction
-        require(address(this).balance >= _amount, "Insufficient contract balance to perform the transaction");
-        
-		(bool sent, ) = owner().call{value: _amount}("");
-		require(sent);
-	}
-	// Example of how you could add an entry
-	 function addJob(uint256 wageInCents, string memory _name) public onlyOwner {
-        // Iterate through the jobIds array to check if a job with the same name exists
+    function payOwner(uint256 _amount) public {
+        require(address(this).balance >= _amount, "Insufficient contract balance");
+        (bool sent, ) = owner().call{value: _amount}("");
+        require(sent);
+    }
+
+    function addJob(uint256 wageInWei, string memory _name) public onlyOwner {
         for (uint256 i = 0; i < jobIds.length; i++) {
             uint256 jobId = jobIds[i];
             require(
@@ -115,45 +73,49 @@ contract Restaurant is Ownable{
                 "Job with the same name and ID already exists."
             );
         }
-
-        // Increment job ID and add the job
         nextJobId++;
-        jobs[nextJobId] = Job(wageInCents * 100, _name);
-        jobIds.push(nextJobId); // Track the new job ID
+        jobs[nextJobId] = Job(wageInWei, _name); // Wage stored in wei
+        jobIds.push(nextJobId);
         emit JobAdded(nextJobId, block.timestamp, jobs[nextJobId]);
     }
-    function hireEmployee(uint256 _jobId, string memory _name, address employeeAddress) public onlyOwner{
-    require(jobs[_jobId].hourlyWage != 0, "Job does not exist");
-    nextEmployeeId++;
-    employees[nextEmployeeId] = Employee(_jobId, _name, employeeAddress, 0, 0);
-    employeeIds.push(nextEmployeeId);
-    emit EmployeeHired(nextEmployeeId, block.timestamp, employees[nextEmployeeId]);
-	}
-	function startService() public onlyOwner {
-		service = true;
+
+    function hireEmployee(uint256 _jobId, string memory _name, address employeeAddress) public onlyOwner {
+        require(jobs[_jobId].hourlyWageInWei != 0, "Job does not exist");
+        nextEmployeeId++;
+        employees[nextEmployeeId] = Employee(_jobId, _name, employeeAddress, 0, 0);
+        employeeIds.push(nextEmployeeId);
+        emit EmployeeHired(nextEmployeeId, block.timestamp, employees[nextEmployeeId]);
+    }
+
+    function startService() public onlyOwner {
+        service = true;
         serviceStart = block.timestamp;
-	}
+    }
+
     function clockIn(uint256 _id) public {
-        require(employees[_id].clockStamp == 0, "youre already clocked in");
+        require(employees[_id].clockStamp == 0, "Already clocked in");
         employees[_id].clockStamp = block.timestamp;
     }
-    function clockOut(uint256 _id) public {
-        require(!(employees[_id].clockStamp == 0), "you must have been clocked in first to clock out");
-        uint256 x = (jobs[employees[_id].jobId].hourlyWage * ((block.timestamp - employees[_id].clockStamp) / 3600));
-        employeePension += x;
-        employees[_id].employeePension += x;
-    }
-	function endService() public onlyOwner {
-		service = false;
-		for(uint256 i = 0; i < POSIds.length; i++){
-		POS pos = POSMapping[POSIds[i]];
-        pos.payRestaurant();
-		}
-        for(uint256 i = 0; i < employeeIds.length; i++){
-            require(!(employees[employeeIds[i]].employeePension == 0));
-            (bool sent, ) = employees[employeeIds[i]].employeeAddress.call{value: employees[employeeIds[i]].employeePension}("");
-            require(sent);
-        }
-	}
 
+    function clockOut(uint256 _id) public {
+        require(employees[_id].clockStamp != 0, "Must clock in first");
+        uint256 timeWorked = block.timestamp - employees[_id].clockStamp; // Seconds worked
+        uint256 amountEarned = jobs[employees[_id].jobId].hourlyWageInWei * timeWorked / 3600; // Time to be paid in wei
+        employees[_id].employeePension += amountEarned;
+        employees[_id].clockStamp = 0;
+    }
+
+    function endService() public onlyOwner {
+        service = false;
+        for (uint256 i = 0; i < POSIds.length; i++) {
+            POS pos = POSMapping[POSIds[i]];
+            pos.payRestaurant();
+        }
+        for (uint256 i = 0; i < employeeIds.length; i++) {
+            if (employees[employeeIds[i]].employeePension > 0) {
+                payable(employees[employeeIds[i]].employeeAddress).transfer(employees[employeeIds[i]].employeePension);
+                employees[employeeIds[i]].employeePension = 0;
+            }
+        }
+    }
 }

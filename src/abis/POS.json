@@ -78,82 +78,6 @@
       "type": "event"
     },
     {
-      "inputs": [],
-      "name": "name",
-      "outputs": [
-        {
-          "internalType": "string",
-          "name": "",
-          "type": "string"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "restaurant",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "nextMenuItemId",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "menuItemIds",
-      "outputs": [
-        {
-          "internalType": "uint256[]",
-          "name": "",
-          "type": "uint256[]"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "name": "menu",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "cost",
-          "type": "uint256"
-        },
-        {
-          "internalType": "string",
-          "name": "name",
-          "type": "string"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
       "inputs": [
         {
           "internalType": "uint256",
@@ -203,8 +127,28 @@
       "type": "function"
     },
     {
-      "stateMutability": "payable",
-      "type": "receive"
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_menuId",
+          "type": "uint256"
+        }
+      ],
+      "name": "menu",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "cost",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
     },
     {
       "inputs": [
@@ -250,7 +194,7 @@
           "type": "uint256"
         },
         {
-          "internalType": "struct POS.menuItem[]",
+          "internalType": "tuple[]",
           "name": "_orders",
           "type": "tuple[]",
           "components": [
@@ -273,36 +217,10 @@
       "type": "function"
     },
     {
-      "inputs": [],
-      "name": "nextTicketId",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "TicketIds",
-      "outputs": [
-        {
-          "internalType": "uint256[]",
-          "name": "",
-          "type": "uint256[]"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
       "inputs": [
         {
           "internalType": "uint256",
-          "name": "",
+          "name": "ticketId",
           "type": "uint256"
         }
       ],
@@ -343,7 +261,7 @@
       "name": "getTicket",
       "outputs": [
         {
-          "internalType": "struct POS.Ticket",
+          "internalType": "tuple",
           "name": "",
           "type": "tuple",
           "components": [
@@ -351,23 +269,6 @@
               "internalType": "string",
               "name": "name",
               "type": "string"
-            },
-            {
-              "internalType": "struct POS.menuItem[]",
-              "name": "orders",
-              "type": "tuple[]",
-              "components": [
-                {
-                  "internalType": "uint256",
-                  "name": "cost",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "string",
-                  "name": "name",
-                  "type": "string"
-                }
-              ]
             },
             {
               "internalType": "address",
@@ -383,6 +284,23 @@
               "internalType": "bool",
               "name": "paid",
               "type": "bool"
+            },
+            {
+              "internalType": "tuple[]",
+              "name": "orders",
+              "type": "tuple[]",
+              "components": [
+                {
+                  "internalType": "uint256",
+                  "name": "cost",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "string",
+                  "name": "name",
+                  "type": "string"
+                }
+              ]
             }
           ]
         }
@@ -396,6 +314,30 @@
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "payEmployees",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "nextTicketId",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "stateMutability": "payable",
+      "type": "receive"
     }
   ]
 }

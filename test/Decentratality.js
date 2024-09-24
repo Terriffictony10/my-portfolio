@@ -91,7 +91,7 @@ describe('Decentratality', () => {
     describe('Restaurant Job and Employee Management', () => {
     let restaurant, restaurantId, transaction, result, restaurantContract, jobId, job;
     const employeeName = "John Doe";
-    const hourlyWage = 20; // Example: $20.00/hour in cents
+    const hourlyWage = 2000000000000000; // Example: $20.00/hour in cents
 
     describe('Success', () => {
       
@@ -132,7 +132,7 @@ describe('Decentratality', () => {
       it('adds a job and stores it in the jobs mapping', async () => {
         const job = await restaurantContract.jobs(jobId);
         expect(job.jobName).to.equal('Chef');
-        expect(job.hourlyWage).to.equal(hourlyWage * 100);
+        expect(job.hourlyWage).to.equal(hourlyWage);
       });
 
       it('emits the JobAdded event with correct arguments', async () => {
@@ -141,65 +141,68 @@ describe('Decentratality', () => {
           .withArgs(
             jobId,  // The job ID
             (await ethers.provider.getBlock(result.blockNumber)).timestamp,  // The timestamp from the block
-            [hourlyWage * 100,  // The `hourlyWage` from the struct
+            [hourlyWage,  // The `hourlyWage` from the struct
             'Chef'] // The `jobName` from the struct
         );
       });
 
-      describe('Hiring Employee', () => {
-        let hireTransaction, hireResult, employeeAddress;
-        
+     describe('Hiring Employee', () => {
+    let hireTransaction, hireResult, employeeAddress, employeeId;
 
-        beforeEach(async () => {
-    employeeAddress = user1.address;
+    beforeEach(async () => {
+        employeeAddress = user1.address;
 
-    restaurantContract = new ethers.Contract(restaurant, restaurantABI, deployer);
+        restaurantContract = new ethers.Contract(restaurant, restaurantABI, deployer);
 
-    hireTransaction = await restaurantContract.hireEmployee(jobId, employeeName, employeeAddress);
-    hireResult = await hireTransaction.wait();
-     // Add this to check if the event is in the logs
-    // Find the EmployeeHired event in the logs
-    const employeeEvent = await hireResult.logs.find(log =>
-        log.topics[0] === ethers.id("EmployeeHired(uint256,uint256,(uint256,string,address))")
-    );
+        hireTransaction = await restaurantContract.hireEmployee(jobId, employeeName, employeeAddress);
+        await restaurantContract.hireEmployee(jobId, 'server 1', accounts[7].address);
+        await restaurantContract.hireEmployee(jobId, 'server 2', accounts[8].address);
+        hireResult = await hireTransaction.wait();
 
-    
-    if (!employeeEvent) {
-        throw new Error('EmployeeHired event not found in logs');
-    }
+        // Log the raw logs to debug
 
-    // Decode the EmployeeHired event data
-    const employeeDecodedEvent = ethers.AbiCoder.defaultAbiCoder().decode(
-        [ 'uint256', 'uint256', 'tuple(uint256,string,address)'], 
-        employeeEvent.data
-    );
+        // Find the EmployeeHired event in the logs (v6 uses ethers.EventLog)
+        const employeeEvent = hireResult.logs.find(log => log.fragment.name === "EmployeeHired");
 
-    // Extract employeeId from the decoded event
-    employeeId = employeeDecodedEvent[0];
+        if (!employeeEvent) {
+            throw new Error('EmployeeHired event not found in logs');
+        }
+
+        // Decode the EmployeeHired event data (v6 handles fragment-based decoding)
+        const decodedEvent = ethers.AbiCoder.defaultAbiCoder().decode(
+            ['uint256', 'uint256', 'tuple(uint256,string,address,uint256,uint256)'], 
+            employeeEvent.data
+        );
+
+        // Extract the employeeId from the decoded event
+        employeeId = decodedEvent[0];
+    });
+
+    it('stores the employee in the employees mapping', async () => {
+        const employee = await restaurantContract.employees(employeeId);
+        expect(employee.name).to.equal(employeeName);
+        expect(employee.employeeAddress).to.equal(employeeAddress);
+        expect(employee.jobId).to.equal(jobId);
+    });
+
+    it('emits the EmployeeHired event with correct arguments', async () => {
+        await expect(hireTransaction)
+            .to.emit(restaurantContract, 'EmployeeHired')
+            .withArgs(
+                employeeId, // The employee ID
+                (await ethers.provider.getBlock(hireResult.blockNumber)).timestamp, // The block timestamp
+                [
+                    jobId, // The job ID from the Employee struct
+                    employeeName, // The employee name from the Employee struct
+                    employeeAddress, // The employee address from the Employee struct
+                    0, // clockStamp
+                    0  // employeePension
+                ]
+            );
+    });
 });
 
-        it('stores the employee in the employees mapping', async () => {
-          const employee = await restaurantContract.employees(employeeId);
-          expect(employee.name).to.equal(employeeName);
-          expect(employee.employeeAddress).to.equal(employeeAddress);
-          expect(employee.jobId).to.equal(jobId);
-        });
 
-        it('emits the EmployeeHired event with correct arguments', async () => {
-  await expect(hireTransaction)
-    .to.emit(restaurantContract, 'EmployeeHired')
-    .withArgs(
-      employeeId, // This is the employeeId from the Employee struct
-      (await ethers.provider.getBlock(hireResult.blockNumber)).timestamp, // The block timestamp
-      [
-        jobId, // This is the jobId from the Employee struct
-        employeeName, // This is the employee name from the Employee struct
-        employeeAddress, // This is the employee address from the Employee struct
-      ]
-    );
-});
-
-      });
     });
 
     describe('Failure', async () => {
@@ -473,13 +476,13 @@ describe('POS Ticket Payment', () => {
         ).to.be.revertedWith('Insufficient balance input');
     });
 });
-    describe('Restaurant Service Management and POS Payment', () => {
-    let pos1, pos2, posId1, posId2, posContract1, posContract2, customer1, customer2, restaurantInitialBalance, restaurantFinalBalance;
-
+describe('Restaurant Service Management and POS Payment', () => {
+    let pos1, pos2, posId1, posId2, posContract1, posContract2, customer1, customer2, server1, server2, restaurantInitialBalance, restaurantFinalBalance;
     const itemName1 = "Burger";
     const itemCost1 = ethers.parseUnits('5', 'ether'); // 5 ether for a burger
     const itemName2 = "Pizza";
     const itemCost2 = ethers.parseUnits('7', 'ether'); // 7 ether for a pizza
+    const hourlyWage = 2000000000000000 // 1 ether/hour wage
 
     beforeEach(async () => {
         // Create the restaurant and two POS terminals
@@ -541,9 +544,56 @@ describe('POS Ticket Payment', () => {
 
         // Record initial balance of the restaurant
         restaurantInitialBalance = await ethers.provider.getBalance(restaurant);
+
+        // Add servers (employees)
+        server1 = accounts[7];
+        server2 = accounts[8];
+
+        // Add jobs for servers and hire them
+        await restaurantContract.addJob(hourlyWage, "Server");
+        const jobId = await restaurantContract.nextJobId();
+        await restaurantContract.hireEmployee(jobId, "Server1", server1.address);
+        await restaurantContract.hireEmployee(jobId, "Server2", server2.address);
+
+        // Servers clock in
+        await restaurantContract.connect(server1).clockIn(1); // Employee ID 1
+        await restaurantContract.connect(server2).clockIn(2); // Employee ID 2
+
+        // Simulate some time passing (e.g., 1 hour)
+        await ethers.provider.send("evm_increaseTime", [3600]); // 1 hour in seconds
+        await ethers.provider.send("evm_mine"); // Force a new block
+
+        
     });
 
-   it('should toggle service state and settle payments when service ends', async () => {
+    it('should toggle service state and settle payments when service ends', async () => {
+        // Start the service
+        await restaurantContract.startService();
+        let serviceStatus = await restaurantContract.service();
+        expect(serviceStatus).to.equal(true);
+
+        // Create tickets and make payments on POS systems
+        await posContract1.createTicket(customer1.address, 'Order 1');
+        await posContract1.addTicketOrders(1, [{ cost: itemCost1, name: itemName1 }]);
+        await posContract1.connect(customer1).payTicket(1, customer1.address, { value: itemCost1 });
+
+        await posContract2.createTicket(customer2.address, 'Order 2');
+        await posContract2.addTicketOrders(1, [{ cost: itemCost2, name: itemName2 }]);
+        await posContract2.connect(customer2).payTicket(1, customer2.address, { value: itemCost2 });
+
+        // End the service
+        await restaurantContract.endService();
+
+        serviceStatus = await restaurantContract.service();
+        expect(serviceStatus).to.equal(false);
+
+        // Check that both POS balances have been transferred to the restaurant
+        restaurantFinalBalance = await ethers.provider.getBalance(restaurant);
+        const expectedBalanceIncrease = itemCost1 + itemCost2; // Total payment from both POS systems
+        expect(restaurantFinalBalance).to.equal(restaurantInitialBalance + expectedBalanceIncrease);
+    });
+
+    it('should pay servers their wages when service ends, accounting for gas', async () => {
     // Start the service
     await restaurantContract.startService();
     let serviceStatus = await restaurantContract.service();
@@ -558,22 +608,76 @@ describe('POS Ticket Payment', () => {
     await posContract2.addTicketOrders(1, [{ cost: itemCost2, name: itemName2 }]);
     await posContract2.connect(customer2).payTicket(1, customer2.address, { value: itemCost2 });
 
+    // Record initial balance of the servers
+    const server1InitialBalance = await ethers.provider.getBalance(server1.address);
+    const server2InitialBalance = await ethers.provider.getBalance(server2.address);
+
+    // Servers clock out
+    const tx1 = await restaurantContract.connect(server1).clockOut(1); // Employee ID 1
+    const tx1Receipt = await tx1.wait();
+    const tx2 = await restaurantContract.connect(server2).clockOut(2); // Employee ID 2
+    const tx2Receipt = await tx2.wait();
+
+    // Get gas prices and calculate gas cost in wei for each transaction
+    const tx1GasCost = tx1Receipt.gasUsed * tx1Receipt.gasPrice;
+    const tx2GasCost = tx2Receipt.gasUsed * tx2Receipt.gasPrice;
+
     // End the service
-    // Connect to the POS contracts with the correct owner (deployer)
+    const endServiceTx = await restaurantContract.endService();
+    await endServiceTx.wait();
 
-    await restaurantContract.endService();
+    // Record final balance of the servers
+    const server1FinalBalance = await ethers.provider.getBalance(server1.address);
+    const server2FinalBalance = await ethers.provider.getBalance(server2.address);
 
-    serviceStatus = await restaurantContract.service();
-    expect(serviceStatus).to.equal(false);
+    // Expected wage for 1 hour of work (in wei)
+    const expectedWage = hourlyWage * 1; // Assuming 1 hour of work
 
-    // Check that both POS balances have been transferred to the restaurant
-    restaurantFinalBalance = await ethers.provider.getBalance(restaurant);
+    // Calculate actual payouts (taking into account gas costs)
+        // Calculate actual payouts (taking into account gas costs)
+    const server1BalanceChange = server1FinalBalance - server1InitialBalance;
+    const server2BalanceChange = server2FinalBalance - server2InitialBalance;
 
-    const expectedBalanceIncrease = itemCost1 + itemCost2; // Total payment from both POS systems
-    expect(restaurantFinalBalance).to.equal(restaurantInitialBalance + expectedBalanceIncrease);
+    // Ensure the final balance is greater than the initial balance plus the gas cost
+    expect(server1FinalBalance).to.be.greaterThan(server1InitialBalance, 'Server 1 did not make a profit');
+    expect(server2FinalBalance).to.be.greaterThan(server2InitialBalance, 'Server 2 did not make a profit');
+
 });
 
+
+
+    it('should toggle the service state to true when startService is called', async () => {
+        // Initially, the service should be false
+        let serviceStatus = await restaurantContract.service();
+        expect(serviceStatus).to.equal(false);
+
+        // Start the service
+        const transaction = await restaurantContract.startService();
+        const result = await transaction.wait();
+
+        // Service should now be true
+        serviceStatus = await restaurantContract.service();
+        expect(serviceStatus).to.equal(true);
+    });
+
+    it('should store the timestamp when the service starts', async () => {
+        // Start the service
+        const transaction = await restaurantContract.startService();
+        const result = await transaction.wait();
+
+        // Get the block number and timestamp
+        const block = await ethers.provider.getBlock(result.blockNumber);
+        const expectedTimestamp = block.timestamp;
+
+        // Retrieve the stored service start timestamp
+        const serviceStartTimestamp = await restaurantContract.serviceStart();
+
+        // Check if the stored timestamp matches the expected timestamp
+        expect(serviceStartTimestamp).to.equal(expectedTimestamp);
+    });
 });
+
+
 
 
 

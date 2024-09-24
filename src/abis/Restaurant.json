@@ -11,11 +11,6 @@
           "internalType": "address",
           "name": "_owner",
           "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "_restaurant",
-          "type": "address"
         }
       ],
       "stateMutability": "nonpayable",
@@ -26,24 +21,24 @@
       "inputs": [
         {
           "indexed": false,
-          "internalType": "string",
-          "name": "name",
-          "type": "string"
+          "internalType": "contract POS",
+          "name": "pos",
+          "type": "address"
         },
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "indexOfId",
+          "name": "id",
           "type": "uint256"
         },
         {
           "indexed": false,
-          "internalType": "uint256",
-          "name": "timestamp",
-          "type": "uint256"
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
         }
       ],
-      "name": "menuItemAdded",
+      "name": "POSCreated",
       "type": "event"
     },
     {
@@ -51,20 +46,8 @@
       "inputs": [
         {
           "indexed": false,
-          "internalType": "string",
-          "name": "name",
-          "type": "string"
-        },
-        {
-          "indexed": false,
-          "internalType": "address",
-          "name": "server",
-          "type": "address"
-        },
-        {
-          "indexed": false,
           "internalType": "uint256",
-          "name": "indexOfId",
+          "name": "id",
           "type": "uint256"
         },
         {
@@ -72,218 +55,96 @@
           "internalType": "uint256",
           "name": "timestamp",
           "type": "uint256"
-        }
-      ],
-      "name": "newTicketAdded",
-      "type": "event"
-    },
-    {
-      "inputs": [],
-      "name": "name",
-      "outputs": [
-        {
-          "internalType": "string",
-          "name": "",
-          "type": "string"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "restaurant",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "nextMenuItemId",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "menuItemIds",
-      "outputs": [
-        {
-          "internalType": "uint256[]",
-          "name": "",
-          "type": "uint256[]"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_cost",
-          "type": "uint256"
         },
         {
-          "internalType": "string",
-          "name": "_name",
-          "type": "string"
-        }
-      ],
-      "name": "addMenuItem",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_id",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_index",
-          "type": "uint256"
-        }
-      ],
-      "name": "removeMenuItem",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getMenuItemIds",
-      "outputs": [
-        {
-          "internalType": "uint256[]",
-          "name": "",
-          "type": "uint256[]"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "stateMutability": "payable",
-      "type": "receive"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_server",
-          "type": "address"
-        },
-        {
-          "internalType": "string",
-          "name": "_name",
-          "type": "string"
-        }
-      ],
-      "name": "createTicket",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "ticketId",
-          "type": "uint256"
-        },
-        {
-          "internalType": "address",
-          "name": "_customer",
-          "type": "address"
-        }
-      ],
-      "name": "payTicket",
-      "outputs": [],
-      "stateMutability": "payable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "ticketId",
-          "type": "uint256"
-        },
-        {
-          "internalType": "struct POS.menuItem[]",
-          "name": "_orders",
-          "type": "tuple[]",
+          "indexed": false,
+          "internalType": "tuple",
+          "name": "job",
+          "type": "tuple",
           "components": [
             {
               "internalType": "uint256",
-              "name": "cost",
+              "name": "hourlyWage",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "jobName",
+              "type": "string"
+            }
+          ]
+        }
+      ],
+      "name": "JobAdded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "timestamp",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "tuple",
+          "name": "employee",
+          "type": "tuple",
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "jobId",
               "type": "uint256"
             },
             {
               "internalType": "string",
               "name": "name",
               "type": "string"
+            },
+            {
+              "internalType": "address",
+              "name": "employeeAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "clockStamp",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "employeePension",
+              "type": "uint256"
             }
           ]
         }
       ],
-      "name": "addTicketOrders",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "nextTicketId",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "TicketIds",
-      "outputs": [
-        {
-          "internalType": "uint256[]",
-          "name": "",
-          "type": "uint256[]"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
+      "name": "EmployeeHired",
+      "type": "event"
     },
     {
       "inputs": [
         {
           "internalType": "uint256",
-          "name": "",
+          "name": "_employeeId",
           "type": "uint256"
         }
       ],
-      "name": "tickets",
+      "name": "employees",
       "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "jobId",
+          "type": "uint256"
+        },
         {
           "internalType": "string",
           "name": "name",
@@ -291,17 +152,44 @@
         },
         {
           "internalType": "address",
-          "name": "server",
+          "name": "employeeAddress",
           "type": "address"
         },
         {
           "internalType": "uint256",
-          "name": "id",
+          "name": "clockStamp",
           "type": "uint256"
         },
         {
+          "internalType": "uint256",
+          "name": "employeePension",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "startService",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "endService",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "service",
+      "outputs": [
+        {
           "internalType": "bool",
-          "name": "paid",
+          "name": "",
           "type": "bool"
         }
       ],
@@ -312,55 +200,120 @@
       "inputs": [
         {
           "internalType": "uint256",
+          "name": "_jobId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "_name",
+          "type": "string"
+        },
+        {
+          "internalType": "address",
+          "name": "employeeAddress",
+          "type": "address"
+        }
+      ],
+      "name": "hireEmployee",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "wageInCents",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "_name",
+          "type": "string"
+        }
+      ],
+      "name": "addJob",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_name",
+          "type": "string"
+        }
+      ],
+      "name": "createPOS",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "contract POS",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "payOwner",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
           "name": "_id",
           "type": "uint256"
         }
       ],
-      "name": "getTicket",
+      "name": "clockIn",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_id",
+          "type": "uint256"
+        }
+      ],
+      "name": "clockOut",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_posId",
+          "type": "uint256"
+        }
+      ],
+      "name": "POSMapping",
       "outputs": [
         {
-          "internalType": "struct POS.Ticket",
+          "internalType": "contract POS",
           "name": "",
-          "type": "tuple",
-          "components": [
-            {
-              "internalType": "string",
-              "name": "name",
-              "type": "string"
-            },
-            {
-              "internalType": "struct POS.menuItem[]",
-              "name": "orders",
-              "type": "tuple[]",
-              "components": [
-                {
-                  "internalType": "uint256",
-                  "name": "cost",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "string",
-                  "name": "name",
-                  "type": "string"
-                }
-              ]
-            },
-            {
-              "internalType": "address",
-              "name": "server",
-              "type": "address"
-            },
-            {
-              "internalType": "uint256",
-              "name": "id",
-              "type": "uint256"
-            },
-            {
-              "internalType": "bool",
-              "name": "paid",
-              "type": "bool"
-            }
-          ]
+          "type": "address"
         }
       ],
       "stateMutability": "view",
@@ -368,9 +321,117 @@
     },
     {
       "inputs": [],
-      "name": "payRestaurant",
-      "outputs": [],
-      "stateMutability": "nonpayable",
+      "name": "nextJobId",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "nextPOSId",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "nextEmployeeId",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "serviceStart",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "jobIds",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "employeeIds",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "POSIds",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "jobId",
+          "type": "uint256"
+        }
+      ],
+      "name": "jobs",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "hourlyWage",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "jobName",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     }
   ]
