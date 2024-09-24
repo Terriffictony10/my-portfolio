@@ -476,7 +476,7 @@ describe('POS Ticket Payment', () => {
         ).to.be.revertedWith('Insufficient balance input');
     });
 });
-describe('Restaurant Service Management and POS Payment', () => {
+describe('Restaurant Service Management and POS and Employee Payment', () => {
     let pos1, pos2, posId1, posId2, posContract1, posContract2, customer1, customer2, server1, server2, restaurantInitialBalance, restaurantFinalBalance;
     const itemName1 = "Burger";
     const itemCost1 = ethers.parseUnits('5', 'ether'); // 5 ether for a burger
@@ -676,15 +676,6 @@ describe('Restaurant Service Management and POS Payment', () => {
         expect(serviceStartTimestamp).to.equal(expectedTimestamp);
     });
 });
-
-
-
-
-
-
-
-
-
 
 
   })
