@@ -1,84 +1,86 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
-import "./Restaurant.sol";
+
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-contract decentratalityServiceFactory is Ownable{
-    ERC20 token;
-    // Mapping to store restaurant contracts with their IDs
-    mapping(uint256 => Restaurant) public restaurants;
 
+interface IrestaurantDeployer {
+    function deployRestaurant(string memory _name, address _owner, address _posDeployer) external returns (address);
+}
 
-    // Variable to track the next restaurant ID
+contract decentratalityServiceFactory is Ownable {
+    ERC20 public token;
+    IrestaurantDeployer public restaurantDeployer;
+    address public posDeployer;
+
+    mapping(uint256 => address) public restaurants;
     uint256 public nextRestaurantId;
-    
+
     event RestaurantCreated(
-        Restaurant restaurant, 
-        uint256 id, 
+        address indexed restaurant,
+        uint256 id,
         address owner
     );
-    event fundsAdded(
-        address restaurant, 
+    event FundsAdded(
+        address indexed restaurant,
         uint256 id,
         uint256 timestamp
     );
 
-
-    modifier onlyInvestor () {
+    modifier onlyInvestor() {
         require(
             token.balanceOf(msg.sender) > 0,
-            'must be token holder'
+            "must be token holder"
         );
         _;
     }
-    
-    // Constructor to initialize the token with a name, symbol, and total supply
-    constructor(
-        ERC20 _token
-    ) Ownable(msg.sender){
+
+   constructor(
+        ERC20 _token,
+        IrestaurantDeployer _restaurantDeployer,
+        address _posDeployer
+    ) Ownable(msg.sender) {
         token = _token;
-    }
-    receive() external payable {
-        
+        restaurantDeployer = _restaurantDeployer;
+        posDeployer = _posDeployer;
     }
 
-    
+    receive() external payable {}
+
     function createRestaurant(
         string memory _name,
         uint256 _startingCash
-    ) public payable onlyInvestor returns(uint256, Restaurant){
-       // Create the new Restaurant contract
-    require(msg.value >= _startingCash);
-    Restaurant restaurant = new Restaurant(_name, msg.sender);
+    ) public payable onlyInvestor returns (uint256, address) {
+        require(msg.value >= _startingCash, "Insufficient starting cash");
 
-    // Increment the nextRestaurantId for the newly created restaurant
-    nextRestaurantId++;
+        // Deploy the new Restaurant contract via the deployer
+        address restaurant = restaurantDeployer.deployRestaurant(_name, msg.sender, posDeployer);
 
-    // Map the newly created restaurant contract to the nextRestaurantId
-    restaurants[nextRestaurantId] = restaurant;
+        nextRestaurantId++;
+        restaurants[nextRestaurantId] = restaurant;
 
-    // Emit an event with the address and the ID of the new restaurant
-    emit RestaurantCreated(restaurant, nextRestaurantId, restaurant.owner());
+        emit RestaurantCreated(restaurant, nextRestaurantId, msg.sender);
 
-    _addFunds(_startingCash, restaurant);
+        _addFunds(_startingCash, payable(restaurant));
 
-    emit fundsAdded(address(restaurant), nextRestaurantId, block.timestamp);
+        emit FundsAdded(restaurant, nextRestaurantId, block.timestamp);
 
-    // Return the newly created restaurant contract
-    return (nextRestaurantId, restaurant);
+        return (nextRestaurantId, restaurant);
     }
+
     function _addFunds(
-        uint256 _amount, 
-        Restaurant _restaurant
-    ) internal {    
-         (bool sent, ) = address(_restaurant).call{value: _amount}("");
-         require(sent, "failed to send"); 
+        uint256 _amount,
+        address payable _restaurant
+    ) internal {
+        (bool sent, ) = _restaurant.call{value: _amount}("");
+        require(sent, "failed to send");
     }
-    function balanceOf(address _address) public view virtual onlyOwner returns (uint256) {
+
+    function balanceOf(address _address) public view onlyOwner returns (uint256) {
         return token.balanceOf(_address);
     }
-    function transfer(address _to, uint256 _value) public virtual onlyOwner returns (bool) {
+
+    function transfer(address _to, uint256 _value) public onlyOwner returns (bool) {
         return token.transfer(_to, _value);
     }
-    
 }

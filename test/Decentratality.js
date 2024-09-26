@@ -4,27 +4,53 @@ const { ethers } = require('hardhat');
 const restaurantABI = require('../src/abis/Restaurant.json').abi;
 
 const tokens = (n) => {
-  return ethers.parseUnits(n.toString(), 'ether')
-}
+  return ethers.parseUnits(n.toString(), 'ether');
+};
 
-const ether = tokens
+const ether = tokens;
 
 describe('Decentratality', () => {
-  let decentratality, accounts, deployer, receiver, exchange, decentratalityServiceFactory, user1, restaurant, customer
+  let decentratality,
+    accounts,
+    deployer,
+    receiver,
+    exchange,
+    decentratalityServiceFactory,
+    user1,
+    restaurant,
+    customer,
+    restaurantDeployer,
+    posDeployer;
 
   beforeEach(async () => {
-    const Token = await ethers.getContractFactory('Decentratality')
-    decentratality = await Token.deploy()
+    const Token = await ethers.getContractFactory('Decentratality');
+    decentratality = await Token.deploy();
 
-    decentratalityServiceFactory = await ethers.deployContract('decentratalityServiceFactory', [decentratality.target])
+    const POSDeployer = await ethers.getContractFactory('POSDeployer');
+    posDeployer = await POSDeployer.deploy();
 
-    accounts = await ethers.getSigners()
-    deployer = accounts[0]
-    receiver = accounts[1]
-    exchange = accounts[2]
-    user1 = accounts[3]
+    const RestaurantDeployer = await ethers.getContractFactory('RestaurantDeployer');
+    restaurantDeployer = await RestaurantDeployer.deploy();
+
+    const Factory = await ethers.getContractFactory('decentratalityServiceFactory');
+
+    const decentratalityAddress = await decentratality.getAddress();
+    const restaurantDeployerAddress = await restaurantDeployer.getAddress();
+    const posDeployerAddress = await posDeployer.getAddress();
+
+    decentratalityServiceFactory = await Factory.deploy(
+      decentratalityAddress,
+      restaurantDeployerAddress,
+      posDeployerAddress
+    );
+
+    accounts = await ethers.getSigners();
+    deployer = accounts[0];
+    receiver = accounts[1];
+    exchange = accounts[2];
+    user1 = accounts[3];
     customer = accounts[4];
-  })
+  });
 
   describe('Deployment', () => {
     
@@ -38,18 +64,24 @@ describe('Decentratality', () => {
         result = await transaction.wait()
 
         
-        const event = result.logs.find(log => 
-                log.topics[0] === ethers.id("RestaurantCreated(address,uint256,address)")
-            );
+         // Access the event data
+        const blockNumber = result.blockNumber;
 
-            const decodedEvent = ethers.AbiCoder.defaultAbiCoder().decode(
-                ['address', 'uint256', 'address'], 
-                event.data
-            );
+        const events = await decentratalityServiceFactory.queryFilter(
+          decentratalityServiceFactory.filters.RestaurantCreated(),
+          blockNumber,
+          blockNumber
+        );
 
-            restaurant = decodedEvent[0];
-            restaurantId = decodedEvent[1]; // Get the restaurant address from the decoded event // Log the address
-            restaurantOwner = decodedEvent[2];
+        if (events.length === 0) {
+          throw new Error('RestaurantCreated event not found');
+        }
+
+        const event = events[0];
+        const { restaurant: restaurantAddr, id, owner } = event.args;
+        restaurant = restaurantAddr;
+        restaurantId = id;
+        restaurantOwner = owner;
             
       })
       it('creates the restaurant and stores it in the restaurants mapping properly', async() => {
@@ -67,7 +99,7 @@ describe('Decentratality', () => {
        it('emits the fundsAdded event with correct arguments', async () => {
             // Ensure the fundsAdded event is emitted with the correct arguments
             await expect(transaction)
-                .to.emit(decentratalityServiceFactory, 'fundsAdded')
+                .to.emit(decentratalityServiceFactory, 'FundsAdded')
                 .withArgs(restaurant, restaurantId, (await ethers.provider.getBlock(result.blockNumber)).timestamp);
         });
 
@@ -89,61 +121,90 @@ describe('Decentratality', () => {
     })
 
     describe('Restaurant Job and Employee Management', () => {
-    let restaurant, restaurantId, transaction, result, restaurantContract, jobId, job;
+    let restaurant, restaurantId, transaction, transaction2, result, restaurantContract, jobId, job, timestamp;
     const employeeName = "John Doe";
     const hourlyWage = 2000000000000000; // Example: $20.00/hour in cents
 
     describe('Success', () => {
       
       beforeEach(async () => {
-        transaction  = await decentratalityServiceFactory.createRestaurant('Montecito', ether(100), { value: ether(100) })
-        result = await transaction.wait()
+    transaction  = await decentratalityServiceFactory.createRestaurant('Montecito', ether(100), { value: ether(100) });
+    result = await transaction.wait();
 
-        
-        const event = result.logs.find(log => 
-                log.topics[0] === ethers.id("RestaurantCreated(address,uint256,address)")
-            );
+    const blockNumber = result.blockNumber;
 
-            const decodedEvent = ethers.AbiCoder.defaultAbiCoder().decode(
-                ['address', 'uint256', 'address'], 
-                event.data
-            );
+    // Retrieve the RestaurantCreated event
+    const events = await decentratalityServiceFactory.queryFilter(
+      decentratalityServiceFactory.filters.RestaurantCreated(),
+      blockNumber,
+      blockNumber
+    );
 
-            restaurant = decodedEvent[0];
-            restaurantId = decodedEvent[1]; // Get the restaurant address from the decoded event // Log the address
-            restaurantOwner = decodedEvent[2];
-            restaurantContract = new ethers.Contract(restaurant, restaurantABI, deployer); 
+    if (events.length === 0) {
+      throw new Error('RestaurantCreated event not found');
+    }
 
-            transaction = await restaurantContract.addJob(hourlyWage, 'Chef');
-            result = await transaction.wait();
+    const event = events[0];
+    ({ restaurant: restaurantAddr, id: restaurantId, owner: restaurantOwner } = event.args);
+    restaurant = restaurantAddr;
 
-            const jobEvent = result.logs.find(log => 
-                log.topics[0] === ethers.id("JobAdded(uint256,uint256,(uint256,string))")
-            );
+    // Initialize the restaurant contract instance
+    restaurantContract = new ethers.Contract(restaurant, restaurantABI, deployer);
 
-            const jobDecodedEvent = ethers.AbiCoder.defaultAbiCoder().decode(
-                ['uint256', 'uint256', 'tuple(uint256,string)'], 
-                jobEvent.data
-            );
-            jobId = jobDecodedEvent[0];
-            job = jobDecodedEvent[2];
-      })
+    // Add a job
+    transaction2 = await restaurantContract.addJob(hourlyWage, 'Chef');
+    const receipt2 = await transaction2.wait();
+    const blockNumber2 = receipt2.blockNumber;
+
+    // Retrieve the JobAdded event
+    const jobEvents = await restaurantContract.queryFilter(
+      restaurantContract.filters.JobAdded(),
+      blockNumber2,
+      blockNumber2
+    );
+
+    if (jobEvents.length === 0) {
+      throw new Error('JobAdded event not found');
+    }
+
+    const jobEvent = jobEvents[0];
+    ({ id: jobId, timestamp: Timestamp, job: jobStruct } = jobEvent.args);
+    job = jobStruct;
+    timestamp = Timestamp
+});
 
       it('adds a job and stores it in the jobs mapping', async () => {
-        const job = await restaurantContract.jobs(jobId);
-        expect(job.jobName).to.equal('Chef');
-        expect(job.hourlyWage).to.equal(hourlyWage);
+         const functionData = restaurantContract.interface.encodeFunctionData('jobs', [jobId]);
+
+    const data = await ethers.provider.call({
+        to: await restaurantContract.getAddress(),
+        data: functionData,
+    });
+
+    const outputTypes = ['uint256', 'string'];
+
+    const decoded = ethers.AbiCoder.defaultAbiCoder().decode(outputTypes, data);
+
+    const [hourlyWageInWei, jobName] = decoded;
+
+    expect(jobName).to.equal('Chef');
+    expect(hourlyWageInWei).to.equal(hourlyWage);
       });
 
       it('emits the JobAdded event with correct arguments', async () => {
-        await expect(transaction)
-          .to.emit(restaurantContract, 'JobAdded')
-          .withArgs(
-            jobId,  // The job ID
-            (await ethers.provider.getBlock(result.blockNumber)).timestamp,  // The timestamp from the block
-            [hourlyWage,  // The `hourlyWage` from the struct
-            'Chef'] // The `jobName` from the struct
-        );
+         await expect(transaction2)
+    .to.emit(restaurantContract, 'JobAdded')
+    .withArgs(
+      jobId,
+      timestamp, // Use anyValue for the timestamp since it's non-deterministic
+      // We can't compare structs directly, so we'll check the arguments manually
+      // You can pass a function to compare the struct
+      (jobStruct) => {
+        expect(jobStruct[0]).to.equal(hourlyWage);
+        expect(jobStruct[1]).to.equal('Chef');
+        return true;
+      }
+    );
       });
 
      describe('Hiring Employee', () => {
@@ -223,44 +284,60 @@ it('rejects hiring an employee for a non-existent job', async () => {
   });
   
   describe('POS Creation and Payment', () => {
-    let pos, posId, posContract, transaction, result, event, decodedEvent;
+    let pos, posId, posContract, transaction, result, event, decodedEvent, posTransaction;
 
     describe('Success', () => {
         beforeEach(async () => {
+  // Create the restaurant
+  const transaction = await decentratalityServiceFactory.createRestaurant('Montecito', ether(100), { value: ether(100) });
+  const receipt = await transaction.wait();
+  const blockNumber = receipt.blockNumber;
 
-            transaction  = await decentratalityServiceFactory.createRestaurant('Montecito', ether(100), { value: ether(100) })
-            result = await transaction.wait()
+  // Retrieve the RestaurantCreated event
+  const events = await decentratalityServiceFactory.queryFilter(
+    decentratalityServiceFactory.filters.RestaurantCreated(),
+    blockNumber,
+    blockNumber
+  );
 
-        
-            event = result.logs.find(log => 
-                log.topics[0] === ethers.id("RestaurantCreated(address,uint256,address)")
-            );
+  if (events.length === 0) {
+    throw new Error('RestaurantCreated event not found');
+  }
 
-            decodedEvent = ethers.AbiCoder.defaultAbiCoder().decode(
-                ['address', 'uint256', 'address'], 
-                event.data
-            );
+  const event = events[0];
+  const { restaurant: restaurantAddr, id: restaurantId, owner: restaurantOwner } = event.args;
+  restaurant = restaurantAddr;
 
-            restaurant = decodedEvent[0];
-            restaurantId = decodedEvent[1]; // Get the restaurant address from the decoded event // Log the address
-            restaurantOwner = decodedEvent[2];
-            restaurantContract = new ethers.Contract(restaurant, restaurantABI, deployer); 
-            transaction = await restaurantContract.createPOS('POS #1');
-            result = await transaction.wait();
+  // Initialize the restaurant contract instance
+  restaurantContract = new ethers.Contract(restaurant, restaurantABI, deployer);
 
-            event = result.logs.find(log => 
-                log.topics[0] === ethers.id("POSCreated(address,uint256,address)")
-            );
+  // Create the POS
+  posTransaction = await restaurantContract.createPOS('POS #1');
+  const posReceipt = await posTransaction.wait();
+  const posBlockNumber = posReceipt.blockNumber;
 
-            decodedEvent = ethers.AbiCoder.defaultAbiCoder().decode(
-                ['address', 'uint256', 'address'], 
-                event.data
-            );
+  // Retrieve the POSCreated event
+  const posEvents = await restaurantContract.queryFilter(
+    restaurantContract.filters.POSCreated(),
+    posBlockNumber,
+    posBlockNumber
+  );
 
-            pos = decodedEvent[0];
-            posId = decodedEvent[1];
-            posContract = new ethers.Contract(pos, restaurantABI, deployer);
-        });
+  if (posEvents.length === 0) {
+    throw new Error('POSCreated event not found');
+  }
+
+  const posEvent = posEvents[0];
+  ({ pos: posAddress, id: posId, owner: posOwner } = posEvent.args);
+
+  pos = posAddress;
+  posId = posId;
+
+  // Initialize the POS contract instance with the correct ABI
+  const posABI = require('../src/abis/POS.json').abi;
+  posContract = new ethers.Contract(pos, posABI, deployer);
+});
+
 
         it('creates a POS and stores it in the POS mapping properly', async () => {
             const createdPOS = await restaurantContract.POSMapping(posId);
@@ -268,10 +345,10 @@ it('rejects hiring an employee for a non-existent job', async () => {
         });
 
         it('emits the POSCreated event with correct arguments', async () => {
-            await expect(transaction)
-                .to.emit(restaurantContract, 'POSCreated')
-                .withArgs(pos, posId, deployer.address);
-        });
+  await expect(posTransaction)
+    .to.emit(restaurantContract, 'POSCreated')
+    .withArgs(pos, posId, deployer.address);
+});
     });
 
     describe('Failure', () => {
@@ -286,42 +363,58 @@ it('rejects hiring an employee for a non-existent job', async () => {
 
     describe('Success', () => {
         beforeEach(async () => {
-            // Create the restaurant and POS first
-            transaction = await decentratalityServiceFactory.createRestaurant('Montecito', ether(100), { value: ether(100) });
-            result = await transaction.wait();
+  // Create the restaurant
+  const transaction = await decentratalityServiceFactory.createRestaurant(
+    'Montecito',
+    ether(100),
+    { value: ether(100) }
+  );
+  const receipt = await transaction.wait();
+  const blockNumber = receipt.blockNumber;
 
-            event = result.logs.find(log => 
-                log.topics[0] === ethers.id("RestaurantCreated(address,uint256,address)")
-            );
+  // Retrieve the RestaurantCreated event
+  const events = await decentratalityServiceFactory.queryFilter(
+    decentratalityServiceFactory.filters.RestaurantCreated(),
+    blockNumber,
+    blockNumber
+  );
 
-            decodedEvent = ethers.AbiCoder.defaultAbiCoder().decode(
-                ['address', 'uint256', 'address'], 
-                event.data
-            );
+  if (events.length === 0) {
+    throw new Error('RestaurantCreated event not found');
+  }
 
-            restaurant = decodedEvent[0];
-            restaurantId = decodedEvent[1];
-            restaurantOwner = decodedEvent[2];
-            restaurantContract = new ethers.Contract(restaurant, restaurantABI, deployer);
+  const event = events[0];
+  const { restaurant: restaurantAddr, id: restaurantId, owner: restaurantOwner } = event.args;
+  restaurant = restaurantAddr;
 
-            // Create the POS
-            transaction = await restaurantContract.createPOS('POS #1', { value: ether(50) });
-            result = await transaction.wait();
+  // Initialize the restaurant contract instance
+  restaurantContract = new ethers.Contract(restaurant, restaurantABI, deployer);
 
-            event = result.logs.find(log => 
-                log.topics[0] === ethers.id("POSCreated(address,uint256,address)")
-            );
+  // Create the POS
+  const posTransaction = await restaurantContract.createPOS('POS #1', { value: ether(50) });
+  const posReceipt = await posTransaction.wait();
+  const posBlockNumber = posReceipt.blockNumber;
 
-            decodedEvent = ethers.AbiCoder.defaultAbiCoder().decode(
-                ['address', 'uint256', 'address'], 
-                event.data
-            );
+  // Retrieve the POSCreated event
+  const posEvents = await restaurantContract.queryFilter(
+    restaurantContract.filters.POSCreated(),
+    posBlockNumber,
+    posBlockNumber
+  );
 
-            pos = decodedEvent[0];
-            posId = decodedEvent[1];
-            const posABI = require('../src/abis/POS.json').abi;
-            posContract = new ethers.Contract(pos, posABI, deployer); // Use POS ABI here
-        });
+  if (posEvents.length === 0) {
+    throw new Error('POSCreated event not found');
+  }
+
+  const posEvent = posEvents[0];
+  const { pos: posAddress, id: posId, owner: posOwner } = posEvent.args;
+
+  pos = posAddress;
+  // posId is already assigned from event.args
+  // Initialize the POS contract instance with the correct ABI
+  const posABI = require('../src/abis/POS.json').abi;
+  posContract = new ethers.Contract(pos, posABI, deployer);
+});
 
         it('adds a menu item successfully', async () => {
             // Add a menu item
@@ -388,50 +481,66 @@ describe('POS Ticket Payment', () => {
     let customer, totalCost;
 
     beforeEach(async () => {
-        // Create the restaurant and POS first
-        transaction = await decentratalityServiceFactory.createRestaurant('Montecito', ether(100), { value: ether(100) });
-        result = await transaction.wait();
+  // Create the restaurant
+  const transaction = await decentratalityServiceFactory.createRestaurant(
+    'Montecito',
+    ether(100),
+    { value: ether(100) }
+  );
+  const receipt = await transaction.wait();
+  const blockNumber = receipt.blockNumber;
 
-        event = result.logs.find(log => 
-            log.topics[0] === ethers.id("RestaurantCreated(address,uint256,address)")
-        );
+  // Retrieve the RestaurantCreated event
+  const events = await decentratalityServiceFactory.queryFilter(
+    decentratalityServiceFactory.filters.RestaurantCreated(),
+    blockNumber,
+    blockNumber
+  );
 
-        decodedEvent = ethers.AbiCoder.defaultAbiCoder().decode(
-            ['address', 'uint256', 'address'], 
-            event.data
-        );
+  if (events.length === 0) {
+    throw new Error('RestaurantCreated event not found');
+  }
 
-        restaurant = decodedEvent[0];
-        restaurantId = decodedEvent[1];
-        restaurantOwner = decodedEvent[2];
-        restaurantContract = new ethers.Contract(restaurant, restaurantABI, deployer);
+  const event = events[0];
+  const { restaurant: restaurantAddr, id: restaurantId, owner: restaurantOwner } = event.args;
+  restaurant = restaurantAddr;
 
-        // Create the POS
-        transaction = await restaurantContract.createPOS('POS #1', { value: ether(50) });
-        result = await transaction.wait();
+  // Initialize the restaurant contract instance
+  restaurantContract = new ethers.Contract(restaurant, restaurantABI, deployer);
 
-        event = result.logs.find(log => 
-            log.topics[0] === ethers.id("POSCreated(address,uint256,address)")
-        );
+  // Create the POS
+  const posTransaction = await restaurantContract.createPOS('POS #1', { value: ether(50) });
+  const posReceipt = await posTransaction.wait();
+  const posBlockNumber = posReceipt.blockNumber;
 
-        decodedEvent = ethers.AbiCoder.defaultAbiCoder().decode(
-            ['address', 'uint256', 'address'], 
-            event.data
-        );
+  // Retrieve the POSCreated event
+  const posEvents = await restaurantContract.queryFilter(
+    restaurantContract.filters.POSCreated(),
+    posBlockNumber,
+    posBlockNumber
+  );
 
-        pos = decodedEvent[0];
-        posId = decodedEvent[1];
-        const posABI = require('../src/abis/POS.json').abi;
-        posContract = new ethers.Contract(pos, posABI, deployer);
+  if (posEvents.length === 0) {
+    throw new Error('POSCreated event not found');
+  }
 
-        customer = accounts[4]; // Assign customer account
+  const posEvent = posEvents[0];
+  const { pos: posAddress, id: posId, owner: posOwner } = posEvent.args;
 
-        // Add some menu items
-        await posContract.addMenuItem(itemCost1, itemName1);
-        await posContract.addMenuItem(itemCost2, itemName2);
+  pos = posAddress;
+  // Initialize the POS contract instance with the correct ABI
+  const posABI = require('../src/abis/POS.json').abi;
+  posContract = new ethers.Contract(pos, posABI, deployer);
 
-        totalCost = itemCost1 + itemCost2; // ethers.js v6 BigInt arithmetic
-    });
+  customer = accounts[4]; // Assign customer account
+
+  // Add some menu items
+  await posContract.addMenuItem(itemCost1, itemName1);
+  await posContract.addMenuItem(itemCost2, itemName2);
+
+  totalCost = itemCost1 + itemCost2; // ethers.js v6 BigInt arithmetic
+});
+
 
     it('should allow a customer to pay for a ticket after adding orders', async () => {
         // Create a ticket
@@ -485,86 +594,108 @@ describe('Restaurant Service Management and POS and Employee Payment', () => {
     const hourlyWage = 2000000000000000 // 1 ether/hour wage
 
     beforeEach(async () => {
-        // Create the restaurant and two POS terminals
-        let transaction = await decentratalityServiceFactory.createRestaurant('Montecito', ether(100), { value: ether(100) });
-        let result = await transaction.wait();
+  // Create the restaurant
+  const transaction = await decentratalityServiceFactory.createRestaurant(
+    'Montecito',
+    ether(100),
+    { value: ether(100) }
+  );
+  const receipt = await transaction.wait();
+  const blockNumber = receipt.blockNumber;
 
-        let event = result.logs.find(log =>
-            log.topics[0] === ethers.id("RestaurantCreated(address,uint256,address)")
-        );
+  // Retrieve the RestaurantCreated event
+  const events = await decentratalityServiceFactory.queryFilter(
+    decentratalityServiceFactory.filters.RestaurantCreated(),
+    blockNumber,
+    blockNumber
+  );
 
-        let decodedEvent = ethers.AbiCoder.defaultAbiCoder().decode(
-            ['address', 'uint256', 'address'],
-            event.data
-        );
+  if (events.length === 0) {
+    throw new Error('RestaurantCreated event not found');
+  }
 
-        restaurant = decodedEvent[0];
-        restaurantContract = new ethers.Contract(restaurant, restaurantABI, deployer);
+  const event = events[0];
+  const { restaurant: restaurantAddr } = event.args;
+  restaurant = restaurantAddr;
 
-        // Create two POS systems
-        transaction = await restaurantContract.createPOS('POS #1');
-        result = await transaction.wait();
+  // Initialize the restaurant contract instance
+  restaurantContract = new ethers.Contract(restaurant, restaurantABI, deployer);
 
-        event = result.logs.find(log =>
-            log.topics[0] === ethers.id("POSCreated(address,uint256,address)")
-        );
+  // Create POS #1
+  let posTransaction = await restaurantContract.createPOS('POS #1');
+  let posReceipt = await posTransaction.wait();
+  let posBlockNumber = posReceipt.blockNumber;
 
-        decodedEvent = ethers.AbiCoder.defaultAbiCoder().decode(
-            ['address', 'uint256', 'address'],
-            event.data
-        );
+  // Retrieve the POSCreated event for POS #1
+  let posEvents = await restaurantContract.queryFilter(
+    restaurantContract.filters.POSCreated(),
+    posBlockNumber,
+    posBlockNumber
+  );
 
-        pos1 = decodedEvent[0];
-        posId1 = decodedEvent[1];
-        const posABI = require('../src/abis/POS.json').abi;
-        posContract1 = new ethers.Contract(pos1, posABI, deployer);
+  if (posEvents.length === 0) {
+    throw new Error('POSCreated event not found for POS #1');
+  }
 
-        transaction = await restaurantContract.createPOS('POS #2');
-        result = await transaction.wait();
+  let posEvent = posEvents[0];
+  const { pos: posAddress1 } = posEvent.args;
 
-        event = result.logs.find(log =>
-            log.topics[0] === ethers.id("POSCreated(address,uint256,address)")
-        );
+  pos1 = posAddress1;
+  const posABI = require('../src/abis/POS.json').abi;
+  posContract1 = new ethers.Contract(pos1, posABI, deployer);
 
-        decodedEvent = ethers.AbiCoder.defaultAbiCoder().decode(
-            ['address', 'uint256', 'address'],
-            event.data
-        );
+  // Create POS #2
+  posTransaction = await restaurantContract.createPOS('POS #2');
+  posReceipt = await posTransaction.wait();
+  posBlockNumber = posReceipt.blockNumber;
 
-        pos2 = decodedEvent[0];
-        posId2 = decodedEvent[1];
-        posContract2 = new ethers.Contract(pos2, posABI, deployer);
+  // Retrieve the POSCreated event for POS #2
+  posEvents = await restaurantContract.queryFilter(
+    restaurantContract.filters.POSCreated(),
+    posBlockNumber,
+    posBlockNumber
+  );
 
-        customer1 = accounts[4];
-        customer2 = accounts[5];
+  if (posEvents.length === 0) {
+    throw new Error('POSCreated event not found for POS #2');
+  }
 
-        // Add menu items to both POS systems
-        await posContract1.addMenuItem(itemCost1, itemName1);
-        await posContract2.addMenuItem(itemCost2, itemName2);
+  posEvent = posEvents[0];
+  const { pos: posAddress2 } = posEvent.args;
 
-        // Record initial balance of the restaurant
-        restaurantInitialBalance = await ethers.provider.getBalance(restaurant);
+  pos2 = posAddress2;
+  posContract2 = new ethers.Contract(pos2, posABI, deployer);
 
-        // Add servers (employees)
-        server1 = accounts[7];
-        server2 = accounts[8];
+  customer1 = accounts[4];
+  customer2 = accounts[5];
 
-        // Add jobs for servers and hire them
-        await restaurantContract.addJob(hourlyWage, "Server");
-        const jobId = await restaurantContract.nextJobId();
-        await restaurantContract.hireEmployee(jobId, "Server1", server1.address);
-        await restaurantContract.hireEmployee(jobId, "Server2", server2.address);
+  // Add menu items to both POS systems
+  await posContract1.addMenuItem(itemCost1, itemName1);
+  await posContract2.addMenuItem(itemCost2, itemName2);
 
-        // Servers clock in
-        await restaurantContract.connect(server1).clockIn(1); // Employee ID 1
-        await restaurantContract.connect(server2).clockIn(2); // Employee ID 2
+  // Record initial balance of the restaurant
+  restaurantInitialBalance = await ethers.provider.getBalance(restaurant);
 
-        // Simulate some time passing (e.g., 1 hour)
-        await ethers.provider.send("evm_increaseTime", [3600]); // 1 hour in seconds
-        await ethers.provider.send("evm_mine"); // Force a new block
+  // Add servers (employees)
+  server1 = accounts[7];
+  server2 = accounts[8];
 
-        
-    });
+  // Add jobs for servers and hire them
+  await restaurantContract.addJob(hourlyWage, "Server");
+  const jobId = await restaurantContract.nextJobId();
+
+  await restaurantContract.hireEmployee(jobId, "Server1", server1.address);
+  await restaurantContract.hireEmployee(jobId, "Server2", server2.address);
+
+  // Servers clock in
+  await restaurantContract.connect(server1).clockIn(1); // Employee ID 1
+  await restaurantContract.connect(server2).clockIn(2); // Employee ID 2
+
+  // Simulate some time passing (e.g., 1 hour)
+  await ethers.provider.send("evm_increaseTime", [3600]); // 1 hour in seconds
+  await ethers.provider.send("evm_mine"); // Force a new block
+});
+
 
     it('should toggle service state and settle payments when service ends', async () => {
         // Start the service

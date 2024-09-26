@@ -4,6 +4,22 @@ import "hardhat/console.sol";
 import "./POS.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+interface IPOSDeployer {
+    function deployPOS(
+        string memory _name,
+        address _owner,
+        address _restaurant
+    ) external returns (address);
+
+}
+
+interface IPOS {
+    function name() external view returns (string memory);
+    function owner() external view returns (address);
+    function payRestaurant() external;
+    // Add other functions as needed
+}
+
 contract Restaurant is Ownable {
     struct Job {
         uint256 hourlyWageInWei; // Wage is now in wei
@@ -18,7 +34,7 @@ contract Restaurant is Ownable {
         uint256 employeePension;
     }
 
-    event POSCreated(POS pos, uint256 id, address owner);
+    event POSCreated(address pos, uint256 id, address owner);
     event JobAdded(uint256 id, uint256 timestamp, Job job);
     event EmployeeHired(uint256 id, uint256 timestamp, Employee employee);
 
@@ -34,28 +50,33 @@ contract Restaurant is Ownable {
     uint256[] public jobIds;
     mapping(uint256 => Employee) public employees;
     uint256[] public employeeIds;
-    mapping(uint256 => POS) public POSMapping;
+    mapping(uint256 => address) public POSMapping;
     uint256[] public POSIds;
 
-    constructor(string memory _name, address _owner) Ownable(_owner) {
+    IPOSDeployer public posDeployer;
+
+    constructor(string memory _name, address _owner, IPOSDeployer _posDeployer) Ownable(_owner) {
         name = _name;
+        posDeployer = _posDeployer;
     }
 
     receive() external payable {}
 
-    function createPOS(string memory _name) public payable returns (uint256, POS) {
+    function createPOS(string memory _name) public payable returns (uint256, address) {
         for (uint256 i = 0; i < POSIds.length; i++) {
             uint256 posId = POSIds[i];
+            address posAddress = POSMapping[posId];
+            string memory existingName = IPOS(posAddress).name();
             require(
-                keccak256(bytes(POSMapping[posId].name())) != keccak256(bytes(_name)),
-                "POS with the same name and ID already exists."
+                keccak256(bytes(existingName)) != keccak256(bytes(_name)),
+                "POS with the same name already exists."
             );
         }
         nextPOSId++;
-        POS pos = new POS(_name, owner(), address(this));
+        address pos = posDeployer.deployPOS(_name, owner(), address(this));
         POSMapping[nextPOSId] = pos;
         POSIds.push(nextPOSId);
-        emit POSCreated(pos, nextPOSId, pos.owner());
+        emit POSCreated(pos, nextPOSId, IPOS(pos).owner());
         return (nextPOSId, pos);
     }
 
@@ -108,7 +129,7 @@ contract Restaurant is Ownable {
     function endService() public onlyOwner {
         service = false;
         for (uint256 i = 0; i < POSIds.length; i++) {
-            POS pos = POSMapping[POSIds[i]];
+            IPOS pos = IPOS(POSMapping[POSIds[i]]);
             pos.payRestaurant();
         }
         for (uint256 i = 0; i < employeeIds.length; i++) {
