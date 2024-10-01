@@ -61,7 +61,7 @@ function RestaurantSelectionDashboardBody({ onclick, fun }) {
     }
 
 
-  }, [isLoading, dispatch, provider]);
+  }, [loadBlockchainData, isLoading, dispatch, provider]);
 
  
   const navigateToCrowdsale = () => {

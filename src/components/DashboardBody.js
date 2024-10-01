@@ -43,7 +43,7 @@ function DashboardBody({ onclick2, onclick3}) {
     if (isLoading) {
       loadBlockchainData();
     }
-  }, [isLoading]);
+  }, [loadBlockchainData, isLoading]);
 
  
   const navigateToCrowdsale = () => {

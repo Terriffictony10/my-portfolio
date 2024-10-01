@@ -72,7 +72,7 @@ function CrowdsaleBody() {
     if (isLoading) {
       loadBlockchainData();
     }
-  }, [isLoading, maxTokens, tokensSold]);
+  }, [loadBlockchainData, isLoading, maxTokens, tokensSold]);
 
   return (
     <div>

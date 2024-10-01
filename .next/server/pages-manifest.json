@@ -2,6 +2,8 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/RestaurantDashboard": "pages/RestaurantDashboard.js",
-  "/Dashboard": "pages/Dashboard.js"
+  "/": "pages/index.js",
+  "/Demo": "pages/Demo.js",
+  "/Dashboard": "pages/Dashboard.js",
+  "/RestaurantDashboard": "pages/RestaurantDashboard.js"
 }

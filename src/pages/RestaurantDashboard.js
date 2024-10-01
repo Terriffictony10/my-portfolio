@@ -104,7 +104,7 @@ export default function Home() {
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [isLoading]);
+  }, [loadBlockchainData, isLoading]);
 
   const navigateToCrowdsale = () => {
     router.push('/Crowdsale');

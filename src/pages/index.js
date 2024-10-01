@@ -89,22 +89,23 @@ export default function Home() {
           </video>
         
         <div className="page-text">
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;What is Decentratality? Well right now, not much, but it is the launchpad for an idea that could redefine Hospitality forever.            
-          The name comes from putting the words "Decentralized" and "Hospitality" together.
-          <br />
-          <br />
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          The goal is to build an app that can be a launchpad for business owners and employees to access the world of hospitality in a completely redefined way. We will do this by giving prospective restaurant 
-          (or any other facility that provides "hospitality") owners a platform designed from scratch to house all of the functionality of their payroll, and Inventory management. The app will have built in software similar to micros or jonas for
-          more "FINE DINING" settings.
-          <br />
-          <br />
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          This is just the beginning though, one day, we plan to connect vendors to markets, markets to customers, and customers to well designed approaches to world class hospitality,  all over the world.
-          <br />
-          <br />
-          If that sounds good to you, I would recommend first reading the about section, for a more comprehensive look under the hood, if you do decide to support the project, Welcome to decentratality, lets change the world.
-          </div>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;What is Decentratality? Well right now, not much, but it is the launchpad for an idea that could redefine Hospitality forever.            
+  The name comes from putting the words &quot;Decentralized&quot; and &quot;Hospitality&quot; together.
+  <br />
+  <br />
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  The goal is to build an app that can be a launchpad for business owners and employees to access the world of hospitality in a completely redefined way. We will do this by giving prospective restaurant 
+  (or any other facility that provides &quot;hospitality&quot;) owners a platform designed from scratch to house all of the functionality of their payroll, and Inventory management. The app will have built in software similar to micros or jonas for
+  more &quot;FINE DINING&quot; settings.
+  <br />
+  <br />
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  This is just the beginning though, one day, we plan to connect vendors to markets, markets to customers, and customers to well designed approaches to world class hospitality,  all over the world.
+  <br />
+  <br />
+  If that sounds good to you, I would recommend first reading the about section, for a more comprehensive look under the hood, if you do decide to support the project, Welcome to decentratality, lets change the world.
+</div>
+
         
 
 
