@@ -19,7 +19,7 @@ export default function Home() {
   useEffect(() => {
     const handleResize = () => {
       const menu = document.querySelector('.menu');
-      if (window.innerWidth > 800) {
+      if (menu && window.innerWidth > 800) {
         menu.style.display = ''; // Reset inline style to let CSS handle it
       }
     };

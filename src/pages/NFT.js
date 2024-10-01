@@ -1,4 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { Container } from 'react-bootstrap';
+import { ethers } from 'ethers'
+
+
 
 export default function Home() {
   const showSidebar = () => {
@@ -19,7 +23,7 @@ export default function Home() {
   useEffect(() => {
     const handleResize = () => {
       const menu = document.querySelector('.menu');
-      if (window.innerWidth > 800) {
+      if (menu && window.innerWidth > 800) {
         menu.style.display = ''; // Reset inline style to let CSS handle it
       }
     };
@@ -36,13 +40,16 @@ export default function Home() {
   const navigateToIndex = () => {
     window.location.href = '/';
   };
+
   const navigateToNFT = () => {
     window.location.href = '/NFT';
   };
   const navigateToDemo = () => {
     window.location.href = '/Demo';
   };
-
+  const navigateToDashboard = () => {
+    window.location.href = '/Dashboard';
+  };
 
   return (
     <div>
@@ -57,8 +64,8 @@ export default function Home() {
               </svg>
             </a>
           </li>
-          <li><a href="#">Crowdsale</a></li>
-          <li><a href="#">NFT Drop</a></li>
+          <li onClick={navigateToCrowdsale}><a href="#">Crowdsale</a></li>
+          <li onClick={navigateToNFT}><a href="#">NFT</a></li>
           <li><a href="#">DAO</a></li>
           <li><a href="#">About</a></li>
           <li><a href="#">Project</a></li>
@@ -83,11 +90,7 @@ export default function Home() {
       </nav>
     </div>
 
-    <div className="crowdsaleBody">
-      <div className="Crowdsale">
-      
-      </div>
-    </div>
+    
     </div>
   );
 }

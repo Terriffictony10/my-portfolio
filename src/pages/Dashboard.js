@@ -1,10 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Container } from 'react-bootstrap';
 import { ethers } from 'ethers'
+import Image from 'next/image';
 
+import DashboardBody from "../components/DashboardBody.js"
+
+import { useRouter } from 'next/router';
 
 
 export default function Home() {
+  const router = useRouter();
   const showSidebar = () => {
     const sidebar = document.querySelector('.sidebar');
     const menu = document.querySelector('.menu');
@@ -35,25 +40,50 @@ export default function Home() {
   }, []);
 
   const navigateToCrowdsale = () => {
-    window.location.href = '/Crowdsale';
+    router.push('/Crowdsale');
   };
   const navigateToIndex = () => {
-    window.location.href = '/';
+   router.push('/');
   };
 
   const navigateToNFT = () => {
-    window.location.href = '/NFT';
+    router.push('/NFT');
   };
   const navigateToDemo = () => {
-    window.location.href = '/Demo';
+    router.push('/Demo');
   };
   const navigateToDashboard = () => {
-    window.location.href = '/Dashboard';
+    router.push('/Dashboard');
   };
+   const navigateToRestaurantDashboard = () => {
+    router.push('/RestaurantDashboard');
+  };
+  const navigateToEmployeeDashboard = () => {
+    router.push('/EmployeeDashboard');
+  };
+  
+
 
   return (
-    <div>
-    
+    <div className="BlueBackground">
+    <div width={250} height={250} onClick={navigateToIndex} style={{ position: 'absolute', top: 0, left: 0 }}  >
+        <Image
+
+          src="/Decentralized.png" 
+          alt="Decentralized Image" 
+          width={250}   // Replace with actual width
+          height={250}  // Replace with actual height
+          style={{ position: 'relative', top: 0, left: 0 }} 
+          priority={true}  // Adds priority to improve page load speed
+        />
+      </div>
+      <div className="DashboardBackground">
+      <DashboardBody onclick1={navigateToIndex} onclick2={navigateToRestaurantDashboard} onclick3={navigateToEmployeeDashboard}/>
+      <button className="clean-button-home" onClick={navigateToIndex}>
+          go Home
+        </button>
+      </div>
+      
     </div>
   );
 }

@@ -193,6 +193,228 @@ nav li:first-child{
   color: white;
   text-shadow: 5px 5px 4px rgba(0, 0, 0, 0.9);
 }
+.demopane{
+  height: 80vh; 
+  width: 100vw; 
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.demoglass {
+  height: 40vh; 
+  width: 50vw; 
+  background-color: rgba(55, 56, 61, 0.5);
+  backdrop-filter: blur(5px);
+  box-shadow: -10px 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.DashboardBackground{
+  height: 100vh; 
+  width: 100vw; 
+  background-image: url('DashboardBackground.jpg');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  color: white;
+}
+.BlueBackground{
+  height: 100vh; 
+  width: 100vw; 
+  background-image: url('DashboardBackground.jpg');
+  
+}
+.DashboardAccount{
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;  
+  padding: 60px 50px 0px 0px; 
+  font-family: 'CrowdsaleBuyBox';
+}
+.account-label {
+  margin-right: 4px; /* Adds a margin between 'Account:' and the address */
+  position: relative;
+}
+.DashboardButtonContainer{
+  height: 100vh; 
+  width: 100vw; 
+  display: flex;
+  justify-content: center;
+  align-items: center; 
+  position: absolute;
+  flex-direction: column;
+  padding: 0px 0px 0px 0px; 
+  font-family: 'CrowdsaleBuyBox';
+}.DashboardLoginContainer{
+  height: 100vh; 
+  width: 100vw; 
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center; 
+  position: absolute;
+  flex-direction: column;
+  padding: 0px 0px 450px 0px; 
+  font-family: 'CrowdsaleBuyBox';
+}
+
+.clean-button-red {
+  background-color: transparent; /* Transparent background */
+  color: white;               /* White text */
+  border: 2px solid white;        /* White border */
+  height: 21vh; 
+  width: 35vw;            /* Padding for a nice look */
+  border-radius: 5px;            /* Rounded corners */
+  font-size: 16px;               /* Font size */
+  cursor: pointer;               /* Cursor to indicate it's clickable */
+  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth hover transition */
+  background-color: red;
+}
+.clean-button-green {
+  background-color: transparent; /* Transparent background */
+  color: white;               /* White text */
+  border: 2px solid white;        /* White border */
+  height: 21vh; 
+  width: 35vw;            /* Padding for a nice look */
+  border-radius: 5px;            /* Rounded corners */
+  font-size: 16px;               /* Font size */
+  cursor: pointer;               /* Cursor to indicate it's clickable */
+  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth hover transition */
+  background-color: green;
+}
+.clean-button-home {
+  background-color: transparent; /* Transparent background */
+  color: white;               /* White text */
+  border: 2px solid white;        /* White border */
+  height: 10vh; 
+  width: 35vw;            /* Padding for a nice look */
+  border-radius: 5px;            /* Rounded corners */
+  font-size: 16px;               /* Font size */
+  cursor: pointer;               /* Cursor to indicate it's clickable */
+  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth hover transition */
+  background-color: black;
+   position: fixed;
+  bottom: 0;                /* Aligns it to the bottom */
+  left: 50%;                /* Aligns the left edge at 50% of the viewport */
+  transform: translateX(-50%); /* Centers the object horizontally */
+  z-index: 1000;
+}
+.clean-button-home-RestaurantSelector{
+  background-color: transparent; /* Transparent background */
+  color: white;               /* White text */
+  border: 2px solid white;        /* White border */
+  height: 10vh; 
+  width: 18vw;            /* Padding for a nice look */
+  border-radius: 5px;            /* Rounded corners */
+  font-size: 16px;               /* Font size */
+  cursor: pointer;               /* Cursor to indicate it's clickable */
+  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth hover transition */
+  background-color: black;               /* Aligns it to the bottom */                
+  z-index: 1000;
+}
+.clean-button-home-Dashboard{
+  background-color: transparent; /* Transparent background */
+  color: white;               /* White text */
+  border: 2px solid white;        /* White border */
+  height: 10vh; 
+  width: 18vw;            /* Padding for a nice look */
+  border-radius: 5px;            /* Rounded corners */
+  font-size: 16px;               /* Font size */
+  cursor: pointer;               /* Cursor to indicate it's clickable */
+  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth hover transition */
+  background-color: grey;              /* Aligns it to the bottom */                
+  z-index: 1000;
+}
+
+.clean-button-red:hover {
+  background-color: white; /* Changes background to white on hover */
+  color: black;            /* Changes text color to black on hover */
+}
+.clean-button-green:hover {
+  background-color: white; /* Changes background to white on hover */
+  color: black;            /* Changes text color to black on hover */
+}
+.clean-button-home:hover {
+  background-color: white; /* Changes background to white on hover */
+  color: black;            /* Changes text color to black on hover */
+}
+.DashboardLogoFrame{
+  height: 250px; 
+  width: 250px; 
+}
+.RestaurantSelectorDashboardFrame{
+  height: 50vh; 
+  width: 50vw;
+  border-color: white;
+  border-width: 7px;
+  border-radius: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.fullFlexCenter{
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; 
+  width: 100vw;
+}
+.RestaurantSelectorHomeButtons{
+  position: fixed;
+  bottom: 0;  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  height: 10vh; 
+  width: 100vw;
+}
+.newRestaurantButton{ 
+  height: 30vh; 
+  width: 15vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  border-color: white;
+  border-width: 3px;
+  border-radius: 30px;
+  padding: 0px 0px 45px 0px;
+}
+.newRestaurantButton:hover {
+  background-color: white; /* Changes background to white on hover */
+  color: black;            /* Changes text color to black on hover */
+}
+.newRestaurantForm{
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  background-color: rgba(55, 56, 61, 0.5);
+  backdrop-filter: blur(5px);
+  top: 0;
+  left: 0;
+  z-index: -2;
+}
+.newRestaurantFormContainer{
+  height: 30vh;
+  width: 30w;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  flex-direction: column;
+  top: 50;
+  left: 50;
+  z-index: -1;
+}
 
 
 /* Ensure the video background container has the right size */
