@@ -11,36 +11,43 @@ loadFactory,
 loadAllRestaurants,
 loadMyRestaurants,
 subscribeToEvents,
-createNewRestaurant
+createNewRestaurant,
+decorateMyRestaurants
 } from '../store/interactions'
+
 
 import Image from 'next/image';
 
 import { useRouter } from 'next/router';
 import config from '../config.json'
+import { useProvider } from '../context/ProviderContext';
 
 function RestaurantSelectionDashboardBody({ onclick, fun }) {
 
   const dispatch = useDispatch()
-  const [provider, setProvider] = useState(null);
+  const { provider, setProvider } = useProvider();
   const [myRestaurants, setMyRestaurants] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const account = useSelector(state => state.provider.account)
 
+  const toRestaurantDashHandler = (e, restaurant) => {
+    console.log("funstuff")
+  };
+  
 
   const loadBlockchainData = async () => {
     if (typeof window.ethereum !== 'undefined') {
       try {
-        const provider = await loadProvider(dispatch)
-        setProvider(provider);
-
-        const chainId = await loadNetwork(provider, dispatch)
-        const Factory = await loadFactory(provider, config[chainId].decentratalityServiceFactory.address, dispatch)
-        const Restaurants = await loadAllRestaurants(provider, Factory, dispatch)
-        const myRestaurants = await loadMyRestaurants(provider, account, Restaurants, dispatch)
-        console.log(myRestaurants)
-        setMyRestaurants(myRestaurants)
+        const ethersProvider = new ethers.BrowserProvider(window.ethereum);
+        setProvider(ethersProvider);
+        const chainId = await loadNetwork(ethersProvider, dispatch)
+        const Factory = await loadFactory(ethersProvider, config[chainId].decentratalityServiceFactory.address, dispatch)
+        const Restaurants = await loadAllRestaurants(ethersProvider, Factory, dispatch)
+       
+        const myRestaurants = await loadMyRestaurants(ethersProvider, account, Restaurants, dispatch)
+        const myDecoratedRestaurants = await decorateMyRestaurants(ethersProvider, myRestaurants)
+        setMyRestaurants(myDecoratedRestaurants)
         subscribeToEvents(Factory, dispatch)
       } catch (error) {
         console.error("Error loading blockchain data:", error.message);
@@ -99,16 +106,18 @@ function RestaurantSelectionDashboardBody({ onclick, fun }) {
           </p>
           </div>
           <div className="fullFlexCenter">
-            <div className="RestaurantSelectorDashboardFrame">
-              { ((myRestaurants) ? ((myRestaurants.length() > 0) ? (
-                <div >
-                  
-                </div>
+            
+              { ((myRestaurants && myRestaurants.length > 0) ? (
+              <div className="RestaurantSelectorDashboardFrameRestaurants">
+                {myRestaurants.map((restaurant, i) => (
+                  <div key={i} value={restaurant.name} className="restaurantButton" onClick={(e) => toRestaurantDashHandler(e, )}>
+                    <p>{restaurant.name}</p>
+                    <p>{Number(restaurant.cash) / (10 ** 18)} ETH</p>
+                  </div>
+                ))}
+              </div>
               ) : (
-                (<div >
-                  
-                </div>)
-              )) : (
+              <div className="RestaurantSelectorDashboardFrame">
                 <div className="newRestaurantButton" onClick={onclick}>
 
                   <Image
@@ -123,8 +132,9 @@ function RestaurantSelectionDashboardBody({ onclick, fun }) {
                     Add New Restaurant
                   </div>
                 </div>
+              </div>
               ))}
-            </div>
+            
           </div>
         </div>
       )}

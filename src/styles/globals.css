@@ -354,6 +354,14 @@ nav li:first-child{
   justify-content: center;
   align-items: center;
 }
+.RestaurantSelectorDashboardFrameRestaurants{
+  height: 50vh; 
+  width: 50vw;
+  display: flex;
+  border-color: white;
+  border-width: 7px;
+  border-radius: 15px;
+}
 .fullFlexCenter{
   position: absolute;
   top: 0;
@@ -414,6 +422,44 @@ nav li:first-child{
   top: 50;
   left: 50;
   z-index: -1;
+}
+.restaurantButton{
+  height: 16vh; 
+  width: 9vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-color: white;
+  border-width: 2px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  justify-content: center;
+}
+.restaurantButton:hover {
+  background-color: white; /* Changes background to white on hover */
+  color: black;            /* Changes text color to black on hover */
+}
+.addNewRestaurantButtonAlreadyOwnOne{
+  height: 6vh; 
+  width: 6vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-color: white;
+  border-width: 2px;
+  border-radius: 5px;
+  font-size: 0.5rem;
+  justify-content: center;
+  z-index: 300;
+}
+.addNewRestaurantButtonAlreadyOwnOne:hover {
+  background-color: white; /* Changes background to white on hover */
+  color: black;            /* Changes text color to black on hover */
+}
+.flex{
+  display: flex;
+  flex-direction: row;
+  padding: 0px 0px 0px 0px;
 }
 
 

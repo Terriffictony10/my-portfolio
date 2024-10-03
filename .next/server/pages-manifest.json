@@ -2,8 +2,10 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
+  "/Crowdsale": "pages/Crowdsale.js",
+  "/RestaurantDashboard": "pages/RestaurantDashboard.js",
   "/": "pages/index.js",
+  "/NFT": "pages/NFT.js",
   "/Demo": "pages/Demo.js",
-  "/Dashboard": "pages/Dashboard.js",
-  "/RestaurantDashboard": "pages/RestaurantDashboard.js"
+  "/Dashboard": "pages/Dashboard.js"
 }

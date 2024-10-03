@@ -24,7 +24,9 @@ export const Restaurants = (state = DEFAULT_RESTAURANTS_STATE, action) => {
 				...state,
 				allRestaurants: {
 					loaded: true,
-					data : action.Restaurants
+					data : [
+						action.Restaurants
+						]
 				}
 			}
 		case 'MY_RESTAURANTS_LOADED':

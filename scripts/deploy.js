@@ -23,6 +23,7 @@ async function main() {
 	const Token = await hre.ethers.getContractFactory("Decentratality")
 	const decentratality = await Token.deploy()
 	
+	
 	const POSDeployer = await ethers.getContractFactory('POSDeployer');
   posDeployer = await POSDeployer.deploy();
 

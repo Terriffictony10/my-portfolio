@@ -1,14 +1,20 @@
 import { ethers } from 'ethers'
+import RESTAURANT_ABI from "../abis/Restaurant"
 import DECENTRATALITYSERVICEFACTORY_ABI from "../abis/decentratalityServiceFactory.json"
-export const loadProvider = (dispatch) => {
-	const connection = new ethers.BrowserProvider(window.ethereum);
+import { useSelector } from 'react-redux'
+
+let GlobalRestaurants = []
+export const loadProvider = async (dispatch) => {
+	const connection = await new ethers.BrowserProvider(window.ethereum);
+    
+    
     dispatch({ type: 'PROVIDER_LOADED', connection })
 
     return connection
 }
 export const loadAccount = async (provider, dispatch) => {
 	const accounts = await provider.send("eth_requestAccounts", []);
-	const account = ethers.getAddress(accounts[0])
+	const account = ethers.getAddress(accounts[0]); 
 
     dispatch({ type: 'ACCOUNT_LOADED', account})
 
@@ -29,25 +35,73 @@ export const subscribeToEvents = async (restaurantFactory, dispatch) => {
     
 }
 export const loadFactory = async (provider, address, dispatch) => {
-    const decentratalityServiceFactory = new ethers.Contract(address, DECENTRATALITYSERVICEFACTORY_ABI.abi, provider);
+    const user = await provider.getSigner()
+    const decentratalityServiceFactory = new ethers.Contract(address, DECENTRATALITYSERVICEFACTORY_ABI.abi, user);
     dispatch({ type: 'DECENTRATALITY_SERVICE_FACTORY_LOADED', decentratalityServiceFactory })
     return decentratalityServiceFactory
 }
 export const loadAllRestaurants = async (provider, factory, dispatch) => {
-
+    let Restaurants, Restaurant, RestaurantsRaw
+    Restaurant = []
+    Restaurants = []
     const block = await provider.getBlockNumber()
 
     const restaurantStream = await factory.queryFilter('RestaurantCreated', 0, block)
-    const Restaurants = restaurantStream.map(event => event.args)
+    RestaurantsRaw = restaurantStream.map(event => event.args)
 
+    if(GlobalRestaurants.length == 0){
+        for (let i = 0; i < RestaurantsRaw.length; i++) {
+            let restaurant = RestaurantsRaw[i];
+                
+            for (let key in restaurant) {
+                if(typeof restaurant[key] === 'bigint'){
+                    Restaurant.push(Number(restaurant[key]))
+                } else {
+                    Restaurant.push(restaurant[key])
+                }
+
+                
+            }
+            Restaurants.push(Restaurant)
+            Restaurant = []
+        }        
+    }
+    GlobalRestaurants = Restaurants
+    
+    
+    for (let i = GlobalRestaurants.length; i < Restaurants.length - 1; i++) {
+        
+                let restaurant = RestaurantsRaw[i];
+                
+                for (let key in restaurant) {
+                    if(typeof restaurant[key] === 'bigint'){
+                       Restaurant.push(Number(restaurant[key]))
+                    } else {
+                       Restaurant.push(restaurant[key])
+                    }
+
+                    
+                }
+                Restaurants.push(Restaurant)
+                Restaurant = []
+    }
+
+    
+    GlobalRestaurants = Restaurants
+    
+    
     dispatch({ type: 'All_RESTAURANTS_LOADED', Restaurants })
+
+    
 
     return Restaurants
 }
 export const loadMyRestaurants = async (provider, user, Restaurants, dispatch) => {
+    
     let myRestaurants = []
-    for(let i = 0; i < Restaurants.length(); i++){
+    for(let i = 0; i < Restaurants.length; i++){
         if(Restaurants[i][2] == user){
+            
             myRestaurants.push(Restaurants[i])
         }
     }
@@ -55,20 +109,34 @@ export const loadMyRestaurants = async (provider, user, Restaurants, dispatch) =
     dispatch({ type: 'MY_RESTAURANTS_LOADED', myRestaurants })
     return myRestaurants
 }
+export const decorateMyRestaurants = async (provider, myRestaurants) => {
+    const user = await provider.getSigner()
+    for(let i = 0; i < myRestaurants.length; i++) {
+        
+        const contract = await new ethers.Contract(myRestaurants[i][0], RESTAURANT_ABI.abi, user)
+        
+        
+        myRestaurants[i].name = await contract.name()
+        myRestaurants[i].cash = await provider.getBalance(contract.target)
+    }
+    return myRestaurants
+}
 export const createNewRestaurant = async (provider, factory, restaurantName, restaurantLiquidity, dispatch) => {
-
-    const user = provider.getSigner()
-    const balance = provider.getBalance(user)
+    let newRestaurant
+    const user = await provider.getSigner()
+    const balance = await provider.getBalance(user)
     try{
+        
         if(Number(balance) >= restaurantLiquidity){
-        const newRestaurant = factory.connect(user).createRestaurant(restaurantName, restaurantLiquidity, { value: restaurantLiquidity })
+        newRestaurant = await factory.createRestaurant(restaurantName, restaurantLiquidity, { value: restaurantLiquidity })
         dispatch({ type: 'RESTAURANT_CREATION_REQUEST', myRestaurants })
         }
         else {
-
+            console.log("welp")
         }
+        
     }catch(error){
         dispatch({ type: "RESTAURANT_CREATION_FAIL"})
     }
-    return myRestaurants
+    return newRestaurant
 }

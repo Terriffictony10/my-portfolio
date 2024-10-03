@@ -5,7 +5,8 @@ import { ethers } from 'ethers'
 import Image from 'next/image';
 
 import RestaurantSelectionDashboardBody from "../components/RestaurantSelectionDashboardBody.js"
-
+import Loading from "../components/Loading.js"
+import DECENTRATALITYSERVICEFACTORY_ABI from "../abis/decentratalityServiceFactory.json"
 import { useRouter } from 'next/router';
 import { 
 loadProvider, 
@@ -17,13 +18,19 @@ loadMyRestaurants,
 subscribeToEvents,
 createNewRestaurant
 } from '../store/interactions'
+import { useProvider } from '../context/ProviderContext';
 import config from '../config.json'
 
 export default function Home() {
-  const dispatch = useDispatch()
+
+  let dispatch, Factory
+  dispatch = useDispatch()
+  const { provider, setProvider } = useProvider();
+  const [factory, setFactory] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [newRestaurantName, setNewRestaurantName] = useState('')
-  const [newRestaurantLiquidity, setNewRestaurantLiquidity] = useState(null)
+  const [myRestaurants, setMyRestaurants] = useState('')
+  const [newRestaurantLiquidity, setNewRestaurantLiquidity] = useState(0)
   const router = useRouter();
   const showSidebar = () => {
     const sidebar = document.querySelector('.sidebar');
@@ -38,10 +45,15 @@ export default function Home() {
     sidebar.style.display = 'none';
     menu.style.display = 'flex';
   };
-  const addNewRestaurant = (e, factory, name, liquidity) => {
+  const addNewRestaurant = async (e, _factory, name, liquidity) => {
     e.preventDefault()
-
-    createNewRestaurant(provider, factory, name, liquidity, dispatch)
+    console.log(liquidity)
+    createNewRestaurant(provider, _factory, name, liquidity.toString(), dispatch)
+    const _Background = document.querySelector('.newRestaurantForm');
+    _Background.style.zIndex = '-1';
+    const _Form = document.querySelector('.newRestaurantFormContainer');
+     _Form.style.zIndex = '-2';
+     
   }
 
   const newRestaurantPopupHandler = (e) => {
@@ -60,38 +72,41 @@ export default function Home() {
     
   }
 
-   const loadBlockchainData = async () => {
-    if (typeof window.ethereum !== 'undefined') {
-      try {
-        const provider = await loadProvider(dispatch)
 
-        loadAccount(provider, dispatch)
-        
-        const chainId = await loadNetwork(provider, dispatch)
-        const Factory = await loadFactory(provider, config[chainId].decentratalityServiceFactory.address, dispatch)
-        const Restaurants = await loadAllRestaurants(provider, Factory, dispatch)
-        const myRestaurants = await loadMyRestaurants(provider, account, Restaurants, dispatch)
-        setMyRestaurants(myRestaurants)
-        subscribeToEvents(Factory, dispatch)
-      } catch (error) {
-        console.error("Error loading blockchain data:", error.message);
-          // In case of error, set account to null
-      } finally {
-        setIsLoading(false); // Ensure loading ends
-      }
-    } else {
-      console.error("MetaMask not detected");
-        // Handle case where MetaMask isn't available
-      setIsLoading(false);
-    }
-  };
 
   // Detect when screen size changes and reset the inline styles
   useEffect(() => {
+     const loadProvider = async () => {
+      if (typeof window !== 'undefined' && window.ethereum) {
+        try{
+          const ethersProvider = new ethers.BrowserProvider(window.ethereum);
+          setProvider(ethersProvider); // Set provider in context
+          const account = await loadAccount(ethersProvider, dispatch);
+          const chainId = await loadNetwork(ethersProvider, dispatch)
+          const Factory = await loadFactory(ethersProvider, config[chainId].decentratalityServiceFactory.address, dispatch)
+          setFactory(Factory)
+          
+          const Restaurants = await loadAllRestaurants(ethersProvider, Factory, dispatch)
+          
+          const myRestaurants = await loadMyRestaurants(ethersProvider, account, Restaurants, dispatch)
+          
+          setMyRestaurants(myRestaurants)
+          subscribeToEvents(Factory, dispatch)
+        } catch (error) {
+        console.error("Error loading blockchain data:", error.message);
+          // In case of error, set account to null
+        } finally {
+          setIsLoading(false); // Ensure loading ends
+        }
+      } else {
+          console.error("MetaMask not detected");
+          // Handle case where MetaMask isn't available
+          setIsLoading(false);
+        }
+      }
+    
 
-    if (isLoading) {
-      loadBlockchainData();
-    }
+    loadProvider();
 
     const handleResize = () => {
       const menu = document.querySelector('.menu');
@@ -104,7 +119,7 @@ export default function Home() {
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [loadBlockchainData, isLoading]);
+  }, [setProvider, loadAllRestaurants]);
 
   const navigateToCrowdsale = () => {
     router.push('/Crowdsale');
@@ -135,8 +150,8 @@ export default function Home() {
     <div className="BlueBackground">
       <div className="newRestaurantForm">
         <div className="newRestaurantFormContainer">
-          <form onSubmit={(e) => addNewRestaurant(e, factory, newRestaurantName, liquidity)}>
-            <li>
+          <form onSubmit={(e) => addNewRestaurant(e, factory, newRestaurantName, ((newRestaurantLiquidity) * (10 ** 18)))}>
+            <p>
             <input 
             type="text" 
             id='name' 
@@ -144,8 +159,8 @@ export default function Home() {
             value={newRestaurantName === '' ? "" : newRestaurantName}
             onChange={(e) => newRestaurantNameHandler(e)}/
             >
-            </li>
-            <li>
+            </p>
+            <p>
             <input 
             type="number" 
             id='liquidity' 
@@ -153,7 +168,7 @@ export default function Home() {
             value={newRestaurantLiquidity === '' ? "" : newRestaurantLiquidity}
             onChange={(e) => newRestaurantLiquidityHandler(e)}/
             >
-            </li>
+            </p>
 
             <button className='button' type='submit'>
               Create New Restaurant
@@ -173,6 +188,16 @@ export default function Home() {
         />
       </div>
       <div className="DashboardBackground">
+      <button  style={{ position: 'absolute', top: '21%', left: '72%', transform: 'translate(-50%, -50%)' }} className="addNewRestaurantButtonAlreadyOwnOne" onClick={newRestaurantPopupHandler}>
+            new Restaurant
+        </button>
+      <row style={{ position: 'absolute', top: '21%', left: '50%', transform: 'translate(-50%, -50%)' }}> Your Restaurants 
+      </row>
+        
+        <button  style={{ position: 'absolute', top: '21%', left: '72%', transform: 'translate(-50%, -50%)' }} className="addNewRestaurantButtonAlreadyOwnOne" onClick={newRestaurantPopupHandler}>
+            new Restaurant
+        </button>
+      
       <RestaurantSelectionDashboardBody onclick={newRestaurantPopupHandler}/>
       <div className="RestaurantSelectorHomeButtons">
         <button className="clean-button-home-RestaurantSelector" onClick={navigateToIndex}>
