@@ -27,11 +27,16 @@ export const loadNetwork = async (provider, dispatch) => {
 
     return chainId
 }
-export const subscribeToEvents = async (restaurantFactory, dispatch) => {
-        restaurantFactory.on('RestaurantCreated', (id, user, tokenGet, amountGet, tokenGive, amountGive, timestamp, event) => {
-        const restaurant = event.args
-        dispatch({ type: 'NEW_RESTAURANT_CREATION_SUCCESS', restaurant, event })
+export const subscribeToEvents = async (restaurantFactory, dispatch, ...Restaurants) => {
+        restaurantFactory.on('RestaurantCreated', (restaurant, id, owner, event) => {
+        const _restaurant = event.args
+        dispatch({ type: 'NEW_RESTAURANT_CREATION_SUCCESS', _restaurant, event })
     })
+        for(restaurant in Restaurants) {
+            restaurant.on('JobAdded', (id, timestamp, job, event) => {
+                
+            })
+        }
     
 }
 export const loadFactory = async (provider, address, dispatch) => {
@@ -167,4 +172,9 @@ export const loadDashboardRestaurantContractData = async (provider, Restaurant, 
 
     return contract
     
+}
+export const addJob = async (provider, dispatch, contractAddress, jobName, jobWage ) => {
+    const user = provider.getSigner()
+    const contract = new ethers.Contract(contractAddress, RESTAURANT_ABI.abi, user)
+    await contract.addJob(jobWage, jobName)
 }

@@ -42,7 +42,12 @@ function MainDashboardRestaurantBody() {
   
   const router = useRouter();
 
-  
+  const addNewJobHandler = async (e) => {
+    const _Background = document.querySelector('.newJobForm');
+    _Background.style.zIndex = '500';
+    const _Form = document.querySelector('.newJobFormContainer');
+     _Form.style.zIndex = '501';
+  }
   
 
  const loadBlockchainData = async () => {
@@ -110,25 +115,34 @@ function MainDashboardRestaurantBody() {
       {isLoading ? <Loading /> : (
         <div>
           <div>
-          <p className="MainDashboardAccount">
-           <strong className="account-label">Account : </strong>
-            {account ? account : 'no account detected'}
-          </p>
-          <div  className="MainDashboardRestaurantBox">
-            <div className="restaurant-text">
-            Restaurant Data
+            <p className="MainDashboardAccount">
+             <strong className="account-label">Account : </strong>
+              {account ? account : 'no account detected'}
+            </p>
+            <div  className="MainDashboardRestaurantBox">
+              <div className="restaurant-text">
+              Restaurant Data
+              </div>
+              <div className="MainDashboardRestaurantDataBox">
+                <p>
+                 <strong className="account-label"> Name : </strong>
+                 {name ? name : 'no name found'}
+                </p>
+                <p>
+                 <strong className="account-label"> Cash : </strong>
+                 {cash ? (cash / (10 ** 18)) : 'no cash found'} ETH
+                </p>
+              </div>
             </div>
-            <div className="MainDashboardRestaurantDataBox">
-              <p>
-               <strong className="account-label"> Name : </strong>
-               {name ? name : 'no name found'}
-              </p>
-              <p>
-               <strong className="account-label"> Cash : </strong>
-               {cash ? (cash / (10 ** 18)) : 'no cash found'} ETH
-              </p>
+            <div className="MainDashboardRestaurantJobsBox">
+            All Jobs
+            <button className="addJobButton" onClick={addNewJobHandler}>
+              Add Job
+            </button>
             </div>
-          </div>
+
+            <div className="MainDashboardRestaurantJobsContainer">
+            </div>
           </div>
         </div>
         )}

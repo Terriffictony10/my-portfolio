@@ -262,6 +262,54 @@ nav li:first-child{
   text-align: center; /* Center text inside the box */
   background-color: rgba(255, 255, 255, 0.1); /* Optional background color */
 }
+.addJobButton {
+  width: 80px;
+  height: 40px;
+  position: relative;
+  top: -30px;
+  left: 440px;
+  display: flex;
+  align-items: center; /* Center items vertically inside the box */
+  justify-content: center; /* Center items horizontally inside the box */
+  flex-direction: column;
+  border: 1px solid white;
+  font-size: 0.85rem;
+  font-family: 'CrowdsaleBuyBox';
+  text-align: center; /* Center text inside the box */
+  background-color: rgba(255, 255, 255, 0.1); /* Optional background color */
+}
+.MainDashboardRestaurantJobsBox {
+  width: 525px;
+  height: 600px;
+  position: absolute;
+  top: 290px;
+  right: 50px;
+  display: flex;
+   /* Center items vertically inside the box */
+  /* Center items horizontally inside the box */
+  flex-direction: column;
+  padding: 10px 0px 0px 0px;
+  border: 1px solid white;
+  font-family: 'CrowdsaleBuyBox';
+  text-align: center; /* Center text inside the box */
+  background-color: rgba(255, 255, 255, 0.1); /* Optional background color */
+}
+.MainDashboardRestaurantJobsContainer {
+  width: 525px;
+  height: 550px;
+  position: absolute;
+  top: 340px;
+  right: 50px;
+  display: flex;
+  align-items: center; /* Center items vertically inside the box */
+  justify-content: center; /* Center items horizontally inside the box */
+  flex-direction: column;
+  border: 1px solid white;
+  font-family: 'CrowdsaleBuyBox';
+  text-align: center; /* Center text inside the box */
+  background-color: rgba(255, 255, 255, 0.1); /* Optional background color */
+}
+
 .MainDashboardRestaurantDataBox{
   width: 300px;
   height: 150px;
