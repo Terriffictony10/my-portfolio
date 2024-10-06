@@ -9,6 +9,10 @@ const DEFAULT_DASHBOARD_RESTAURANTS_STATE = {
 		loaded: false,
 		data: []
 	},
+	allJobs: {
+		loaded: false,
+		data: []
+	},
 	posCreationInProgress: false,
 	events: []
 }
@@ -22,6 +26,18 @@ export const DashboardRestaurant = (state = DEFAULT_DASHBOARD_RESTAURANTS_STATE,
                 abi: action.abi,
                 name: action.name,
                 cash: action.cash
+
+			}
+		case 'NEW_JOB':
+			return {
+				...state,
+				allJobs : {
+					loaded: false,
+					data: [
+						...state.allJobs.data,
+						action.job
+						]
+				}
 
 			}
 		

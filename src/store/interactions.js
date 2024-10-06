@@ -173,8 +173,10 @@ export const loadDashboardRestaurantContractData = async (provider, Restaurant, 
     return contract
     
 }
-export const addJob = async (provider, dispatch, contractAddress, jobName, jobWage ) => {
-    const user = provider.getSigner()
-    const contract = new ethers.Contract(contractAddress, RESTAURANT_ABI.abi, user)
-    await contract.addJob(jobWage, jobName)
+export const createNewJob = async (provider, contractAddress, abi, name, wage, dispatch) => {
+    const user = await provider.getSigner()
+    const contract = new ethers.Contract(contractAddress, abi, user)
+    const job = await contract.addJob(wage, name)
+
+    dispatch({ type: 'NEW_JOB', job})
 }

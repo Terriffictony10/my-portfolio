@@ -16,14 +16,44 @@ loadFactory,
 loadAllRestaurants,
 loadMyRestaurants,
 subscribeToEvents,
-createNewRestaurant
+createNewRestaurant,
+createNewJob
 } from '../store/interactions'
 import { useProvider } from '../context/ProviderContext';
 import config from '../config.json'
 
 export default function Home() {
+  const dispatch = useDispatch()
+  const provider = new ethers.BrowserProvider(window.ethereum);
+  
+  const [newJobName, setNewJobName] = useState('')
+  const [newJobWage, setNewJobWage] = useState('')
+
+  const contractAddress = useSelector(state => state.DashboardRestaurant.contractAddress)
+  const abi = useSelector(state => state.DashboardRestaurant.abi)
+  
+
   const router = useRouter();
   
+  const addNewJob = async (e, name, wage) => {
+    e.preventDefault()
+    createNewJob(provider, contractAddress, abi, name, wage, dispatch)  
+
+    const _Background = document.querySelector('.newJobForm');
+    _Background.style.zIndex = '-1';
+    const _Form = document.querySelector('.newJobFormContainer');
+     _Form.style.zIndex = '-2';  
+  }
+
+  const newJobNameHandler = (e) => {
+    setNewJobName((e.target.value).toString())
+    
+  }
+  const newJobWageHandler = (e) => {
+    setNewJobWage((e.target.value).toString())
+    
+  }
+
   useEffect(() => {
     
   }, []);
@@ -55,7 +85,34 @@ export default function Home() {
 
   return (
   <div className="BlueBackground">
+    <div className="newJobForm">
+        <div className="newJobFormContainer">
+          <form onSubmit={(e) => addNewJob(e, newJobName, newJobWage)}>
+            <p>
+            <input 
+            type="text" 
+            id='name' 
+            placeholder='Enter a name for the new Job' 
+            value={newJobName === '' ? "" : newJobName}
+            onChange={(e) => newJobNameHandler(e)}/
+            >
+            </p>
+            <p>
+            <input 
+            type="number" 
+            id='liquidity' 
+            placeholder='Enter the wage of the new Job in ETH' 
+            value={newJobWage === '' ? "" : newJobWage}
+            onChange={(e) => newJobWageHandler(e)}/
+            >
+            </p>
 
+            <button className='button' type='submit'>
+              Create New Job
+            </button>
+          </form>
+        </div>
+      </div>
     <div width={250} height={250} onClick={navigateToIndex} style={{ position: 'absolute', top: 0, left: 0 }}  >
         <Image
 
