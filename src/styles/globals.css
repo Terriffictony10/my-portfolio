@@ -220,6 +220,8 @@ nav li:first-child{
   background-repeat: no-repeat;
   background-position: center;
   color: white;
+  z-index: 999;
+
 }
 .BlueBackground{
   height: 100vh; 
@@ -233,6 +235,51 @@ nav li:first-child{
   align-items: flex-start;  
   padding: 60px 50px 0px 0px; 
   font-family: 'CrowdsaleBuyBox';
+}
+.MainDashboardAccount{
+  position: absolute;
+  top: 1;
+  right: 0;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;  
+  padding: 60px 50px 0px 0px; 
+  font-family: 'CrowdsaleBuyBox';
+
+}
+.MainDashboardRestaurantBox {
+  width: 525px;
+  height: 200px;
+  position: absolute;
+  top: 90px;
+  right: 50px;
+  display: flex;
+  align-items: center; /* Center items vertically inside the box */
+  justify-content: center; /* Center items horizontally inside the box */
+  flex-direction: column;
+  border: 1px solid white;
+  font-family: 'CrowdsaleBuyBox';
+  text-align: center; /* Center text inside the box */
+  background-color: rgba(255, 255, 255, 0.1); /* Optional background color */
+}
+.MainDashboardRestaurantDataBox{
+  width: 300px;
+  height: 150px;
+  position: absolute;
+  display: flex;
+  text-align: center;
+  justify-content: center;
+  align-items: center; 
+  flex-direction: column; 
+  border-color: white;
+  border-width: 1px;
+  border-radius: 5px;
+  font-family: 'CrowdsaleBuyBox';
+  top: 20px;
+
+}
+.restaurant-text{
+  padding: 0px 0px 180px 0px;
 }
 .account-label {
   margin-right: 4px; /* Adds a margin between 'Account:' and the address */

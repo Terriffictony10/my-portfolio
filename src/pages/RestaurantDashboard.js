@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Container } from 'react-bootstrap';
 import { ethers } from 'ethers'
 import Image from 'next/image';
-
+import { Row } from 'react-bootstrap'
 import RestaurantSelectionDashboardBody from "../components/RestaurantSelectionDashboardBody.js"
 import Loading from "../components/Loading.js"
 import DECENTRATALITYSERVICEFACTORY_ABI from "../abis/decentratalityServiceFactory.json"
@@ -76,50 +76,50 @@ export default function Home() {
 
   // Detect when screen size changes and reset the inline styles
   useEffect(() => {
-     const loadProvider = async () => {
-      if (typeof window !== 'undefined' && window.ethereum) {
-        try{
-          const ethersProvider = new ethers.BrowserProvider(window.ethereum);
-          setProvider(ethersProvider); // Set provider in context
-          const account = await loadAccount(ethersProvider, dispatch);
-          const chainId = await loadNetwork(ethersProvider, dispatch)
-          const Factory = await loadFactory(ethersProvider, config[chainId].decentratalityServiceFactory.address, dispatch)
-          setFactory(Factory)
-          
-          const Restaurants = await loadAllRestaurants(ethersProvider, Factory, dispatch)
-          
-          const myRestaurants = await loadMyRestaurants(ethersProvider, account, Restaurants, dispatch)
-          
-          setMyRestaurants(myRestaurants)
-          subscribeToEvents(Factory, dispatch)
-        } catch (error) {
+  const loadProvider = async () => {
+    if (typeof window !== 'undefined' && window.ethereum) {
+      try {
+        const ethersProvider = new ethers.BrowserProvider(window.ethereum);
+        setProvider(ethersProvider);
+        const account = await loadAccount(ethersProvider, dispatch);
+        const chainId = await loadNetwork(ethersProvider, dispatch);
+        const Factory = await loadFactory(
+          ethersProvider,
+          config[chainId].decentratalityServiceFactory.address,
+          dispatch
+        );
+        setFactory(Factory);
+
+        const Restaurants = await loadAllRestaurants(ethersProvider, Factory, dispatch);
+        const myRestaurants = await loadMyRestaurants(ethersProvider, account, Restaurants, dispatch);
+
+        setMyRestaurants(myRestaurants);
+        subscribeToEvents(Factory, dispatch);
+      } catch (error) {
         console.error("Error loading blockchain data:", error.message);
-          // In case of error, set account to null
-        } finally {
-          setIsLoading(false); // Ensure loading ends
-        }
-      } else {
-          console.error("MetaMask not detected");
-          // Handle case where MetaMask isn't available
-          setIsLoading(false);
-        }
+      } finally {
+        setIsLoading(false);
       }
-    
+    } else {
+      console.error("MetaMask not detected");
+      setIsLoading(false);
+    }
+  };
 
-    loadProvider();
+  loadProvider(); // Call once without adding to dependencies to prevent re-renders
 
-    const handleResize = () => {
-      const menu = document.querySelector('.menu');
-      if (window.innerWidth > 800) {
-        menu.style.display = ''; // Reset inline style to let CSS handle it
-      }
-    };
+  const handleResize = () => {
+    const menu = document.querySelector('.menu');
+    if (window.innerWidth > 800) {
+      menu.style.display = ''; // Reset inline style to let CSS handle it
+    }
+  };
 
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, [setProvider, loadAllRestaurants]);
+  window.addEventListener('resize', handleResize);
+  return () => {
+    window.removeEventListener('resize', handleResize);
+  };
+}, []); // 
 
   const navigateToCrowdsale = () => {
     router.push('/Crowdsale');
@@ -190,13 +190,10 @@ export default function Home() {
       <div className="DashboardBackground">
       <button  style={{ position: 'absolute', top: '21%', left: '72%', transform: 'translate(-50%, -50%)' }} className="addNewRestaurantButtonAlreadyOwnOne" onClick={newRestaurantPopupHandler}>
             new Restaurant
-        </button>
-      <row style={{ position: 'absolute', top: '21%', left: '50%', transform: 'translate(-50%, -50%)' }}> Your Restaurants 
-      </row>
-        
-        <button  style={{ position: 'absolute', top: '21%', left: '72%', transform: 'translate(-50%, -50%)' }} className="addNewRestaurantButtonAlreadyOwnOne" onClick={newRestaurantPopupHandler}>
-            new Restaurant
-        </button>
+      </button>
+      <Row style={{ position: 'absolute', top: '21%', left: '50%', transform: 'translate(-50%, -50%)' }}> 
+      Your Restaurants 
+      </Row>
       
       <RestaurantSelectionDashboardBody onclick={newRestaurantPopupHandler}/>
       <div className="RestaurantSelectorHomeButtons">

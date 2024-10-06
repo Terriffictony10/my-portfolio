@@ -1,11 +1,26 @@
 // store/reducers/index.js
+
 import { combineReducers } from 'redux';
-import  {provider } from './provider'; // Import your reducer(s)
-import  {Restaurants } from './Restaurants';
+import { persistReducer } from 'redux-persist';
+import storage from 'redux-persist/lib/storage'; // Use localStorage as storage
+import { provider } from './provider'; 
+import { Restaurants } from './Restaurants';
+import { DashboardRestaurant } from './dashboardRestaurant';
+
+// Configuration for redux-persist
+const persistConfig = {
+  key: 'root',
+  storage,
+  whitelist: ['DashboardRestaurant'], // Specify which state slices to persist
+};
+
+// Combine all reducers
 const rootReducer = combineReducers({
   provider,
-  Restaurants
+  Restaurants,
+  DashboardRestaurant,
   // Add other reducers here
 });
 
-export default rootReducer;
+// Wrap the root reducer with persistReducer to enable persistence
+export default persistReducer(persistConfig, rootReducer);

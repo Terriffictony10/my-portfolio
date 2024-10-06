@@ -1,0 +1,31 @@
+const DEFAULT_DASHBOARD_RESTAURANTS_STATE = {
+	loaded: false,
+	contractAddress: null,
+    abi: null, 
+	transaction: {
+		isSuccessful: false
+	},
+	allPOS: {
+		loaded: false,
+		data: []
+	},
+	posCreationInProgress: false,
+	events: []
+}
+export const DashboardRestaurant = (state = DEFAULT_DASHBOARD_RESTAURANTS_STATE, action) => {
+	switch (action.type) {
+		case 'DASHBOARD_RESTAURANT_LOADED':
+			return {
+				...state,
+				loaded: true,
+				contractAddress: action.contractAddress,
+                abi: action.abi,
+                name: action.name,
+                cash: action.cash
+
+			}
+		
+		default:
+			return state    
+	}
+}

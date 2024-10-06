@@ -12,7 +12,8 @@ loadAllRestaurants,
 loadMyRestaurants,
 subscribeToEvents,
 createNewRestaurant,
-decorateMyRestaurants
+decorateMyRestaurants,
+loadDashboardRestaurantContractData
 } from '../store/interactions'
 
 
@@ -27,12 +28,18 @@ function RestaurantSelectionDashboardBody({ onclick, fun }) {
   const dispatch = useDispatch()
   const { provider, setProvider } = useProvider();
   const [myRestaurants, setMyRestaurants] = useState(null);
+  const [dashboardRestaurant, setDashboardRestaurant] = useState('')
   const [isLoading, setIsLoading] = useState(true);
 
   const account = useSelector(state => state.provider.account)
+  const router = useRouter();
 
-  const toRestaurantDashHandler = (e, restaurant) => {
-    console.log("funstuff")
+  const toRestaurantDashHandler = async (e, restaurant, myRestaurants) => {
+    e.preventDefault()
+    router.push('/mainRestaurantDashboard');
+    const index = myRestaurants.indexOf(restaurant)
+    await setDashboardRestaurant(restaurant)
+    await loadDashboardRestaurantContractData(provider, restaurant, dispatch, index)
   };
   
 
@@ -49,6 +56,7 @@ function RestaurantSelectionDashboardBody({ onclick, fun }) {
         const myDecoratedRestaurants = await decorateMyRestaurants(ethersProvider, myRestaurants)
         setMyRestaurants(myDecoratedRestaurants)
         subscribeToEvents(Factory, dispatch)
+        
       } catch (error) {
         console.error("Error loading blockchain data:", error.message);
           // In case of error, set account to null
@@ -110,7 +118,7 @@ function RestaurantSelectionDashboardBody({ onclick, fun }) {
               { ((myRestaurants && myRestaurants.length > 0) ? (
               <div className="RestaurantSelectorDashboardFrameRestaurants">
                 {myRestaurants.map((restaurant, i) => (
-                  <div key={i} value={restaurant.name} className="restaurantButton" onClick={(e) => toRestaurantDashHandler(e, )}>
+                  <div key={i} className="restaurantButton" onClick={(e) => toRestaurantDashHandler(e, restaurant, myRestaurants)}>
                     <p>{restaurant.name}</p>
                     <p>{Number(restaurant.cash) / (10 ** 18)} ETH</p>
                   </div>

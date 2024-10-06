@@ -101,25 +101,39 @@ export const loadMyRestaurants = async (provider, user, Restaurants, dispatch) =
     let myRestaurants = []
     for(let i = 0; i < Restaurants.length; i++){
         if(Restaurants[i][2] == user){
-            
             myRestaurants.push(Restaurants[i])
         }
     }
-
+    if(myRestaurants.length == 0) {
+        return
+    }
     dispatch({ type: 'MY_RESTAURANTS_LOADED', myRestaurants })
     return myRestaurants
 }
 export const decorateMyRestaurants = async (provider, myRestaurants) => {
     const user = await provider.getSigner()
+    const decoratedRestaurants = []
+    try{
     for(let i = 0; i < myRestaurants.length; i++) {
         
         const contract = await new ethers.Contract(myRestaurants[i][0], RESTAURANT_ABI.abi, user)
-        
-        
-        myRestaurants[i].name = await contract.name()
-        myRestaurants[i].cash = await provider.getBalance(contract.target)
+        const name = await contract.name()
+        const cash = Number(await provider.getBalance(contract.target))
+
+        // Create a new object instead of mutating the existing one
+        const decoratedRestaurant = {
+            ...myRestaurants[i],
+            name,
+            cash
+        }
+
+        decoratedRestaurants.push(decoratedRestaurant)
     }
-    return myRestaurants
+}catch(error){
+    console.log(error)
+}
+    return decoratedRestaurants
+
 }
 export const createNewRestaurant = async (provider, factory, restaurantName, restaurantLiquidity, dispatch) => {
     let newRestaurant
@@ -139,4 +153,18 @@ export const createNewRestaurant = async (provider, factory, restaurantName, res
         dispatch({ type: "RESTAURANT_CREATION_FAIL"})
     }
     return newRestaurant
+}
+export const loadDashboardRestaurantContractData = async (provider, Restaurant, dispatch) => {
+    const user = await provider.getSigner()
+    const contractAddress = Restaurant[0]
+    const abi = RESTAURANT_ABI.abi
+    const contract = await new ethers.Contract(contractAddress, abi, user)
+    const name = await contract.name()
+    const myCash = await provider.getBalance(contractAddress)
+    const cash = Number(myCash).toString()
+
+    dispatch({ type: 'DASHBOARD_RESTAURANT_LOADED', contractAddress, abi, name, cash })
+
+    return contract
+    
 }

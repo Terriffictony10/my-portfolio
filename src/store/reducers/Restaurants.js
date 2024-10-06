@@ -67,6 +67,7 @@ export const Restaurants = (state = DEFAULT_RESTAURANTS_STATE, action) => {
 				},
 				restaurantCreationInProgress: false
 			}
+		
 		default:
 			return state    
 	}
