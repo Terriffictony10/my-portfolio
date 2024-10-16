@@ -35,7 +35,7 @@ export const DashboardRestaurant = (state = DEFAULT_DASHBOARD_RESTAURANTS_STATE,
 					loaded: false,
 					data: [
 						...state.allJobs.data,
-						action.job
+						action.eventArgs
 						]
 				}
 

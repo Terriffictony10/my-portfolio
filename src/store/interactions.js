@@ -174,9 +174,46 @@ export const loadDashboardRestaurantContractData = async (provider, Restaurant, 
     
 }
 export const createNewJob = async (provider, contractAddress, abi, name, wage, dispatch) => {
-    const user = await provider.getSigner()
-    const contract = new ethers.Contract(contractAddress, abi, user)
-    const job = await contract.addJob(wage, name)
+    const user = await provider.getSigner();
+    const contract = new ethers.Contract(contractAddress, abi, user);
 
-    dispatch({ type: 'NEW_JOB', job})
-}
+    // Call the contract function to add a new job
+    const tx = await contract.addJob(wage, name);
+    
+    // Wait for the transaction to be mined
+    const receipt = await tx.wait();
+    console.log(receipt)
+    // Parse the logs to find the JobAdded event
+    let event = null;
+    for (const log of receipt.logs) {
+        
+        // Only process logs from our contract
+        if (log.eventName === "JobAdded") {
+            try {
+                event = log // Stop after finding the event
+                
+            } catch (e) {
+                // Log not from this contract, continue
+                continue;
+            }
+        }
+    }
+
+    if (!event) {
+        throw new Error('JobAdded event not found in transaction logs');
+    }
+
+    // Extract the arguments from the event and store them in an array
+    const { id, timestamp, job } = event.args;
+
+    const eventArgs = [
+        id.toString(),
+        timestamp.toString(),
+        job[0].toString(),
+        job[1]
+    ];
+    console.log(eventArgs)
+    // Dispatch the event arguments array
+    dispatch({ type: 'NEW_JOB', eventArgs });
+};
+

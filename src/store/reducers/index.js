@@ -24,3 +24,4 @@ const rootReducer = combineReducers({
 
 // Wrap the root reducer with persistReducer to enable persistence
 export default persistReducer(persistConfig, rootReducer);
+

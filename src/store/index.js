@@ -15,5 +15,10 @@ const store = configureStore({
 
 // Create the persistor for the store
 export const persistor = persistStore(store);
+  
+// window.addEventListener('beforeunload', () => {
+//   persistor.purge();
+// });
+
 
 export default store;

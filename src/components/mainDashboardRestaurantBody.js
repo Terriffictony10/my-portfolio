@@ -17,6 +17,9 @@ loadDashboardRestaurantContractData,
 reloadRestaurantData
 } from '../store/interactions'
 
+import { 
+persistor
+} from '../store/index'
 
 import Image from 'next/image';
 
@@ -79,6 +82,15 @@ function MainDashboardRestaurantBody() {
   };
   
   useEffect(() => {
+    const handleBeforeUnload = () => {
+      persistor.purge();
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    // Clean up the event listener on component unmount
+    
+
     if (isLoading) {
       loadBlockchainData();
     }

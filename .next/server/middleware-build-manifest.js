@@ -9,10 +9,10 @@ self.__BUILD_MANIFEST = {
   "lowPriorityFiles": [],
   "rootMainFiles": [],
   "pages": {
-    "/Crowdsale": [
+    "/": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/Crowdsale.js"
+      "static/chunks/pages/index.js"
     ],
     "/Dashboard": [
       "static/chunks/webpack.js",
