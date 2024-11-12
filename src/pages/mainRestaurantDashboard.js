@@ -1,3 +1,5 @@
+// mainDashboardRestaurant.js
+
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux'
 import { Container } from 'react-bootstrap';
@@ -38,7 +40,7 @@ export default function Home() {
   const addNewJob = async (e, name, wage) => {
     e.preventDefault()
     createNewJob(provider, contractAddress, abi, name, wage, dispatch)  
-
+    console.log('success')
     const _Background = document.querySelector('.newJobForm');
     _Background.style.zIndex = '-1';
     const _Form = document.querySelector('.newJobFormContainer');

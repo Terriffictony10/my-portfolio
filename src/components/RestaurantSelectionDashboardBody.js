@@ -24,13 +24,14 @@ import config from '../config.json'
 import { useProvider } from '../context/ProviderContext';
 
 function RestaurantSelectionDashboardBody({ onclick, fun }) {
+ 
 
   const dispatch = useDispatch()
   const { provider, setProvider } = useProvider();
   const [myRestaurants, setMyRestaurants] = useState(null);
   const [dashboardRestaurant, setDashboardRestaurant] = useState('')
   const [isLoading, setIsLoading] = useState(true);
-
+  
   const account = useSelector(state => state.provider.account)
   const router = useRouter();
 
@@ -46,6 +47,7 @@ function RestaurantSelectionDashboardBody({ onclick, fun }) {
   const loadBlockchainData = async () => {
     if (typeof window.ethereum !== 'undefined') {
       try {
+        
         const ethersProvider = new ethers.BrowserProvider(window.ethereum);
         setProvider(ethersProvider);
         const chainId = await loadNetwork(ethersProvider, dispatch)

@@ -572,6 +572,10 @@ nav li:first-child{
   justify-content: center;
   z-index: 300;
 }
+.job{
+  
+  z-index: 300;
+}
 .addNewRestaurantButtonAlreadyOwnOne:hover {
   background-color: white; /* Changes background to white on hover */
   color: black;            /* Changes text color to black on hover */

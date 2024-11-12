@@ -139,4 +139,7 @@ contract Restaurant is Ownable {
             }
         }
     }
+    function getJobIds() public view returns (uint256[] memory) {
+    return jobIds;
+    }
 }

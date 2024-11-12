@@ -9,6 +9,9 @@ contract Crowdsale {
 	uint256 public price;
 	uint256 public maxTokens;
 	uint256 public tokensSold;
+	// uint256 public start = "";
+	// uint256 public end = "";
+	// uint256 public goal = "";
 	
 	event Buy(uint256 amount, address buyer);
 	event Finalize(uint256 tokensSold, uint256 ethRaised);

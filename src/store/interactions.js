@@ -1,3 +1,5 @@
+// src/store/interactions.js
+
 import { ethers } from 'ethers'
 import RESTAURANT_ABI from "../abis/Restaurant"
 import DECENTRATALITYSERVICEFACTORY_ABI from "../abis/decentratalityServiceFactory.json"
@@ -173,10 +175,44 @@ export const loadDashboardRestaurantContractData = async (provider, Restaurant, 
     return contract
     
 }
-export const createNewJob = async (provider, contractAddress, abi, name, wage, dispatch) => {
-    const user = await provider.getSigner()
-    const contract = new ethers.Contract(contractAddress, abi, user)
-    const job = await contract.addJob(wage, name)
+// interactions.js
 
-    dispatch({ type: 'NEW_JOB', job})
-}
+export const createNewJob = async (provider, contractAddress, abi, name, wage, dispatch) => {
+  const user = await provider.getSigner();
+  const contract = new ethers.Contract(contractAddress, abi, user);
+
+  // Call the contract function to add a new job
+  const tx = await contract.addJob(wage, name);
+
+  // Wait for the transaction to be mined
+  await tx.wait();
+
+  // Reload all jobs
+  await loadAllJobs(provider, contractAddress, abi, dispatch);
+};
+export const loadAllJobs = async (provider, contractAddress, abi, dispatch) => {
+  try {
+    const user = await provider.getSigner();
+    const contract = new ethers.Contract(contractAddress, abi, user);
+
+    // Fetch the array of job IDs
+    const jobIds = await contract.getJobIds();
+
+    const jobsArray = [];
+    for (let i = 0; i < jobIds.length; i++) {
+
+      const jobId = Number(jobIds[i]); // Convert BigNumber to Number
+      const job = await contract.jobs(jobId);
+      jobsArray.push({
+        id: jobId.toString(),
+        hourlyWageInWei: job.hourlyWage.toString(),
+        jobName: job.jobName,
+      });
+    }
+
+    // Dispatch action to update jobs in Redux store
+    dispatch({ type: 'JOBS_LOADED', jobs: jobsArray });
+  } catch (error) {
+    console.error('Error in loadAllJobs:', error.message);
+  }
+};
