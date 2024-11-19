@@ -1,57 +1,58 @@
+/* Tailwind CSS Base */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-
+/* Custom Fonts */
 @font-face {
   font-family: 'MyCustomFont';
-  src: url('./cyberfont.otf') format('opentype'); /* Specify OTF format */
+  src: url('./cyberfont.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
   font-family: 'CrowdsaleBuyBox';
-  src: url('./ArchivoBlack-Regular.otf') format('opentype'); /* Specify OTF format */
+  src: url('./ArchivoBlack-Regular.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
 }
 
-
-*{
+/* Global Styles */
+* {
   margin: 0;
   padding: 0;
 }
-body{
+body {
   min-height: 100vh;
-  background-image: url(background-image.jpg);
+  background-image: url('background-image.jpg');
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
   font-family: 'MyCustomFont';
   color: #FD5E53;
 }
-.body{
+.body {
   display: flex;
   flex-direction: column;
 }
 
-nav{
+/* Navigation Styles */
+nav {
   background-color: rgba(55, 56, 61, 0.2);
   backdrop-filter: blur(5px);
   box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.1);
 }
-
-nav ul{
+nav ul {
   width: 100%;
   list-style: none;
   display: flex;
   justify-content: flex-end;
   align-items: center;
 }
-nav li{
+nav li {
   height: 120px;
 }
-nav a{
+nav a {
   height: 100%;
   padding: 0 30px;
   display: flex;
@@ -59,30 +60,49 @@ nav a{
   color: white;
   font-size: 1.5rem;
 }
-.big{
-  font-size: 1.8rem ;
-  color: white;
-}
-.menu{
-  display: none;
-  z-index: 10;
-}
-
-.centered{
-  display: flex;
-  justify-content: center; /* Horizontally centers the X */
-  align-items: center;
-  background-color: black;
-  backdrop-filter: blur(0px)!important;
-}
-nav a:hover{
+nav a:hover {
   background-color: rgba(55, 56, 61, 0.35);
   backdrop-filter: blur(5px);
 }
-nav li:first-child{
+nav li:first-child {
   margin-right: auto;
 }
-.sidebar{
+
+/* Menu Styles */
+.menu {
+  display: none;
+  z-index: 10;
+}
+@media (max-width: 800px) {
+  .hideOnMobile {
+    display: none;
+  }
+  .menu {
+    display: block !important;
+  }
+}
+@media (max-width: 400px) {
+  .sidebar {
+    width: 100%;
+    backdrop-filter: blur(5px);
+  }
+  .big {
+    font-size: 2.0rem;
+    color: white;
+  }
+}
+
+/* Centered Content */
+.centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: black;
+  backdrop-filter: blur(0px) !important;
+}
+
+/* Sidebar Styles */
+.sidebar {
   position: fixed;
   top: 0;
   right: 0;
@@ -97,25 +117,25 @@ nav li:first-child{
   align-items: flex-start;
   justify-content: flex-start;
 }
-.sidebar li{
-  height: 50 px;
+.sidebar li {
+  height: 50px;
   width: 100%;
 }
-.sidebar a{
+.sidebar a {
   width: 100%;
 }
 
-.crowdsaleBody{
+/* Body Content */
+.crowdsaleBody {
   height: 100%;
   width: 100%;
   overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 90px 0px 0px 0px;
-
+  padding: 90px 0 0 0;
 }
-.Crowdsale-glass{
+.Crowdsale-glass {
   height: 500px;
   width: 1200px;
   background-color: rgba(55, 56, 61, 0.5);
@@ -124,18 +144,18 @@ nav li:first-child{
   border-radius: 30px;
   position: relative;
 }
-.Crowdsale{
+.Crowdsale {
   height: 500px;
   width: 1200px;
   color: white;
-  font-size: 1.0rem;
+  font-size: 1rem;
   position: absolute;
 }
-.crowdsaleUi{
+.crowdsaleUi {
   font-family: 'CrowdsaleBuyBox';
   color: black;
-  font-size: 2.0rem;
-  background-image: url("buyBackground.png");
+  font-size: 2rem;
+  background-image: url('buyBackground.png');
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
@@ -143,13 +163,13 @@ nav li:first-child{
   height: 452px;
   display: flex;
   flex-direction: column;
-  align-items: center; /* Fixed typo */
-  justify-content: center; /* Fixed typo */
+  align-items: center;
+  justify-content: center;
   position: relative;
-  padding: 0px 0px 0px 0px;
+  padding: 0;
   border-radius: 30px;
 }
-.crowdsaleUi::before{
+.crowdsaleUi::before {
   content: '';
   position: absolute;
   top: 0;
@@ -159,51 +179,52 @@ nav li:first-child{
   z-index: 1;
 }
 .content {
-  z-index: 2; /* Ensure content is above the overlay */
+  z-index: 2;
 }
 
-.text-body{
+/* Text and Video Sections */
+.text-body {
   height: 100%;
   width: 100%;
   overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px 900px 0px 0px;
+  padding: 20px 900px 0 0;
 }
-.video{
+.video {
   width: 65vh;
   transform: rotate(180deg);
-  
   display: flex;
-  justify-content: flex-end; 
+  justify-content: flex-end;
   align-items: flex-end;
-
 }
-.video-specs{
+.video-specs {
   border-radius: 3.1rem;
   filter: blur(2px);
   opacity: 0.7;
 }
-.page-text{
-  padding: 30px 30px 30px 30px;
-  font-size: 1.0rem ;
+.page-text {
+  padding: 30px;
+  font-size: 1rem;
   position: absolute;
   transform: rotate(180deg);
   color: white;
   text-shadow: 5px 5px 4px rgba(0, 0, 0, 0.9);
 }
-.demopane{
-  height: 80vh; 
-  width: 100vw; 
+
+/* Demo Pane */
+.demopane {
+  height: 80vh;
+  width: 100vw;
   overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 .demoglass {
-  height: 40vh; 
-  width: 50vw; 
+  height: 40vh;
+  width: 50vw;
   background-color: rgba(55, 56, 61, 0.5);
   backdrop-filter: blur(5px);
   box-shadow: -10px 0 10px rgba(0, 0, 0, 0.1);
@@ -212,41 +233,44 @@ nav li:first-child{
   justify-content: center;
   align-items: center;
 }
-.DashboardBackground{
-  height: 100vh; 
-  width: 100vw; 
+
+/* Backgrounds */
+.DashboardBackground {
+  height: 100vh;
+  width: 100vw;
   background-image: url('DashboardBackground.jpg');
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
   color: white;
   z-index: 999;
-
 }
-.BlueBackground{
-  height: 100vh; 
-  width: 100vw; 
+.BlueBackground {
+  height: 100vh;
+  width: 100vw;
   background-image: url('DashboardBackground.jpg');
-  
 }
-.DashboardAccount{
+
+/* Account Information */
+.DashboardAccount {
   display: flex;
   justify-content: flex-end;
-  align-items: flex-start;  
-  padding: 60px 50px 0px 0px; 
+  align-items: flex-start;
+  padding: 60px 50px 0 0;
   font-family: 'CrowdsaleBuyBox';
 }
-.MainDashboardAccount{
+.MainDashboardAccount {
   position: absolute;
   top: 1;
   right: 0;
   display: flex;
   justify-content: flex-end;
-  align-items: flex-start;  
-  padding: 60px 50px 0px 0px; 
+  align-items: flex-start;
+  padding: 60px 50px 0 0;
   font-family: 'CrowdsaleBuyBox';
-
 }
+
+/* Restaurant Data Box */
 .MainDashboardRestaurantBox {
   width: 525px;
   height: 200px;
@@ -254,14 +278,23 @@ nav li:first-child{
   top: 90px;
   right: 50px;
   display: flex;
-  align-items: center; /* Center items vertically inside the box */
-  justify-content: center; /* Center items horizontally inside the box */
+  align-items: center;
+  justify-content: center;
   flex-direction: column;
   border: 1px solid white;
   font-family: 'CrowdsaleBuyBox';
-  text-align: center; /* Center text inside the box */
-  background-color: rgba(255, 255, 255, 0.1); /* Optional background color */
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.1);
 }
+.restaurant-text {
+  padding: 0 0 180px 0;
+}
+.account-label {
+  margin-right: 4px;
+  position: relative;
+}
+
+/* Add Job Button */
 .addJobButton {
   width: 80px;
   height: 40px;
@@ -269,15 +302,26 @@ nav li:first-child{
   top: -30px;
   left: 440px;
   display: flex;
-  align-items: center; /* Center items vertically inside the box */
-  justify-content: center; /* Center items horizontally inside the box */
+  align-items: center;
+  justify-content: center;
   flex-direction: column;
   border: 1px solid white;
   font-size: 0.85rem;
   font-family: 'CrowdsaleBuyBox';
-  text-align: center; /* Center text inside the box */
-  background-color: rgba(255, 255, 255, 0.1); /* Optional background color */
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.1);
 }
+
+.right-side-content {
+  position: absolute;
+  top:120px;
+  left: 50px; /* Adjust this value to move the right-side content horizontally */
+  width: 300px; /* Adjust the width as needed */
+  /* You can add more styles here to customize the positioning */
+}
+
+
+/* Jobs Section */
 .MainDashboardRestaurantJobsBox {
   width: 525px;
   height: 600px;
@@ -285,14 +329,12 @@ nav li:first-child{
   top: 290px;
   right: 50px;
   display: flex;
-   /* Center items vertically inside the box */
-  /* Center items horizontally inside the box */
   flex-direction: column;
-  padding: 10px 0px 0px 0px;
+  padding: 10px 0 0 0;
   border: 1px solid white;
   font-family: 'CrowdsaleBuyBox';
-  text-align: center; /* Center text inside the box */
-  background-color: rgba(255, 255, 255, 0.1); /* Optional background color */
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 .MainDashboardRestaurantJobsContainer {
   width: 525px;
@@ -301,251 +343,388 @@ nav li:first-child{
   top: 340px;
   right: 50px;
   display: flex;
-  align-items: center; /* Center items vertically inside the box */
-  justify-content: center; /* Center items horizontally inside the box */
+  align-items: center;
+  justify-content: center;
   flex-direction: column;
   border: 1px solid white;
   font-family: 'CrowdsaleBuyBox';
-  text-align: center; /* Center text inside the box */
-  background-color: rgba(255, 255, 255, 0.1); /* Optional background color */
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+.job {
+  /* Add any specific styles for job items here */
 }
 
-.MainDashboardRestaurantDataBox{
+/* Restaurant Data Box Inner */
+.MainDashboardRestaurantDataBox {
   width: 300px;
   height: 150px;
   position: absolute;
   display: flex;
   text-align: center;
   justify-content: center;
-  align-items: center; 
-  flex-direction: column; 
+  align-items: center;
+  flex-direction: column;
   border-color: white;
   border-width: 1px;
   border-radius: 5px;
   font-family: 'CrowdsaleBuyBox';
   top: 20px;
+}
 
+/* Employee Section */
+.MainDashboardRestaurantEmployeesBox {
+  width: 525px;
+  height: 500px;
+  position: absolute;
+  top: 90px;
+  left: 44%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  padding: 10px 0 0 0;
+  border: 1px solid white;
+  font-family: 'CrowdsaleBuyBox';
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.1);
 }
-.restaurant-text{
-  padding: 0px 0px 180px 0px;
-}
-.account-label {
-  margin-right: 4px; /* Adds a margin between 'Account:' and the address */
+.addEmployeeButton {
+  width: 80px;
+  height: 40px;
   position: relative;
-}
-.DashboardButtonContainer{
-  height: 100vh; 
-  width: 100vw; 
+  top: -30px;
+  left: 440px;
   display: flex;
+  align-items: center;
   justify-content: center;
-  align-items: center; 
-  position: absolute;
   flex-direction: column;
-  padding: 0px 0px 0px 0px; 
+  border: 1px solid white;
+  font-size: 0.85rem;
   font-family: 'CrowdsaleBuyBox';
-}.DashboardLoginContainer{
-  height: 100vh; 
-  width: 100vw; 
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+.MainDashboardRestaurantEmployeesContainer {
+  width: 525px;
+  height: 450px;
+  position: absolute;
+  top: 140px;
+  left: 44%;
+  transform: translateX(-50%);
   display: flex;
-  justify-content: space-evenly;
-  align-items: center; 
-  position: absolute;
+  align-items: center;
+  justify-content: center;
   flex-direction: column;
-  padding: 0px 0px 450px 0px; 
+  border: 1px solid white;
   font-family: 'CrowdsaleBuyBox';
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+.employee {
+  background-color: #444;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  width: 90%;
+}
+.employee p {
+  margin: 5px 0;
 }
 
-.clean-button-red {
-  background-color: transparent; /* Transparent background */
-  color: white;               /* White text */
-  border: 2px solid white;        /* White border */
-  height: 21vh; 
-  width: 35vw;            /* Padding for a nice look */
-  border-radius: 5px;            /* Rounded corners */
-  font-size: 16px;               /* Font size */
-  cursor: pointer;               /* Cursor to indicate it's clickable */
-  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth hover transition */
-  background-color: red;
-}
-.clean-button-green {
-  background-color: transparent; /* Transparent background */
-  color: white;               /* White text */
-  border: 2px solid white;        /* White border */
-  height: 21vh; 
-  width: 35vw;            /* Padding for a nice look */
-  border-radius: 5px;            /* Rounded corners */
-  font-size: 16px;               /* Font size */
-  cursor: pointer;               /* Cursor to indicate it's clickable */
-  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth hover transition */
-  background-color: green;
-}
-.clean-button-home {
-  background-color: transparent; /* Transparent background */
-  color: white;               /* White text */
-  border: 2px solid white;        /* White border */
-  height: 10vh; 
-  width: 35vw;            /* Padding for a nice look */
-  border-radius: 5px;            /* Rounded corners */
-  font-size: 16px;               /* Font size */
-  cursor: pointer;               /* Cursor to indicate it's clickable */
-  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth hover transition */
-  background-color: black;
-   position: fixed;
-  bottom: 0;                /* Aligns it to the bottom */
-  left: 50%;                /* Aligns the left edge at 50% of the viewport */
-  transform: translateX(-50%); /* Centers the object horizontally */
-  z-index: 1000;
-}
-.clean-button-home-RestaurantSelector{
-  background-color: transparent; /* Transparent background */
-  color: white;               /* White text */
-  border: 2px solid white;        /* White border */
-  height: 10vh; 
-  width: 18vw;            /* Padding for a nice look */
-  border-radius: 5px;            /* Rounded corners */
-  font-size: 16px;               /* Font size */
-  cursor: pointer;               /* Cursor to indicate it's clickable */
-  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth hover transition */
-  background-color: black;               /* Aligns it to the bottom */                
-  z-index: 1000;
-}
-.clean-button-home-Dashboard{
-  background-color: transparent; /* Transparent background */
-  color: white;               /* White text */
-  border: 2px solid white;        /* White border */
-  height: 10vh; 
-  width: 18vw;            /* Padding for a nice look */
-  border-radius: 5px;            /* Rounded corners */
-  font-size: 16px;               /* Font size */
-  cursor: pointer;               /* Cursor to indicate it's clickable */
-  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth hover transition */
-  background-color: grey;              /* Aligns it to the bottom */                
-  z-index: 1000;
-}
-
-.clean-button-red:hover {
-  background-color: white; /* Changes background to white on hover */
-  color: black;            /* Changes text color to black on hover */
-}
-.clean-button-green:hover {
-  background-color: white; /* Changes background to white on hover */
-  color: black;            /* Changes text color to black on hover */
-}
-.clean-button-home:hover {
-  background-color: white; /* Changes background to white on hover */
-  color: black;            /* Changes text color to black on hover */
-}
-.DashboardLogoFrame{
-  height: 250px; 
-  width: 250px; 
-}
-.RestaurantSelectorDashboardFrame{
-  height: 50vh; 
-  width: 50vw;
-  border-color: white;
-  border-width: 7px;
-  border-radius: 15px;
+/* Employee Form Modal */
+.employeeFormOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(55, 56, 61, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
 }
-.RestaurantSelectorDashboardFrameRestaurants{
-  height: 50vh; 
-  width: 50vw;
+.employeeFormContainer {
+  background-color: #fff;
+  color: black;
+  padding: 20px;
+  border-radius: 5px;
+  z-index: 1001;
+}
+.employeeFormContainer form {
   display: flex;
-  border-color: white;
-  border-width: 7px;
-  border-radius: 15px;
+  flex-direction: column;
 }
-.fullFlexCenter{
+.employeeFormContainer p {
+  margin-bottom: 10px;
+}
+.employeeFormContainer input {
+  padding: 5px;
+  margin-top: 5px;
+}
+.employeeFormContainer .button {
+  padding: 8px 16px;
+  margin-right: 10px;
+  cursor: pointer;
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+}
+.employeeFormContainer .button:hover {
+  background-color: #218838;
+}
+
+/* Buttons */
+.button {
+  padding: 8px 16px;
+  margin-right: 10px;
+  cursor: pointer;
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+}
+.button:hover {
+  background-color: #218838;
+}
+
+/* Service Control Styles */
+.service-control {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.service-button {
+  padding: 15px 30px;
+  font-size: 18px;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  border-radius: 5px;
+}
+.service-button.start {
+  background-color: #28a745;
+}
+.service-button.stop {
+  background-color: #dc3545;
+}
+.service-button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+.service-timer {
+  margin-top: 10px;
+  font-size: 16px;
+}
+
+/* Services List */
+.services-list {
+  margin-top: 20px;
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Services Table Styling */
+.services-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 auto;
+  color: #fff;
+}
+
+/* Table Header Styling */
+.services-table th {
+  background-color: #333;
+  color: #fff;
+  padding: 10px;
+  text-align: center;
+  border-bottom: 2px solid #444;
+}
+
+/* Table Body Styling */
+.services-table td {
+  padding: 8px;
+  border-bottom: 1px solid #444;
+  text-align: center;
+}
+
+/* Alternate Row Colors */
+.services-table tr:nth-child(even) {
+  background-color: #2a2a2a;
+}
+
+.services-table tr:nth-child(odd) {
+  background-color: #1e1e1e;
+}
+
+/* Financials Cell Styling */
+.financials-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.financials-item {
+  margin: 2px 0;
+}
+
+.financials-item.cost {
+  color: red;
+}
+
+.financials-item.profit {
+  color: green;
+}
+
+.financials-item.revenue {
+  color: #fff;
+}
+@media screen and (max-width: 600px) {
+  .services-table th,
+  .services-table td {
+    font-size: 12px;
+    padding: 6px;
+  }
+
+  .financials-cell {
+    align-items: center;
+  }
+}
+
+/* Additional Styles */
+.big {
+  font-size: 1.8rem;
+  color: white;
+}
+.clean-button-red,
+.clean-button-green,
+.clean-button-home,
+.clean-button-home-RestaurantSelector,
+.clean-button-home-Dashboard {
+  background-color: transparent;
+  color: white;
+  border: 2px solid white;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+.clean-button-red {
+  height: 21vh;
+  width: 35vw;
+  background-color: red;
+}
+.clean-button-green {
+  height: 21vh;
+  width: 35vw;
+  background-color: green;
+}
+.clean-button-home {
+  height: 10vh;
+  width: 35vw;
+  background-color: black;
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+}
+.clean-button-home-RestaurantSelector {
+  height: 10vh;
+  width: 18vw;
+  background-color: black;
+  z-index: 1000;
+}
+.clean-button-home-Dashboard {
+  height: 10vh;
+  width: 18vw;
+  background-color: grey;
+  z-index: 1000;
+}
+.clean-button-red:hover,
+.clean-button-green:hover,
+.clean-button-home:hover {
+  background-color: white;
+  color: black;
+}
+
+/* Flexbox Utilities */
+.fullFlexCenter {
   position: absolute;
   top: 0;
   left: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh; 
+  height: 100vh;
   width: 100vw;
 }
-.RestaurantSelectorHomeButtons{
+.flex {
+  display: flex;
+  flex-direction: row;
+  padding: 0;
+}
+
+/* Dashboard Frames */
+.DashboardButtonContainer {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  flex-direction: column;
+  padding: 0;
+  font-family: 'CrowdsaleBuyBox';
+}
+.DashboardLoginContainer {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  position: absolute;
+  flex-direction: column;
+  padding: 0 0 450px 0;
+  font-family: 'CrowdsaleBuyBox';
+}
+.DashboardLogoFrame {
+  height: 250px;
+  width: 250px;
+}
+.RestaurantSelectorDashboardFrame {
+  height: 50vh;
+  width: 50vw;
+  border-color: white;
+  border-width: 7px;
+  border-radius: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.RestaurantSelectorDashboardFrameRestaurants {
+  height: 50vh;
+  width: 50vw;
+  display: flex;
+  border-color: white;
+  border-width: 7px;
+  border-radius: 15px;
+}
+.RestaurantSelectorHomeButtons {
   position: fixed;
-  bottom: 0;  
+  bottom: 0;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: row;
-  height: 10vh; 
+  height: 10vh;
   width: 100vw;
 }
-.newRestaurantButton{ 
-  height: 30vh; 
-  width: 15vw;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  border-color: white;
-  border-width: 3px;
-  border-radius: 30px;
-  padding: 0px 0px 45px 0px;
-}
-.newRestaurantButton:hover {
-  background-color: white; /* Changes background to white on hover */
-  color: black;            /* Changes text color to black on hover */
-}
-.newRestaurantForm{
-  height: 100vh;
-  width: 100vw;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: absolute;
-  background-color: rgba(55, 56, 61, 0.5);
-  backdrop-filter: blur(5px);
-  top: 0;
-  left: 0;
-  z-index: -2;
-}
-.newRestaurantFormContainer{
-  height: 30vh;
-  width: 30w;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: absolute;
-  flex-direction: column;
-  top: 50;
-  left: 50;
-  z-index: -1;
-}
-.newJobForm{
-  height: 100vh;
-  width: 100vw;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: absolute;
-  background-color: rgba(55, 56, 61, 0.5);
-  backdrop-filter: blur(5px);
-  top: 0;
-  left: 0;
-  z-index: -2;
-}
-.newJobFormContainer{
-  height: 30vh;
-  width: 30w;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: absolute;
-  flex-direction: column;
-  top: 50;
-  left: 50;
-  z-index: -1;
-}
-.restaurantButton{
-  height: 16vh; 
-  width: 9vw;
+
+/* Buttons and Forms */
+.newRestaurantButton,
+.addNewRestaurantButtonAlreadyOwnOne,
+.restaurantButton {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -554,58 +733,67 @@ nav li:first-child{
   border-radius: 10px;
   font-size: 0.8rem;
   justify-content: center;
+  cursor: pointer;
 }
+.newRestaurantButton {
+  height: 30vh;
+  width: 15vw;
+  padding: 0 0 45px 0;
+}
+.newRestaurantButton:hover,
+.addNewRestaurantButtonAlreadyOwnOne:hover,
 .restaurantButton:hover {
-  background-color: white; /* Changes background to white on hover */
-  color: black;            /* Changes text color to black on hover */
+  background-color: white;
+  color: black;
 }
-.addNewRestaurantButtonAlreadyOwnOne{
-  height: 6vh; 
+.addNewRestaurantButtonAlreadyOwnOne {
+  height: 6vh;
   width: 6vw;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border-color: white;
-  border-width: 2px;
-  border-radius: 5px;
   font-size: 0.5rem;
-  justify-content: center;
   z-index: 300;
 }
-.job{
-  
-  z-index: 300;
+.restaurantButton {
+  height: 16vh;
+  width: 9vw;
 }
-.addNewRestaurantButtonAlreadyOwnOne:hover {
-  background-color: white; /* Changes background to white on hover */
-  color: black;            /* Changes text color to black on hover */
-}
-.flex{
+.newRestaurantForm,
+.newJobForm {
+  height: 100vh;
+  width: 100vw;
   display: flex;
-  flex-direction: row;
-  padding: 0px 0px 0px 0px;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  background-color: rgba(55, 56, 61, 0.5);
+  backdrop-filter: blur(5px);
+  top: 0;
+  left: 0;
+  z-index: -2;
+}
+.newRestaurantFormContainer,
+.newJobFormContainer {
+  height: 30vh;
+  width: 30vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  flex-direction: column;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: -1;
 }
 
-
-/* Ensure the video background container has the right size */
-
-
-
-@media(max-width: 800px){
-  .hideOnMobile{
-    display: none;
-  }
-  .menu{
-    display: block!important;
-  }
-}
-@media(max-width: 400px){
-  .sidebar{
-    width: 100%;
-    backdrop-filter: blur(5px);
-  }
-  .big{
-  font-size: 2.0rem ;
+/* Miscellaneous */
+.big {
+  font-size: 1.8rem;
   color: white;
 }
+.hideOnMobile {
+  display: block;
+}
+.menu {
+  display: none;
+  z-index: 10;
 }

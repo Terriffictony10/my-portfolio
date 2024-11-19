@@ -190,6 +190,53 @@ export const createNewJob = async (provider, contractAddress, abi, name, wage, d
   // Reload all jobs
   await loadAllJobs(provider, contractAddress, abi, dispatch);
 };
+export const hireNewEmployee = async (provider, contractAddress, abi, jobId, name, employeeAddress, dispatch) => {
+  try {
+    const user = await provider.getSigner();
+    const contract = new ethers.Contract(contractAddress, abi, user);
+
+    // Call the contract function to hire a new employee
+    const tx = await contract.hireEmployee(jobId, name, employeeAddress);
+
+    // Wait for the transaction to be mined
+    await tx.wait();
+
+    // Reload all employees
+    await loadAllEmployees(provider, contractAddress, abi, dispatch);
+  } catch (error) {
+    console.error('Error in hireNewEmployee:', error);
+  }
+};
+
+export const loadAllEmployees = async (provider, contractAddress, abi, dispatch) => {
+  try {
+    const user = await provider.getSigner();
+    const contract = new ethers.Contract(contractAddress, abi, user);
+
+    // Fetch the array of employee IDs
+    const employeeIds = await contract.getEmployeeIds();
+
+    const employeesArray = [];
+    for (let i = 0; i < employeeIds.length; i++) {
+      const employeeId = Number(employeeIds[i]); // Convert BigNumber to Number
+      const employee = await contract.employees(employeeId);
+
+      employeesArray.push({
+        id: employeeId.toString(),
+        jobId: employee.jobId.toString(),
+        name: employee.name,
+        address: employee.employeeAddress,
+        clockStamp: employee.clockStamp.toString(),
+        employeePension: employee.employeePension.toString(),
+      });
+    }
+
+    // Dispatch action to update employees in Redux store
+    dispatch({ type: 'EMPLOYEES_LOADED', employees: employeesArray });
+  } catch (error) {
+    console.error('Error in loadAllEmployees:', error);
+  }
+};
 export const loadAllJobs = async (provider, contractAddress, abi, dispatch) => {
   try {
     const user = await provider.getSigner();
@@ -214,5 +261,68 @@ export const loadAllJobs = async (provider, contractAddress, abi, dispatch) => {
     dispatch({ type: 'JOBS_LOADED', jobs: jobsArray });
   } catch (error) {
     console.error('Error in loadAllJobs:', error.message);
+  }
+};
+export const startService = async (provider, contractAddress, abi, dispatch) => {
+  try {
+    const user = await provider.getSigner();
+    const contract = new ethers.Contract(contractAddress, abi, user);
+
+    const tx = await contract.startService();
+    const receipt = await tx.wait();
+
+    // Get the block timestamp from the transaction receipt
+    const block = await provider.getBlock(receipt.blockNumber);
+    const serviceStartTime = block.timestamp;
+
+    // Dispatch the service start time
+    dispatch({ type: 'SERVICE_STARTED', serviceStartTime });
+  } catch (error) {
+    console.error('Error in startService:', error);
+  }
+};
+
+export const loadAllServices = async (provider, contractAddress, abi, dispatch) => {
+  try {
+    const user = await provider.getSigner();
+    const contract = new ethers.Contract(contractAddress, abi, user);
+
+    // Fetch the array of service IDs
+    const serviceIds = await contract.getServiceIds();
+
+    const servicesArray = [];
+    for (let i = 0; i < serviceIds.length; i++) {
+      const serviceId = Number(serviceIds[i]);
+      const service = await contract.services(serviceId);
+
+      servicesArray.push({
+        id: serviceId.toString(),
+        startTime: service.startTime.toString(),
+        endTime: service.endTime.toString(),
+        cost: service.cost.toString(),
+        profit: service.profit.toString(),
+        revenue: service.revenue.toString(),
+      });
+    }
+
+    // Dispatch action to update services in Redux store
+    dispatch({ type: 'SERVICES_LOADED', services: servicesArray });
+  } catch (error) {
+    console.error('Error in loadAllServices:', error);
+  }
+};
+
+export const endService = async (provider, contractAddress, abi, dispatch) => {
+  try {
+    const user = await provider.getSigner();
+    const contract = new ethers.Contract(contractAddress, abi, user);
+
+    const tx = await contract.endService();
+    await tx.wait();
+
+    // Optionally dispatch an action to update the service status in Redux
+    dispatch({ type: 'SERVICE_STOPPED' });
+  } catch (error) {
+    console.error('Error in endService:', error);
   }
 };

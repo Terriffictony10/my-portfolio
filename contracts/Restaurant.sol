@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
+
 import "hardhat/console.sol";
 import "./POS.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -10,7 +11,6 @@ interface IPOSDeployer {
         address _owner,
         address _restaurant
     ) external returns (address);
-
 }
 
 interface IPOS {
@@ -34,6 +34,24 @@ contract Restaurant is Ownable {
         uint256 employeePension;
     }
 
+    struct Service {
+    uint256 id;
+    uint256 startTime;
+    uint256 endTime;
+    uint256 cost;
+    uint256 profit;
+    uint256 revenue;
+    }
+
+
+    event ServiceEnded(
+    uint256 id,
+    uint256 startTime,
+    uint256 endTime,
+    uint256 cost,
+    uint256 profit,
+    uint256 revenue
+    );
     event POSCreated(address pos, uint256 id, address owner);
     event JobAdded(uint256 id, uint256 timestamp, Job job);
     event EmployeeHired(uint256 id, uint256 timestamp, Employee employee);
@@ -45,6 +63,10 @@ contract Restaurant is Ownable {
     uint256 public nextPOSId;
     uint256 public nextEmployeeId;
     string public name;
+    uint256 public nextServiceId;
+    mapping(uint256 => Service) public services;
+    uint256[] public serviceIds;
+    uint256 public serviceStartBalance;
 
     mapping(uint256 => Job) public jobs;
     uint256[] public jobIds;
@@ -109,9 +131,20 @@ contract Restaurant is Ownable {
     }
 
     function startService() public onlyOwner {
-        service = true;
-        serviceStart = block.timestamp;
-    }
+    require(!service, "Service is already active");
+    service = true;
+    serviceStart = block.timestamp;
+
+    // Increment service ID and create a new service record
+    nextServiceId++;
+    Service storage newService = services[nextServiceId];
+    newService.id = nextServiceId;
+    newService.startTime = block.timestamp;
+    serviceIds.push(nextServiceId);
+
+    // Record the starting balance
+    serviceStartBalance = address(this).balance;
+}
 
     function clockIn(uint256 _id) public {
         require(employees[_id].clockStamp == 0, "Already clocked in");
@@ -121,25 +154,67 @@ contract Restaurant is Ownable {
     function clockOut(uint256 _id) public {
         require(employees[_id].clockStamp != 0, "Must clock in first");
         uint256 timeWorked = block.timestamp - employees[_id].clockStamp; // Seconds worked
-        uint256 amountEarned = jobs[employees[_id].jobId].hourlyWageInWei * timeWorked / 3600; // Time to be paid in wei
+        uint256 amountEarned = (jobs[employees[_id].jobId].hourlyWageInWei * timeWorked) / 3600; // Time to be paid in wei
         employees[_id].employeePension += amountEarned;
         employees[_id].clockStamp = 0;
     }
 
     function endService() public onlyOwner {
-        service = false;
-        for (uint256 i = 0; i < POSIds.length; i++) {
-            IPOS pos = IPOS(POSMapping[POSIds[i]]);
-            pos.payRestaurant();
-        }
-        for (uint256 i = 0; i < employeeIds.length; i++) {
-            if (employees[employeeIds[i]].employeePension > 0) {
-                payable(employees[employeeIds[i]].employeeAddress).transfer(employees[employeeIds[i]].employeePension);
-                employees[employeeIds[i]].employeePension = 0;
-            }
+    require(service, "Service is not active");
+    service = false;
+
+    // Set the end time of the current service
+    Service storage currentService = services[nextServiceId];
+    currentService.endTime = block.timestamp;
+
+    // Calculate cost as total employee pensions
+    uint256 totalCost = 0;
+    for (uint256 i = 0; i < employeeIds.length; i++) {
+        if (employees[employeeIds[i]].employeePension > 0) {
+            totalCost += employees[employeeIds[i]].employeePension;
+            payable(employees[employeeIds[i]].employeeAddress).transfer(employees[employeeIds[i]].employeePension);
+            employees[employeeIds[i]].employeePension = 0;
         }
     }
+
+    // Calculate revenue as the difference in balance
+    uint256 serviceEndBalance = address(this).balance;
+    uint256 totalRevenue = serviceEndBalance - serviceStartBalance;
+
+    // Calculate profit
+    uint256 totalProfit = 0;
+    if (totalRevenue > totalCost) {
+        totalProfit = totalRevenue - totalCost;
+    }
+
+    // Update the currentService
+    currentService.cost = totalCost;
+    currentService.revenue = totalRevenue;
+    currentService.profit = totalProfit;
+
+    // Reset serviceStartBalance
+    serviceStartBalance = 0;
+
+    emit ServiceEnded(
+        currentService.id,
+        currentService.startTime,
+        currentService.endTime,
+        currentService.cost,
+        currentService.profit,
+        currentService.revenue
+    );
+}
+
     function getJobIds() public view returns (uint256[] memory) {
-    return jobIds;
+        return jobIds;
+    }
+
+    // Removed 'onlyOwner' modifier to make the function publicly accessible
+    function getEmployeeIds() public view returns (uint256[] memory) {
+        return employeeIds;
+    }
+
+    function getServiceIds() public view returns (uint256[] memory) {
+    return serviceIds;
     }
 }

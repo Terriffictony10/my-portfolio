@@ -20,6 +20,14 @@ const DEFAULT_DASHBOARD_RESTAURANTS_STATE = {
     loaded: false,
     data: []
   },
+  allEmployees: {
+    loaded: false,
+    data: []
+  },
+  allServices: {
+    loaded: false,
+    data: [],
+  },
   posCreationInProgress: false,
   events: []
 };
@@ -48,6 +56,22 @@ const dashboardRestaurantReducer = (state = DEFAULT_DASHBOARD_RESTAURANTS_STATE,
         allJobs: {
           loaded: true,
           data: action.jobs,
+        },
+      };
+    case 'SERVICES_LOADED':
+      return {
+        ...state,
+        allServices: {
+          loaded: true,
+          data: action.services,
+        },
+      };
+     case 'EMPLOYEES_LOADED':
+      return {
+        ...state,
+        allEmployees: {
+          loaded: true,
+          data: action.employees,
         },
       };
     // Remove the case for 'NEW_JOB' as we won't store jobs in Redux
