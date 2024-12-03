@@ -1,84 +1,84 @@
 import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux';
 import { ethers } from 'ethers';
 import Loading from "../components/Loading.js";
-
-import { 
-loadProvider, 
-loadAccount,
-loadNetwork,
-loadFactory,
-loadAllRestaurants,
-loadMyRestaurants,
-subscribeToEvents,
-createNewRestaurant,
-decorateMyRestaurants,
-loadDashboardRestaurantContractData
-} from '../store/interactions'
-
-
+import {
+  loadProvider,
+  loadAccount,
+  loadNetwork,
+  loadFactory,
+  loadAllRestaurants,
+  loadMyRestaurants,
+  subscribeToEvents,
+  createNewRestaurant,
+  decorateMyRestaurants,
+  loadDashboardRestaurantContractData
+} from '../store/interactions';
 import Image from 'next/image';
-
 import { useRouter } from 'next/router';
-import config from '../config.json'
+import config from '../config.json';
 import { useProvider } from '../context/ProviderContext';
 
 function RestaurantSelectionDashboardBody({ onclick, fun }) {
- 
-
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const { provider, setProvider } = useProvider();
   const [myRestaurants, setMyRestaurants] = useState(null);
-  const [dashboardRestaurant, setDashboardRestaurant] = useState('')
+  const [dashboardRestaurant, setDashboardRestaurant] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  
-  const account = useSelector(state => state.provider.account)
+
+  const account = useSelector(state => state.provider.account);
   const router = useRouter();
 
   const toRestaurantDashHandler = async (e, restaurant, myRestaurants) => {
-    e.preventDefault()
+    e.preventDefault();
     router.push('/mainRestaurantDashboard');
-    const index = myRestaurants.indexOf(restaurant)
-    await setDashboardRestaurant(restaurant)
-    await loadDashboardRestaurantContractData(provider, restaurant, dispatch, index)
+    const index = myRestaurants.indexOf(restaurant);
+    await setDashboardRestaurant(restaurant);
+    await loadDashboardRestaurantContractData(provider, restaurant, dispatch, index);
   };
-  
 
   const loadBlockchainData = async () => {
     if (typeof window.ethereum !== 'undefined') {
       try {
-        
         const ethersProvider = new ethers.BrowserProvider(window.ethereum);
         setProvider(ethersProvider);
-        const chainId = await loadNetwork(ethersProvider, dispatch)
-        const Factory = await loadFactory(ethersProvider, config[chainId].decentratalityServiceFactory.address, dispatch)
-        const Restaurants = await loadAllRestaurants(ethersProvider, Factory, dispatch)
-       
-        const myRestaurants = await loadMyRestaurants(ethersProvider, account, Restaurants, dispatch)
-        const myDecoratedRestaurants = await decorateMyRestaurants(ethersProvider, myRestaurants)
-        setMyRestaurants(myDecoratedRestaurants)
-        subscribeToEvents(Factory, dispatch)
-        
+        const chainId = await loadNetwork(ethersProvider, dispatch);
+        const Factory = await loadFactory(
+          ethersProvider,
+          config[chainId].decentratalityServiceFactory.address,
+          dispatch
+        );
+        const Restaurants = await loadAllRestaurants(ethersProvider, Factory, dispatch);
+
+        const myRestaurants = await loadMyRestaurants(
+          ethersProvider,
+          account,
+          Restaurants,
+          dispatch
+        );
+        const myDecoratedRestaurants = await decorateMyRestaurants(
+          ethersProvider,
+          myRestaurants
+        );
+        setMyRestaurants(myDecoratedRestaurants);
+        subscribeToEvents(Factory, dispatch);
       } catch (error) {
         console.error("Error loading blockchain data:", error.message);
-          // In case of error, set account to null
       } finally {
-        setIsLoading(false); // Ensure loading ends
+        setIsLoading(false);
       }
     } else {
       console.error("MetaMask not detected");
-      setAccount(null);  // Handle case where MetaMask isn't available
+      setAccount(null);
       setIsLoading(false);
     }
   };
-  
+
   useEffect(() => {
     if (isLoading) {
       loadBlockchainData();
     }
-
-
-  }, [loadBlockchainData, isLoading, dispatch, provider]);
+  }, [isLoading]);
 
  
   const navigateToCrowdsale = () => {

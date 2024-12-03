@@ -6,6 +6,7 @@ import { ethers, isAddress } from 'ethers';
 import Loading from '../components/Loading.js';
 import { useRouter } from 'next/router';
 import { useProvider } from '../context/ProviderContext';
+import RESTAURANT_ABI from "../abis/Restaurant.json";
 import {
   loadAllJobs,
   hireNewEmployee,
@@ -13,6 +14,8 @@ import {
   startService,
   endService,
   loadAllServices,
+  createPOS,
+  loadAllPOS
 } from '../store/interactions';
 
 function MainDashboardRestaurantBody() {
@@ -23,11 +26,15 @@ function MainDashboardRestaurantBody() {
   const cash = useSelector((state) => state.DashboardRestaurant.cash);
   const contractAddress = useSelector((state) => state.DashboardRestaurant.contractAddress);
   const abi = useSelector((state) => state.DashboardRestaurant.abi);
-  const employees = useSelector((state) => state.DashboardRestaurant.allEmployees.data || []);
   const jobs = useSelector((state) => state.DashboardRestaurant.allJobs.data || []);
+  const employees = useSelector((state) => state.DashboardRestaurant.allEmployees.data || []);
   const services = useSelector((state) => state.DashboardRestaurant.allServices.data || []);
+  const posDevices = useSelector((state) => state.DashboardRestaurant.allPOS.data || []);
   const dispatch = useDispatch();
   const router = useRouter();
+
+  const [showPOSForm, setShowPOSForm] = useState(false);
+  const [posName, setPOSName] = useState('');
 
   const [showEmployeeForm, setShowEmployeeForm] = useState(false);
   const [employeeName, setEmployeeName] = useState('');
@@ -45,6 +52,10 @@ function MainDashboardRestaurantBody() {
     setEmployeeName(e.target.value);
   };
 
+   const posNameHandler = (e) => {
+    setPOSName(e.target.value);
+  };
+
   const employeeJobIdHandler = (e) => {
     setEmployeeJobId(e.target.value);
   };
@@ -54,8 +65,36 @@ function MainDashboardRestaurantBody() {
   };
 
   // Handler to add new job (you can implement this as needed)
-  const addNewJobHandler = () => {
-    // Your code to handle adding a new job
+  const addNewJobHandler = async (e) => {
+    const _Background = document.querySelector('.newJobForm');
+    _Background.style.zIndex = '500';
+    const _Form = document.querySelector('.newJobFormContainer');
+    _Form.style.zIndex = '501';
+  };
+
+  const addPOSHandler = async (e) => {
+    e.preventDefault();
+    if (!provider) {
+      console.error('Provider not initialized');
+      return;
+    }
+
+    try {
+      await createPOS(provider, contractAddress, RESTAURANT_ABI, posName, dispatch);
+      // Reset form fields
+      setPOSName('');
+      setShowPOSForm(false);
+    } catch (error) {
+      console.error('Error creating POS:', error);
+    }
+  };
+
+   const openPOSForm = () => {
+    setShowPOSForm(true);
+  };
+
+  const closePOSForm = () => {
+    setShowPOSForm(false);
   };
 
   const hireEmployeeHandler = async (e) => {
@@ -71,7 +110,7 @@ function MainDashboardRestaurantBody() {
     await hireNewEmployee(
       provider,
       contractAddress,
-      abi,
+      RESTAURANT_ABI,
       employeeJobId,
       employeeName,
       employeeAddress,
@@ -102,10 +141,10 @@ function MainDashboardRestaurantBody() {
     try {
       if (serviceActive) {
         // Stop the service
-        await endService(provider, contractAddress, abi, dispatch);
+        await endService(provider, contractAddress, RESTAURANT_ABI, dispatch);
       } else {
         // Start the service
-        await startService(provider, contractAddress, abi, dispatch);
+        await startService(provider, contractAddress, RESTAURANT_ABI, dispatch);
       }
       // After starting/stopping service, refresh the service status
       await getServiceStatus();
@@ -117,10 +156,10 @@ function MainDashboardRestaurantBody() {
 
   // Function to get the service status
   const getServiceStatus = async () => {
-    if (provider && contractAddress && abi) {
+    if (provider && contractAddress) {
       try {
         const user = await provider.getSigner();
-        const contract = new ethers.Contract(contractAddress, abi, user);
+        const contract = new ethers.Contract(contractAddress, RESTAURANT_ABI, user);
         const service = await contract.service();
         const serviceStartTime = await contract.serviceStart();
 
@@ -154,22 +193,24 @@ function MainDashboardRestaurantBody() {
   // First useEffect: Load blockchain data on mount
   useEffect(() => {
     const loadBlockchainData = async () => {
-      if (typeof window.ethereum !== 'undefined') {
+      if (typeof window.ethereum !== 'undefined' && contractAddress) {
         try {
           const ethersProvider = new ethers.BrowserProvider(window.ethereum);
           setProvider(ethersProvider);
           await ethersProvider.send('eth_requestAccounts', []);
-          if (contractAddress && abi) {
-            await loadAllJobs(ethersProvider, contractAddress, abi, dispatch);
-            await loadAllEmployees(ethersProvider, contractAddress, abi, dispatch);
-            await loadAllServices(ethersProvider, contractAddress, abi, dispatch);
-            await getServiceStatus();
-          }
+
+          await loadAllJobs(ethersProvider, contractAddress, RESTAURANT_ABI, dispatch);
+          await loadAllEmployees(ethersProvider, contractAddress, RESTAURANT_ABI, dispatch);
+          await loadAllServices(ethersProvider, contractAddress, RESTAURANT_ABI, dispatch);
+          await loadAllPOS(ethersProvider, contractAddress, RESTAURANT_ABI, dispatch);
+          await getServiceStatus();
         } catch (error) {
           console.error('Error loading blockchain data:', error.message);
         } finally {
           setIsLoading(false);
         }
+      } else if (!contractAddress) {
+        console.error('Contract address is null');
       } else {
         console.error('MetaMask not detected');
         setIsLoading(false);
@@ -177,15 +218,15 @@ function MainDashboardRestaurantBody() {
     };
 
     loadBlockchainData();
-  }, [contractAddress, abi]);
+  }, [contractAddress, dispatch]);
 
   // Second useEffect: Set up interval to refresh data
   useEffect(() => {
     if (provider) {
       const refreshData = () => {
-        loadAllJobs(provider, contractAddress, abi, dispatch);
-        loadAllEmployees(provider, contractAddress, abi, dispatch);
-        loadAllServices(provider, contractAddress, abi, dispatch);
+        loadAllJobs(provider, contractAddress, RESTAURANT_ABI, dispatch);
+        loadAllEmployees(provider, contractAddress, RESTAURANT_ABI, dispatch);
+        loadAllServices(provider, contractAddress, RESTAURANT_ABI, dispatch);
         getServiceStatus();
       };
 
@@ -193,12 +234,12 @@ function MainDashboardRestaurantBody() {
       refreshData();
 
       // Set up periodic refresh every second
-      const interval = setInterval(refreshData, 1000);
+      const interval = setInterval(refreshData, 10000); // Refresh every 10 seconds to reduce load
 
       // Clear interval on cleanup
       return () => clearInterval(interval);
     }
-  }, [provider, contractAddress, abi]);
+  }, [provider, contractAddress, dispatch]);
 
   // useEffect to update service elapsed time
   useEffect(() => {
@@ -310,6 +351,25 @@ function MainDashboardRestaurantBody() {
               )}
             </div>
 
+            <div className="MainDashboardRestaurantPOSBox">
+              <h2>POS Terminals</h2>
+              <button className="addPOSButton" onClick={openPOSForm}>
+                Add POS
+              </button>
+            </div>
+            <div className="MainDashboardRestaurantPOSContainer">
+              {posDevices.length > 0 ? (
+                posDevices.map((pos, index) => (
+                  <div key={index} className="pos">
+                    <p>POS ID: {pos.id}</p>
+                    <p>Address: {pos.address}</p>
+                  </div>
+                ))
+              ) : (
+                <p>No POS terminals available</p>
+              )}
+            </div>
+
             {/* Services List */}
             <div className="services-list">
               <h3>Service History</h3>
@@ -349,6 +409,30 @@ function MainDashboardRestaurantBody() {
                 <p>No services recorded yet.</p>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+               {showPOSForm && (
+        <div className="posFormOverlay">
+          <div className="posFormContainer">
+            <form onSubmit={addPOSHandler}>
+              <p>
+                <input
+                  type="text"
+                  id="posName"
+                  placeholder="Enter the POS Name"
+                  value={posName}
+                  onChange={posNameHandler}
+                />
+              </p>
+              <button className="button-POS" type="submit">
+                Create POS
+              </button>
+              <button className="button" type="button" onClick={closePOSForm}>
+                Cancel
+              </button>
+            </form>
           </div>
         </div>
       )}

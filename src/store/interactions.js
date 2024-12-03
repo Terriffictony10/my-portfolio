@@ -1,7 +1,7 @@
 // src/store/interactions.js
 
 import { ethers } from 'ethers'
-import RESTAURANT_ABI from "../abis/Restaurant"
+import RESTAURANT_ABI from "../abis/Restaurant.json"
 import DECENTRATALITYSERVICEFACTORY_ABI from "../abis/decentratalityServiceFactory.json"
 import { useSelector } from 'react-redux'
 
@@ -123,7 +123,7 @@ export const decorateMyRestaurants = async (provider, myRestaurants) => {
     try{
     for(let i = 0; i < myRestaurants.length; i++) {
         
-        const contract = await new ethers.Contract(myRestaurants[i][0], RESTAURANT_ABI.abi, user)
+        const contract = await new ethers.Contract(myRestaurants[i][0], RESTAURANT_ABI, user)
         const name = await contract.name()
         const cash = Number(await provider.getBalance(contract.target))
 
@@ -164,7 +164,7 @@ export const createNewRestaurant = async (provider, factory, restaurantName, res
 export const loadDashboardRestaurantContractData = async (provider, Restaurant, dispatch) => {
     const user = await provider.getSigner()
     const contractAddress = Restaurant[0]
-    const abi = RESTAURANT_ABI.abi
+    const abi = RESTAURANT_ABI
     const contract = await new ethers.Contract(contractAddress, abi, user)
     const name = await contract.name()
     const myCash = await provider.getBalance(contractAddress)
@@ -247,12 +247,12 @@ export const loadAllJobs = async (provider, contractAddress, abi, dispatch) => {
 
     const jobsArray = [];
     for (let i = 0; i < jobIds.length; i++) {
-
       const jobId = Number(jobIds[i]); // Convert BigNumber to Number
       const job = await contract.jobs(jobId);
+
       jobsArray.push({
         id: jobId.toString(),
-        hourlyWageInWei: job.hourlyWage.toString(),
+        hourlyWageInWei: job.hourlyWageInWei.toString(),
         jobName: job.jobName,
       });
     }
@@ -324,5 +324,66 @@ export const endService = async (provider, contractAddress, abi, dispatch) => {
     dispatch({ type: 'SERVICE_STOPPED' });
   } catch (error) {
     console.error('Error in endService:', error);
+  }
+};
+
+export const createPOS = async (provider, contractAddress, abi, name, dispatch) => {
+  try {
+    const signer = await provider.getSigner();
+    const contract = new ethers.Contract(contractAddress, abi, signer);
+
+    // Call the createPOS function on the contract
+    const tx = await contract.createPOS(name);
+    const receipt = await tx.wait();
+
+    // Extract the POSCreated event from the receipt
+    const event = receipt.logs
+      .map((log) => {
+        try {
+          return contract.interface.parseLog(log);
+        } catch {
+          return null;
+        }
+      })
+      .find((parsedLog) => parsedLog && parsedLog.name === 'POSCreated');
+
+    if (event) {
+      const posId = event.args.id.toString();
+      const posAddress = event.args.pos;
+
+      // Dispatch action to update Redux store
+      dispatch({ type: 'POS_CREATED', pos: { id: posId, address: posAddress, name } });
+    }
+
+    // Reload POS list
+    await loadAllPOS(provider, contractAddress, abi, dispatch);
+  } catch (error) {
+    console.error('Error in createPOS:', error);
+  }
+};
+
+export const loadAllPOS = async (provider, contractAddress, abi, dispatch) => {
+  try {
+    const signer = await provider.getSigner();
+    const contract = new ethers.Contract(contractAddress, abi, signer);
+
+    // Fetch the array of POS IDs
+    const posIds = await contract.POSIds();
+
+    const posArray = [];
+    for (let i = 0; i < posIds.length; i++) {
+      const posId = Number(posIds[i]);
+      const posAddress = await contract.POSMapping(posId);
+
+      posArray.push({
+        id: posId.toString(),
+        address: posAddress,
+      });
+    }
+
+    // Dispatch action to update POS in Redux store
+    dispatch({ type: 'POS_LOADED', posArray });
+  } catch (error) {
+    console.error('Error in loadAllPOS:', error);
   }
 };
