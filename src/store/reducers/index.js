@@ -11,13 +11,12 @@ import { DashboardRestaurant } from './dashboardRestaurant';
 const rootPersistConfig = {
   key: 'root',
   storage,
-  blacklist: ['DashboardRestaurant'] // Exclude DashboardRestaurant
 };
 
 const rootReducer = combineReducers({
   provider,
   Restaurants,
-  DashboardRestaurant
+  DashboardRestaurant, 
 });
 
 export default persistReducer(rootPersistConfig, rootReducer);

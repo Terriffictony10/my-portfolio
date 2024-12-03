@@ -28,7 +28,7 @@ function RestaurantSelectionDashboardBody({ onclick, fun }) {
 
   const account = useSelector(state => state.provider.account);
   const router = useRouter();
-
+  
   const toRestaurantDashHandler = async (e, restaurant, myRestaurants) => {
     e.preventDefault();
     router.push('/mainRestaurantDashboard');

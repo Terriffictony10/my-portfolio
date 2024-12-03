@@ -3,6 +3,7 @@
 import { ethers } from 'ethers'
 import RESTAURANT_ABI from "../abis/Restaurant.json"
 import DECENTRATALITYSERVICEFACTORY_ABI from "../abis/decentratalityServiceFactory.json"
+import POS_ABI from "../abis/POS.json";
 import { useSelector } from 'react-redux'
 
 let GlobalRestaurants = []
@@ -385,5 +386,70 @@ export const loadAllPOS = async (provider, contractAddress, abi, dispatch) => {
     dispatch({ type: 'POS_LOADED', posArray });
   } catch (error) {
     console.error('Error in loadAllPOS:', error);
+  }
+};
+  export const loadAllMenuItems = async (provider, contractAddress, abi, dispatch) => {
+  try {
+    const restaurantContract = new ethers.Contract(contractAddress, abi, provider);
+
+    // Get all POS addresses associated with the restaurant
+    const posAddresses = await restaurantContract.getAllPOSAddresses();
+
+    if (posAddresses.length === 0) {
+      dispatch({ type: 'LOAD_ALL_MENU_ITEMS_SUCCESS', payload: [] });
+      return;
+    }
+
+    const firstPOSAddress = posAddresses[0];
+
+    const posContract = new ethers.Contract(firstPOSAddress, POS_ABI.abi, provider);
+
+    const menuItemIds = await posContract.getMenuItemIds();
+    let menuItems = [];
+
+    for (let i = 0; i < menuItemIds.length; i++) {
+      const id = Number(menuItemIds[i]);
+      const menuItem = await posContract.menu(id);
+
+      menuItems.push({
+        id: id,
+        cost: ethers.formatEther(menuItem.cost),
+        name: menuItem.name,
+      });
+    }
+
+    dispatch({ type: 'LOAD_ALL_MENU_ITEMS_SUCCESS', payload: menuItems });
+  } catch (error) {
+    console.error('Error loading menu items:', error);
+  }
+};
+
+
+export const addNewMenuItem = async (provider, contractAddress, abi, cost, name, dispatch) => {
+  try {
+    const signer = await provider.getSigner();
+    const restaurantContract = new ethers.Contract(contractAddress, RESTAURANT_ABI, provider);
+
+    // Get all POS addresses from the restaurant contract
+    const posAddresses = await restaurantContract.getAllPOSAddresses();
+
+    // Loop through each POS address and add the menu item
+    for (let i = 0; i < posAddresses.length; i++) {
+      const posAddress = posAddresses[i];
+
+      // Create a new contract instance for each POS
+      const posContract = new ethers.Contract(posAddress, POS_ABI.abi, signer);
+
+      // Call the addMenuItem function on each POS contract
+      const costInWei = ethers.parseUnits(cost.toString(), 'ether');
+      const tx = await posContract.addMenuItem(costInWei, name);
+      await tx.wait();
+    }
+
+    dispatch({ type: 'MENU_ITEM_ADDED', payload: { cost, name } });
+
+    await loadAllMenuItems(provider, contractAddress, abi, dispatch);
+  } catch (error) {
+    console.error('Error adding new menu item:', error);
   }
 };

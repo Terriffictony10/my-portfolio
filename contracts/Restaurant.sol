@@ -35,22 +35,21 @@ contract Restaurant is Ownable {
     }
 
     struct Service {
-    uint256 id;
-    uint256 startTime;
-    uint256 endTime;
-    uint256 cost;
-    uint256 profit;
-    uint256 revenue;
+        uint256 id;
+        uint256 startTime;
+        uint256 endTime;
+        uint256 cost;
+        uint256 profit;
+        uint256 revenue;
     }
 
-
     event ServiceEnded(
-    uint256 id,
-    uint256 startTime,
-    uint256 endTime,
-    uint256 cost,
-    uint256 profit,
-    uint256 revenue
+        uint256 id,
+        uint256 startTime,
+        uint256 endTime,
+        uint256 cost,
+        uint256 profit,
+        uint256 revenue
     );
     event POSCreated(address pos, uint256 id, address owner);
     event JobAdded(uint256 id, uint256 timestamp, Job job);
@@ -105,7 +104,7 @@ contract Restaurant is Ownable {
     function payOwner(uint256 _amount) public {
         require(address(this).balance >= _amount, "Insufficient contract balance");
         (bool sent, ) = owner().call{value: _amount}("");
-        require(sent);
+        require(sent, "Transfer failed");
     }
 
     function addJob(uint256 wageInWei, string memory _name) public onlyOwner {
@@ -113,7 +112,7 @@ contract Restaurant is Ownable {
             uint256 jobId = jobIds[i];
             require(
                 keccak256(bytes(jobs[jobId].jobName)) != keccak256(bytes(_name)),
-                "Job with the same name and ID already exists."
+                "Job with the same name already exists."
             );
         }
         nextJobId++;
@@ -131,20 +130,20 @@ contract Restaurant is Ownable {
     }
 
     function startService() public onlyOwner {
-    require(!service, "Service is already active");
-    service = true;
-    serviceStart = block.timestamp;
+        require(!service, "Service is already active");
+        service = true;
+        serviceStart = block.timestamp;
 
-    // Increment service ID and create a new service record
-    nextServiceId++;
-    Service storage newService = services[nextServiceId];
-    newService.id = nextServiceId;
-    newService.startTime = block.timestamp;
-    serviceIds.push(nextServiceId);
+        // Increment service ID and create a new service record
+        nextServiceId++;
+        Service storage newService = services[nextServiceId];
+        newService.id = nextServiceId;
+        newService.startTime = block.timestamp;
+        serviceIds.push(nextServiceId);
 
-    // Record the starting balance
-    serviceStartBalance = address(this).balance;
-}
+        // Record the starting balance
+        serviceStartBalance = address(this).balance;
+    }
 
     function clockIn(uint256 _id) public {
         require(employees[_id].clockStamp == 0, "Already clocked in");
@@ -160,61 +159,73 @@ contract Restaurant is Ownable {
     }
 
     function endService() public onlyOwner {
-    require(service, "Service is not active");
-    service = false;
+        require(service, "Service is not active");
+        service = false;
 
-    // Set the end time of the current service
-    Service storage currentService = services[nextServiceId];
-    currentService.endTime = block.timestamp;
+        // Set the end time of the current service
+        Service storage currentService = services[nextServiceId];
+        currentService.endTime = block.timestamp;
 
-    // Calculate cost as total employee pensions
-    uint256 totalCost = 0;
-    for (uint256 i = 0; i < employeeIds.length; i++) {
-        if (employees[employeeIds[i]].employeePension > 0) {
-            totalCost += employees[employeeIds[i]].employeePension;
-            payable(employees[employeeIds[i]].employeeAddress).transfer(employees[employeeIds[i]].employeePension);
-            employees[employeeIds[i]].employeePension = 0;
+        // Calculate cost as total employee pensions
+        uint256 totalCost = 0;
+        for (uint256 i = 0; i < employeeIds.length; i++) {
+            uint256 empId = employeeIds[i];
+            Employee storage emp = employees[empId];
+            if (emp.employeePension > 0) {
+                totalCost += emp.employeePension;
+                payable(emp.employeeAddress).transfer(emp.employeePension);
+                emp.employeePension = 0;
+            }
         }
+
+        // Calculate revenue as the difference in balance
+        uint256 serviceEndBalance = address(this).balance;
+        uint256 totalRevenue = serviceEndBalance - serviceStartBalance;
+
+        // Calculate profit
+        uint256 totalProfit = 0;
+        if (totalRevenue > totalCost) {
+            totalProfit = totalRevenue - totalCost;
+        }
+
+        // Update the currentService
+        currentService.cost = totalCost;
+        currentService.revenue = totalRevenue;
+        currentService.profit = totalProfit;
+
+        // Reset serviceStartBalance
+        serviceStartBalance = 0;
+
+        emit ServiceEnded(
+            currentService.id,
+            currentService.startTime,
+            currentService.endTime,
+            currentService.cost,
+            currentService.profit,
+            currentService.revenue
+        );
     }
-
-    // Calculate revenue as the difference in balance
-    uint256 serviceEndBalance = address(this).balance;
-    uint256 totalRevenue = serviceEndBalance - serviceStartBalance;
-
-    // Calculate profit
-    uint256 totalProfit = 0;
-    if (totalRevenue > totalCost) {
-        totalProfit = totalRevenue - totalCost;
-    }
-
-    // Update the currentService
-    currentService.cost = totalCost;
-    currentService.revenue = totalRevenue;
-    currentService.profit = totalProfit;
-
-    // Reset serviceStartBalance
-    serviceStartBalance = 0;
-
-    emit ServiceEnded(
-        currentService.id,
-        currentService.startTime,
-        currentService.endTime,
-        currentService.cost,
-        currentService.profit,
-        currentService.revenue
-    );
-}
 
     function getJobIds() public view returns (uint256[] memory) {
         return jobIds;
     }
 
-    // Removed 'onlyOwner' modifier to make the function publicly accessible
     function getEmployeeIds() public view returns (uint256[] memory) {
         return employeeIds;
     }
 
     function getServiceIds() public view returns (uint256[] memory) {
-    return serviceIds;
+        return serviceIds;
+    }
+
+    // New function to retrieve all POS addresses, only callable by the owner
+    function getAllPOSAddresses() public view onlyOwner returns (address[] memory) {
+        uint256 posCount = POSIds.length;
+        address[] memory posAddresses = new address[](posCount);
+        for (uint256 i = 0; i < posCount; i++) {
+            uint256 posId = POSIds[i];
+            posAddresses[i] = POSMapping[posId];
+        }
+        return posAddresses;
     }
 }

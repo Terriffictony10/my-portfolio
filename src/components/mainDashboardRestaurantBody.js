@@ -15,7 +15,9 @@ import {
   endService,
   loadAllServices,
   createPOS,
-  loadAllPOS
+  loadAllPOS,
+  loadAllMenuItems,
+  addNewMenuItem // Import the new interaction
 } from '../store/interactions';
 
 function MainDashboardRestaurantBody() {
@@ -30,8 +32,13 @@ function MainDashboardRestaurantBody() {
   const employees = useSelector((state) => state.DashboardRestaurant.allEmployees.data || []);
   const services = useSelector((state) => state.DashboardRestaurant.allServices.data || []);
   const posDevices = useSelector((state) => state.DashboardRestaurant.allPOS.data || []);
+  const menuItems = useSelector((state) => state.DashboardRestaurant.allMenuItems.data || []); 
   const dispatch = useDispatch();
   const router = useRouter();
+
+  const [showMenuItemForm, setShowMenuItemForm] = useState(false);
+  const [menuItemName, setMenuItemName] = useState('');
+  const [menuItemCost, setMenuItemCost] = useState('');
 
   const [showPOSForm, setShowPOSForm] = useState(false);
   const [posName, setPOSName] = useState('');
@@ -154,6 +161,39 @@ function MainDashboardRestaurantBody() {
     setServiceLoading(false);
   };
 
+  const addMenuItemHandler = () => {
+    setShowMenuItemForm(true);
+  };
+
+  const closeMenuItemForm = () => {
+    setShowMenuItemForm(false);
+  };
+
+  const menuItemNameHandler = (e) => {
+    setMenuItemName(e.target.value);
+  };
+
+  const menuItemCostHandler = (e) => {
+    setMenuItemCost(e.target.value);
+  };
+
+  const addMenuItemSubmitHandler = async (e) => {
+    e.preventDefault();
+    if (!provider) {
+      console.error('Provider not initialized');
+      return;
+    }
+    try {
+      await addNewMenuItem(provider, contractAddress, RESTAURANT_ABI, menuItemCost, menuItemName, dispatch);
+      // Reset form fields
+      setMenuItemName('');
+      setMenuItemCost('');
+      setShowMenuItemForm(false);
+    } catch (error) {
+      console.error('Error adding menu item:', error);
+    }
+  };
+
   // Function to get the service status
   const getServiceStatus = async () => {
     if (provider && contractAddress) {
@@ -203,6 +243,7 @@ function MainDashboardRestaurantBody() {
           await loadAllEmployees(ethersProvider, contractAddress, RESTAURANT_ABI, dispatch);
           await loadAllServices(ethersProvider, contractAddress, RESTAURANT_ABI, dispatch);
           await loadAllPOS(ethersProvider, contractAddress, RESTAURANT_ABI, dispatch);
+          await loadAllMenuItems(ethersProvider, contractAddress, RESTAURANT_ABI, dispatch); // Load menu items
           await getServiceStatus();
         } catch (error) {
           console.error('Error loading blockchain data:', error.message);
@@ -227,6 +268,7 @@ function MainDashboardRestaurantBody() {
         loadAllJobs(provider, contractAddress, RESTAURANT_ABI, dispatch);
         loadAllEmployees(provider, contractAddress, RESTAURANT_ABI, dispatch);
         loadAllServices(provider, contractAddress, RESTAURANT_ABI, dispatch);
+        loadAllMenuItems(provider, contractAddress, RESTAURANT_ABI, dispatch); 
         getServiceStatus();
       };
 
@@ -333,6 +375,28 @@ function MainDashboardRestaurantBody() {
             </div>
           </div>
 
+          {/* Menu Items Section */}
+            <div className="MainDashboardRestaurantMenuBox">
+              <h2>Menu</h2>
+              <button className="addMenuItemButton" onClick={addMenuItemHandler}>
+                Add Menu Item
+              </button>
+            </div>
+            <div className="MainDashboardRestaurantMenuContainer">
+              {menuItems.length > 0 ? (
+                menuItems.map((menuItem, index) => (
+                  <div key={index} className="menuItem">
+                    <p>Item ID: {menuItem.id}</p>
+                    <p>Name: {menuItem.name}</p>
+                    <p>Cost: {menuItem.cost} ETH</p>
+                  </div>
+                ))
+              ) : (
+                <p>No menu items available</p>
+              )}
+            </div>
+          
+
           {/* Right Side Content */}
           <div className="right-side-content">
             {/* Service Control */}
@@ -409,6 +473,40 @@ function MainDashboardRestaurantBody() {
                 <p>No services recorded yet.</p>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+          {/* Menu Item Form Modal */}
+      {showMenuItemForm && (
+        <div className="menuItemFormOverlay">
+          <div className="menuItemFormContainer">
+            <form onSubmit={addMenuItemSubmitHandler}>
+              <p>
+                <input
+                  type="text"
+                  id="menuItemName"
+                  placeholder="Enter the Menu Item Name"
+                  value={menuItemName}
+                  onChange={menuItemNameHandler}
+                />
+              </p>
+              <p>
+                <input
+                  type="text"
+                  id="menuItemCost"
+                  placeholder="Enter the Menu Item Cost in ETH"
+                  value={menuItemCost}
+                  onChange={menuItemCostHandler}
+                />
+              </p>
+              <button className="button" type="submit">
+                Add Menu Item
+              </button>
+              <button className="button" type="button" onClick={closeMenuItemForm}>
+                Cancel
+              </button>
+            </form>
           </div>
         </div>
       )}
