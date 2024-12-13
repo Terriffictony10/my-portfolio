@@ -51,4 +51,7 @@ contract POS is Ownable, MenuTicketBase {
         (bool sent, ) = restaurant.call{value: address(this).balance}("");
         require(sent);
     }
+    function getName() public view onlyOwner returns (string memory){
+        return name;
+    }
 }

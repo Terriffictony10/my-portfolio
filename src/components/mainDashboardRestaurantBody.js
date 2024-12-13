@@ -265,6 +265,7 @@ function MainDashboardRestaurantBody() {
   useEffect(() => {
     if (provider) {
       const refreshData = () => {
+        loadAllPOS(provider, contractAddress, RESTAURANT_ABI, dispatch);
         loadAllJobs(provider, contractAddress, RESTAURANT_ABI, dispatch);
         loadAllEmployees(provider, contractAddress, RESTAURANT_ABI, dispatch);
         loadAllServices(provider, contractAddress, RESTAURANT_ABI, dispatch);

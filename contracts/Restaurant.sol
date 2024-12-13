@@ -228,4 +228,8 @@ contract Restaurant is Ownable {
         }
         return posAddresses;
     }
+    function getPOSIds() public view returns (uint256[] memory) {
+    return POSIds;
+}
+
 }

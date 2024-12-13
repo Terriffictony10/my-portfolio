@@ -87,14 +87,6 @@ const dashboardRestaurantReducer = (state = DEFAULT_DASHBOARD_RESTAURANTS_STATE,
           data: action.posArray,
         },
       };
-    case 'POS_CREATED':
-      return {
-        ...state,
-        allPOS: {
-          loaded: true,
-          data: [...state.allPOS.data, action.pos],
-        },
-      };
     case 'LOAD_ALL_MENU_ITEMS_SUCCESS':
       return {
         ...state,

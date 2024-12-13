@@ -353,7 +353,7 @@ export const createPOS = async (provider, contractAddress, abi, name, dispatch) 
       const posAddress = event.args.pos;
 
       // Dispatch action to update Redux store
-      dispatch({ type: 'POS_CREATED', pos: { id: posId, address: posAddress, name } });
+      
     }
 
     // Reload POS list
@@ -366,19 +366,23 @@ export const createPOS = async (provider, contractAddress, abi, name, dispatch) 
 export const loadAllPOS = async (provider, contractAddress, abi, dispatch) => {
   try {
     const signer = await provider.getSigner();
-    const contract = new ethers.Contract(contractAddress, abi, signer);
+    const contract = new ethers.Contract(contractAddress, RESTAURANT_ABI, signer);
 
     // Fetch the array of POS IDs
-    const posIds = await contract.POSIds();
+    const posIds = await contract.getPOSIds();
 
     const posArray = [];
     for (let i = 0; i < posIds.length; i++) {
       const posId = Number(posIds[i]);
       const posAddress = await contract.POSMapping(posId);
+      const posContract = await new ethers.Contract(posAddress, POS_ABI.abi, signer)
+      const posName = await posContract.getName()
+      console.log(posName)
 
       posArray.push({
         id: posId.toString(),
         address: posAddress,
+        name: posName.toString()
       });
     }
 
