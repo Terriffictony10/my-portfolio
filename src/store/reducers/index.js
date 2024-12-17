@@ -6,6 +6,7 @@ import storage from 'redux-persist/lib/storage';
 import { provider } from './provider';
 import { Restaurants } from './Restaurants';
 import { DashboardRestaurant } from './dashboardRestaurant';
+import { myJob } from './myJob';
 
 // Root persist configuration
 const rootPersistConfig = {
@@ -17,6 +18,7 @@ const rootReducer = combineReducers({
   provider,
   Restaurants,
   DashboardRestaurant, 
+  myJob
 });
 
 export default persistReducer(rootPersistConfig, rootReducer);

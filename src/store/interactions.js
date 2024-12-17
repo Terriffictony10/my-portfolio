@@ -457,3 +457,29 @@ export const addNewMenuItem = async (provider, contractAddress, abi, cost, name,
     console.error('Error adding new menu item:', error);
   }
 };
+export const loadMyEmployeeData = async (provider, contractAddress, account, dispatch) => {
+    const signer = await provider.getSigner()
+    const restaurantContract = new ethers.Contract(contractAddress, RESTAURANT_ABI, provider);
+
+
+    const employeeIds = await restaurantContract.getEmployeeIds();
+
+    const employeesArray = [];
+    for (let i = 0; i < employeeIds.length; i++) {
+      const employeeId = Number(employeeIds[i]); // Convert BigNumber to Number
+      const employee = await contract.employees(employeeId);
+
+      employeesArray.push({
+        id: employeeId.toString(),
+        jobId: employee.jobId.toString(),
+        name: employee.name,
+        address: employee.employeeAddress,
+        clockStamp: employee.clockStamp.toString(),
+        employeePension: employee.employeePension.toString(),
+      });
+    }
+
+    for(let i = 0; i < employeeArray.length; i++) {
+      if (employeeArray[i].address.toString() === account.toString() )
+    }
+}

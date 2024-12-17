@@ -456,13 +456,13 @@ function MainDashboardRestaurantBody() {
                           <td>{new Date(service.startTime * 1000).toLocaleString()}</td>
                           <td className="financials-cell">
                             <div className="financials-item cost">
-                              Cost: {Number(ethers.utils.formatEther(service.cost)).toFixed(4)} ETH
+                              Cost: {Number(ethers.formatEther(service.cost)).toFixed(4)} ETH
                             </div>
                             <div className="financials-item profit">
-                              Profit: {Number(ethers.utils.formatEther(service.profit)).toFixed(4)} ETH
+                              Profit: {Number(ethers.formatEther(service.profit)).toFixed(4)} ETH
                             </div>
                             <div className="financials-item revenue">
-                              Revenue: {Number(ethers.utils.formatEther(service.revenue)).toFixed(4)} ETH
+                              Revenue: {Number(ethers.formatEther(service.revenue)).toFixed(4)} ETH
                             </div>
                           </td>
                           <td>{service.id}</td>

@@ -5,38 +5,10 @@ import Image from 'next/image';
 
 export default function EmployeePage() {
   const router = useRouter();
-  const account = useSelector((state) => state.provider?.account);
-  const dashboardRestaurant = useSelector((state) => state.DashboardRestaurant);
-
-  const [myJobs, setMyJobs] = useState([]);
 
   useEffect(() => {
-    if (
-      dashboardRestaurant &&
-      dashboardRestaurant.allEmployees &&
-      dashboardRestaurant.allEmployees.loaded &&
-      dashboardRestaurant.allJobs &&
-      dashboardRestaurant.allJobs.loaded
-    ) {
-      const employees = dashboardRestaurant.allEmployees.data || [];
-      const jobs = dashboardRestaurant.allJobs.data || [];
-
-      const myEmployeeRecords = employees.filter(
-        (employee) =>
-          employee.address &&
-          employee.address.toLowerCase() === account?.toLowerCase()
-      );
-
-      const jobNames = myEmployeeRecords
-        .map((employee) => {
-          const job = jobs.find((j) => j.id === employee.jobId);
-          return job ? job.jobName : null;
-        })
-        .filter(Boolean);
-
-      setMyJobs(jobNames);
-    }
-  }, [account, dashboardRestaurant]);
+    
+  }, []);
 
   const navigateToMainJobDashboard = () => {
     router.push('/mainJobDashboard');
@@ -52,6 +24,11 @@ export default function EmployeePage() {
 
   const openPOS = () => {
     router.push('/POSterminal');
+  };
+
+  const clockIn = () => {
+    console.log('Clock In button clicked');
+    // Add any logic for the Clock In functionality here
   };
 
   return (
@@ -73,49 +50,6 @@ export default function EmployeePage() {
         />
       </div>
 
-      {/* Center Box to Display Jobs */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '10%',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-          border: '1px solid white',
-          borderRadius: '10px',
-          padding: '20px',
-          textAlign: 'center',
-          minWidth: '300px',
-          zIndex: 9999,
-        }}
-      >
-        <h2 style={{ color: 'white', marginBottom: '20px' }}>Your Jobs</h2>
-        {myJobs && myJobs.length > 0 ? (
-          myJobs.map((jobName, index) => (
-            <button
-              onClick={navigateToMainJobDashboard}
-              key={index}
-              style={{
-                margin: '10px',
-                padding: '10px 20px',
-                fontSize: '16px',
-                cursor: 'pointer',
-                borderRadius: '5px',
-                backgroundColor: '#28a745',
-                color: '#fff',
-                border: 'none',
-              }}
-            >
-              {jobName}
-            </button>
-          ))
-        ) : (
-          <p style={{ color: '#fff', fontSize: '18px' }}>
-            You currently hold no jobs at any restaurants.
-          </p>
-        )}
-      </div>
-
       {/* Non-symmetrical Grid Layout */}
       <div
         style={{
@@ -128,6 +62,7 @@ export default function EmployeePage() {
           gridTemplateAreas: `
             "hours schedule"
             "info pos"
+            "clockin clockin"
           `,
           gridTemplateColumns: '2fr 1fr',
           gridGap: '20px',
@@ -142,11 +77,10 @@ export default function EmployeePage() {
             border: '1px solid #fff',
             borderRadius: '10px',
             padding: '20px',
-            minHeight: '150px'
+            minHeight: '150px',
           }}
         >
           <h3 style={{ color: '#fff' }}>Employee Hours</h3>
-          {/* Insert logic/content for employee hours here */}
           <p style={{ color: '#aaa' }}>This box will display the employee’s logged hours.</p>
         </div>
 
@@ -158,11 +92,10 @@ export default function EmployeePage() {
             border: '1px solid #fff',
             borderRadius: '10px',
             padding: '20px',
-            minHeight: '150px'
+            minHeight: '150px',
           }}
         >
           <h3 style={{ color: '#fff' }}>Employee Schedule</h3>
-          {/* Insert logic/content for employee schedule here */}
           <p style={{ color: '#aaa' }}>This box will show the employee’s upcoming shifts.</p>
         </div>
 
@@ -174,11 +107,10 @@ export default function EmployeePage() {
             border: '1px solid #fff',
             borderRadius: '10px',
             padding: '20px',
-            minHeight: '150px'
+            minHeight: '150px',
           }}
         >
           <h3 style={{ color: '#fff' }}>Employee Info</h3>
-          {/* Insert logic/content for employee info here */}
           <p style={{ color: '#aaa' }}>Here you can see general information about the employee.</p>
         </div>
 
@@ -193,7 +125,7 @@ export default function EmployeePage() {
             minHeight: '150px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
           }}
         >
           <button
@@ -205,10 +137,35 @@ export default function EmployeePage() {
               padding: '15px 30px',
               borderRadius: '5px',
               cursor: 'pointer',
-              fontSize: '16px'
+              fontSize: '16px',
             }}
           >
             Open POS
+          </button>
+        </div>
+
+        {/* Clock In Button */}
+        <div
+          style={{
+            gridArea: 'clockin',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <button
+            onClick={clockIn}
+            style={{
+              backgroundColor: '#28a745',
+              color: '#fff',
+              padding: '15px 30px',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              fontSize: '16px',
+            }}
+          >
+            Clock In
           </button>
         </div>
       </div>
@@ -257,3 +214,4 @@ export default function EmployeePage() {
     </div>
   );
 }
+
