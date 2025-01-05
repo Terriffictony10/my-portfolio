@@ -457,29 +457,103 @@ export const addNewMenuItem = async (provider, contractAddress, abi, cost, name,
     console.error('Error adding new menu item:', error);
   }
 };
-export const loadMyEmployeeData = async (provider, contractAddress, account, dispatch) => {
-    const signer = await provider.getSigner()
-    const restaurantContract = new ethers.Contract(contractAddress, RESTAURANT_ABI, provider);
 
+// In interactions.js (near loadAllPOS or after it):
+export const loadEmployeeRelevantPOS = async (provider, restaurantAddress, dispatch) => {
+  try {
+    const signer = await provider.getSigner();
+    const restaurantContract = new ethers.Contract(restaurantAddress, RESTAURANT_ABI, signer);
+    const posIds = await restaurantContract.getPOSIds();
+    const posArray = [];
 
-    const employeeIds = await restaurantContract.getEmployeeIds();
-
-    const employeesArray = [];
-    for (let i = 0; i < employeeIds.length; i++) {
-      const employeeId = Number(employeeIds[i]); // Convert BigNumber to Number
-      const employee = await contract.employees(employeeId);
-
-      employeesArray.push({
-        id: employeeId.toString(),
-        jobId: employee.jobId.toString(),
-        name: employee.name,
-        address: employee.employeeAddress,
-        clockStamp: employee.clockStamp.toString(),
-        employeePension: employee.employeePension.toString(),
+    for (let i = 0; i < posIds.length; i++) {
+      const posId = Number(posIds[i]);
+      const posAddress = await restaurantContract.POSMapping(posId);
+      const posContract = new ethers.Contract(posAddress, POS_ABI.abi, signer);
+      const posName = await posContract.getName();
+      posArray.push({
+        id: posId.toString(),
+        address: posAddress,
+        name: posName.toString()
       });
     }
 
-    for(let i = 0; i < employeeArray.length; i++) {
-      if (employeeArray[i].address.toString() === account.toString() )
+    // Dispatch an action that specifically stores POS addresses relevant to the current employee's restaurant
+    dispatch({ type: 'RELEVANT_POS_LOADED_FOR_EMPLOYEE', payload: posArray });
+    return posArray;
+  } catch (error) {
+    console.error('Error in loadEmployeeRelevantPOS:', error);
+  }
+};
+
+
+export const createTicketForPOS = async (
+  provider,
+  posAddress,
+  posAbi,
+  ticketName,
+  serverAddress,
+  dispatch
+) => {
+  try {
+    const signer = await provider.getSigner();
+    const posContract = new ethers.Contract(posAddress, posAbi, signer);
+
+    // The POS contract extends MenuTicketBase, which has createTicket(_server, _name)
+    const tx = await posContract.createTicket(serverAddress, ticketName);
+    await tx.wait();
+
+    // After creation, reload tickets so the UI remains up-to-date
+    await loadAllTicketsForPOS(provider, posAddress, posAbi, dispatch);
+
+    dispatch({ type: 'CREATE_TICKET_SUCCESS' });
+  } catch (error) {
+    console.error('Error creating ticket:', error);
+    dispatch({ type: 'CREATE_TICKET_FAIL', error });
+  }
+};
+
+/**
+ * Loads all tickets from a given POS contract.
+ * @param provider Ethers provider/signer
+ * @param posAddress The POS contract address
+ * @param posAbi The ABI for the POS contract
+ * @param dispatch Redux dispatch function
+ */
+export const loadAllTicketsForPOS = async (provider, posAddress, posAbi, dispatch) => {
+  try {
+    const signer = await provider.getSigner();
+    const posContract = new ethers.Contract(posAddress, POS_ABI, signer);
+    console.log()
+    // The POS contract (via MenuTicketBase) has an array TicketIds, so we read that
+    const ticketIds = await posContract.getTicketIds();
+    const ticketsArray = [];
+
+    for (let i = 0; i < ticketIds.length; i++) {
+      const ticketIdBN = ticketIds[i];  // BigInt
+      const ticketId = Number(ticketIdBN);
+      const ticketStruct = await posContract.getTicket(ticketId); 
+      // ticketStruct has { name, orders[], server, id, paid }
+
+      ticketsArray.push({
+        id: ticketStruct.id.toString(),
+        name: ticketStruct.name,
+        server: ticketStruct.server,
+        paid: ticketStruct.paid,
+        posAddress: posAddress // So we know which POS this ticket belongs to
+      });
     }
-}
+
+    // Dispatch to store in Redux. 
+    // We can store them POS-by-POS or in a single array. 
+    // Below, we just push them all into a single array in Redux:
+    dispatch({ 
+      type: 'TICKETS_LOADED', 
+      payload: { posAddress, tickets: ticketsArray } 
+    });
+
+  } catch (error) {
+    console.error('Error loading tickets for POS:', error);
+    dispatch({ type: 'TICKETS_LOAD_FAIL', error });
+  }
+};

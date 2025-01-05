@@ -24,6 +24,20 @@ contract POS is Ownable, MenuTicketBase {
         _;
     }
 
+    /**
+     * @notice Returns the entire array of Ticket IDs, mirroring the pattern in Restaurant.sol
+     */
+    function getTicketIds() external view returns (uint256[] memory) {
+        return TicketIds;
+    }
+
+    /**
+     * @notice Returns the name of this POS. Removed onlyOwner so that loadAllPOS won't revert.
+     */
+    function getName() public view returns (string memory) {
+        return name;
+    }
+
     function getTicket(uint256 _id) public view returns (Ticket memory) {
         return tickets[_id];
     }
@@ -32,7 +46,7 @@ contract POS is Ownable, MenuTicketBase {
         return menuItemIds;
     }
 
-    function payTicket(uint256 ticketId, address _customer) payable public {
+    function payTicket(uint256 ticketId, address _customer) public payable {
         uint256 _balance = 0;
         Ticket storage ticket = tickets[ticketId];
         for (uint256 i = 0; i < ticket.orders.length; i++) {
@@ -45,13 +59,11 @@ contract POS is Ownable, MenuTicketBase {
 
     function payRestaurant() public onlyRestaurant {
         (bool sent, ) = restaurant.call{value: address(this).balance}("");
-        require(sent);
+        require(sent, "Transfer to restaurant failed");
     }
+
     function payEmployees() public onlyRestaurant {
         (bool sent, ) = restaurant.call{value: address(this).balance}("");
-        require(sent);
-    }
-    function getName() public view onlyOwner returns (string memory){
-        return name;
+        require(sent, "Transfer to employees failed");
     }
 }

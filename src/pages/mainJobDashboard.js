@@ -1,14 +1,35 @@
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
+import {
+  loadEmployeeRelevantPOS,
+  loadAllTicketsForPOS
+} from '../store/interactions';
 
 export default function EmployeePage() {
+  const dispatch = useDispatch();
   const router = useRouter();
+  
+  const provider = useSelector((state) => state.provider.connection);
+  const dashboardRestaurant = useSelector((state) => state.DashboardRestaurant);
+  // Assume dashboardRestaurant.contractAddress holds the active restaurant's address
+  const restaurantAddress = dashboardRestaurant.contractAddress;
 
   useEffect(() => {
     
   }, []);
+
+   const handleOpenPOS = async () => {
+    if (!provider || !restaurantAddress) {
+      console.log("Provider or restaurant address not found");
+      return;
+    }
+
+
+    // After loading is done (the above action dispatches state), navigate to POSterminal
+    router.push('/POSterminal');
+  };
 
   const navigateToMainJobDashboard = () => {
     router.push('/mainJobDashboard');
@@ -129,7 +150,7 @@ export default function EmployeePage() {
           }}
         >
           <button
-            onClick={openPOS}
+            onClick={handleOpenPOS}
             style={{
               backgroundColor: '#17a2b8',
               border: 'none',
