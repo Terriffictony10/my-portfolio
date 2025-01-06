@@ -11,7 +11,8 @@ import Image from 'next/image';
 // Import our new interactions
 import { 
   createTicketForPOS, 
-  loadAllTicketsForPOS 
+  loadAllTicketsForPOS,
+  setActiveTicket
 } from '../store/interactions';
 
 import POS_ABI from '../abis/POS.json';  // If you need the ABI locally for reference
@@ -30,6 +31,13 @@ export default function POSterminal() {
 )
 
 
+  const handleTicketClick = async (ticket) => {
+  // 1) Set the active ticket in Redux
+  await setActiveTicket(dispatch, ticket);
+
+  // 2) Navigate to /micros
+  router.push('/micros');
+};
 
   // Local states
   const [showNewTicketModal, setShowNewTicketModal] = useState(false);
@@ -157,7 +165,7 @@ export default function POSterminal() {
                     border: 'none'
                   }}
                   // On click, maybe navigate to a page to view ticket details
-                  onClick={() => console.log(`Clicked on ticket #${ticket.id}`)}
+                  onClick={() => handleTicketClick(ticket)}
                 >
                   {ticket.name} <br />
                   (POS: {ticket.posAddress.slice(0,6)}...)

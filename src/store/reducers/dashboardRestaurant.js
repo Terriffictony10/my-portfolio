@@ -120,6 +120,29 @@ const dashboardRestaurantReducer = (state = DEFAULT_DASHBOARD_RESTAURANTS_STATE,
         ...state,
         transaction: { isSuccessful: false }
       };
+    case 'ACTIVE_TICKET_SET':
+      return {
+        ...state,
+        activeTicket: action.payload
+      };
+
+    case 'ACTIVE_TICKET_CLEAR':
+      return {
+        ...state,
+        activeTicket: null
+      };
+    case 'ACTIVE_TICKET_DETAILS_LOADED':
+  return {
+    ...state,
+    activeTicket: action.payload
+  };
+
+case 'ACTIVE_TICKET_DETAILS_FAIL':
+  // fallback, possibly set activeTicket: null
+  return {
+    ...state,
+    activeTicket: null
+  };
 
     default:
       return state;

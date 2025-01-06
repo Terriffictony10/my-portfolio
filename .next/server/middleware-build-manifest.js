@@ -24,10 +24,10 @@ self.__BUILD_MANIFEST = {
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/mainJobDashboard": [
+    "/micros": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/mainJobDashboard.js"
+      "static/chunks/pages/micros.js"
     ]
   },
   "ampFirstPages": []

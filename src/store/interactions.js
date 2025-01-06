@@ -375,7 +375,7 @@ export const loadAllPOS = async (provider, contractAddress, abi, dispatch) => {
     for (let i = 0; i < posIds.length; i++) {
       const posId = Number(posIds[i]);
       const posAddress = await contract.POSMapping(posId);
-      const posContract = await new ethers.Contract(posAddress, POS_ABI.abi, signer)
+      const posContract = await new ethers.Contract(posAddress, POS_ABI, signer)
       const posName = await posContract.getName()
       console.log(posName)
 
@@ -406,7 +406,7 @@ export const loadAllPOS = async (provider, contractAddress, abi, dispatch) => {
 
     const firstPOSAddress = posAddresses[0];
 
-    const posContract = new ethers.Contract(firstPOSAddress, POS_ABI.abi, provider);
+    const posContract = new ethers.Contract(firstPOSAddress, POS_ABI, provider);
 
     const menuItemIds = await posContract.getMenuItemIds();
     let menuItems = [];
@@ -442,7 +442,7 @@ export const addNewMenuItem = async (provider, contractAddress, abi, cost, name,
       const posAddress = posAddresses[i];
 
       // Create a new contract instance for each POS
-      const posContract = new ethers.Contract(posAddress, POS_ABI.abi, signer);
+      const posContract = new ethers.Contract(posAddress, POS_ABI, signer);
 
       // Call the addMenuItem function on each POS contract
       const costInWei = ethers.parseUnits(cost.toString(), 'ether');
@@ -469,7 +469,7 @@ export const loadEmployeeRelevantPOS = async (provider, restaurantAddress, dispa
     for (let i = 0; i < posIds.length; i++) {
       const posId = Number(posIds[i]);
       const posAddress = await restaurantContract.POSMapping(posId);
-      const posContract = new ethers.Contract(posAddress, POS_ABI.abi, signer);
+      const posContract = new ethers.Contract(posAddress, POS_ABI, signer);
       const posName = await posContract.getName();
       posArray.push({
         id: posId.toString(),
@@ -555,5 +555,126 @@ export const loadAllTicketsForPOS = async (provider, posAddress, posAbi, dispatc
   } catch (error) {
     console.error('Error loading tickets for POS:', error);
     dispatch({ type: 'TICKETS_LOAD_FAIL', error });
+  }
+};
+
+
+export const setActiveTicket = async (dispatch, ticket) => {
+  dispatch({ type: 'ACTIVE_TICKET_SET', payload: ticket });
+};
+
+/**
+ * Clears the currently active ticket in Redux.
+ * @param {Object} dispatch Redux dispatch
+ */
+export const clearActiveTicket = async (dispatch) => {
+  dispatch({ type: 'ACTIVE_TICKET_CLEAR' });
+};
+
+/**
+ * Loads all menu items for a given POS contract address and returns them as an array.
+ * Optionally, you could dispatch a Redux action to store them if desired.
+ *
+ * @param {*} provider Ethers provider/signer
+ * @param {String} posAddress The address of the POS
+ * @param {Array} posAbi The ABI for the POS contract
+ * @param {Object} dispatch Redux dispatch
+ * @returns {Array} An array of menu items [{ id, name, cost }, ...]
+ */
+export const loadMenuItemsForPOS = async (provider, posAddress, posAbi, dispatch) => {
+  try {
+    // Optional: dispatch({ type: 'MENU_ITEMS_LOAD_REQUEST' });
+
+    const signer = await provider.getSigner();
+    const posContract = new ethers.Contract(posAddress, POS_ABI, signer);
+    const menuItemIds = await posContract.getMenuItemIds();
+    
+
+    let menuItems = [];
+    for (let i = 0; i < menuItemIds.length; i++) {
+      const id = Number(menuItemIds[i]);
+      const item = await posContract.menu(id);
+      // Convert cost from wei to Ether (or you can store raw wei).
+      menuItems.push({
+        id,
+        name: item.name,
+        cost: Number(ethers.formatEther(item.cost)),
+      });
+    }
+
+    // Optional: dispatch({ type: 'MENU_ITEMS_FOR_POS_LOADED', payload: menuItems });
+
+    return menuItems;
+  } catch (error) {
+    console.error('Error loading menu for POS:', error);
+    // Optional: dispatch({ type: 'MENU_ITEMS_LOAD_FAIL', error });
+    return [];
+  }
+};
+
+
+export const addTicketOrders = async (
+  provider,
+  posAddress,
+  posAbi,
+  ticketId,
+  items, // array of { cost, name } to be appended
+  dispatch
+) => {
+  try {
+    const signer = await provider.getSigner();
+    const posContract = new ethers.Contract(posAddress, POS_ABI, signer);
+    const tx = await posContract.addTicketOrders(ticketId, items);
+    await tx.wait();
+
+    // Optionally reload the updated ticket...
+    // await loadAllTicketsForPOS(provider, posAddress, posAbi, dispatch);
+
+    dispatch({ type: 'ADD_TICKET_ORDERS_SUCCESS' });
+  } catch (error) {
+    console.error('Error adding orders:', error);
+    dispatch({ type: 'ADD_TICKET_ORDERS_FAIL', error });
+  }
+};
+
+export const loadFullTicketDetails = async (
+  provider,
+  posAddress,
+  posAbi,
+  ticketId,
+  dispatch
+) => {
+  try {
+    const signer = await provider.getSigner();
+    const posContract = new ethers.Contract(posAddress, POS_ABI, signer);
+
+    // Grab the entire ticket struct from the contract
+    const ticketStruct = await posContract.getTicket(ticketId);
+    // ticketStruct -> { name, orders[], server, id, paid }
+
+    // Convert orders[] from contract (cost in wei) to a friendlier JS array
+    const orders = [];
+    for (let i = 0; i < ticketStruct.orders.length; i++) {
+      const orderItem = ticketStruct.orders[i];
+      orders.push({
+        name: orderItem.name,
+        cost: Number(ethers.formatEther(orderItem.cost)),
+      });
+    }
+
+    const fullTicket = {
+      id: Number(ticketStruct.id).toString(),
+      name: ticketStruct.name,
+      server: ticketStruct.server,
+      paid: ticketStruct.paid,
+      posAddress,
+      orders
+    };
+
+    // Dispatch so Redux knows about the fully detailed ticket
+    dispatch({ type: 'ACTIVE_TICKET_DETAILS_LOADED', payload: fullTicket });
+  } catch (error) {
+    console.error('Error loading full ticket details:', error);
+    dispatch({ type: 'ACTIVE_TICKET_DETAILS_FAIL', error });
   }
 };
