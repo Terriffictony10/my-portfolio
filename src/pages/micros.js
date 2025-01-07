@@ -7,10 +7,11 @@ import { ethers } from 'ethers';
 
 // Interactions
 import {
-  loadMenuItemsForPOS,
-  clearActiveTicket,
   loadFullTicketDetails,
-  addTicketOrders
+  loadMenuItemsForPOS,
+  bufferItemForTicket,
+  ringBufferedItems,
+  clearActiveTicket
 } from '../store/interactions';
 
 // ABIs
@@ -20,13 +21,23 @@ export default function Micros() {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  // The "activeTicket" we previously set in Redux
-  // This ticket might only have partial info at first,
-  // but loadFullTicketDetails will populate its orders.
   const activeTicket = useSelector((state) => state.DashboardRestaurant.activeTicket);
 
-  // Local state for the POS's entire menu (to add new items if we want)
+  // We’ll read from Redux the array of pending items for this ticket
+  const pendingOrderBuffer = useSelector(
+  (state) => state.DashboardRestaurant.pendingOrderBuffer
+) || {};
+
+const ticketStringId = activeTicket ? activeTicket.id.toString() : null;
+const currentPendingItems = ticketStringId
+  ? pendingOrderBuffer[ticketStringId] || []
+  : [];
+
+  // Local state for the POS menu
   const [posMenuItems, setPosMenuItems] = useState([]);
+
+  // Local state to track if we’re in the middle of a ring transaction
+  const [ringInProgress, setRingInProgress] = useState(false);
 
   // 1) If there's no activeTicket, redirect to /POSterminal
   useEffect(() => {
@@ -35,72 +46,93 @@ export default function Micros() {
     }
   }, [activeTicket, router]);
 
-  // 2) Once we know which ticket is active, load the FULL ticket (including orders)
-  //    and the full POS menu for that ticket’s POS address.
+  // 2) Load full ticket + menu
   useEffect(() => {
     if (!activeTicket) return;
 
     (async () => {
       try {
         const provider = new ethers.BrowserProvider(window.ethereum);
-
-        // 2a) Load the full ticket (with orders) from the contract
+        
+        // Load the full ticket details:
         await loadFullTicketDetails(
           provider,
           activeTicket.posAddress,
           POS_ABI,
           activeTicket.id,
           dispatch
-        );
+        )
 
-        // 2b) Also load the entire POS menu
+        // Load the menu for the given POS
         const items = await loadMenuItemsForPOS(
           provider,
           activeTicket.posAddress,
-          POS_ABI.abi,
+          POS_ABI,
           dispatch
         );
         setPosMenuItems(items);
       } catch (error) {
-        console.error('Error loading data for micros page:', error);
+        console.error('Error loading data:', error);
       }
     })();
   }, [activeTicket, dispatch]);
 
-  // 3) If user wants to go back, we can clear the activeTicket
-  //    from Redux so we don't mix up states next time.
+  // 3) If user wants to go back
   const handleGoBack = async () => {
     await clearActiveTicket(dispatch);
     router.push('/POSterminal');
   };
 
-  // If we still have no ticket or it’s null, show a fallback
-  if (!activeTicket) {
-    return (
-      <div style={{ color: '#fff', textAlign: 'center', padding: '20px' }}>
-        Redirecting to POS Terminal...
-      </div>
+  // Helper to sum up the rung items (on the left)
+  const rungOrders = activeTicket?.orders || [];
+  const rungSubtotal = rungOrders.reduce((acc, item) => acc + item.cost, 0);
+
+  // Helper to sum up the *pending* items (on the right)
+  let pendingSubtotal = 0;
+for (let i = 0; i < currentPendingItems.length; i++) {
+  pendingSubtotal += currentPendingItems[i].cost;
+}
+
+  // For adding an item to the “pending” list
+  const handleAddItemToBuffer = (menuItem) => {
+    dispatch(bufferItemForTicket(activeTicket.id, menuItem));
+  };
+
+  // For “ringing” all items that are in the buffer:
+  const handleRing = async () => {
+  try {
+    setRingInProgress(true);
+    const provider = new ethers.BrowserProvider(window.ethereum);
+
+    // 1) ring in the items => dispatch ORDER_RING_SUCCESS => merges items
+    await ringBufferedItems(
+      provider,
+      activeTicket.posAddress,
+      pendingOrderBuffer,
+      POS_ABI,
+      activeTicket.id,
+      dispatch,
+      () => ({ DashboardRestaurant: { pendingOrderBuffer } })
     );
+
+    // 2) Optionally reload the chain data, though the reducer has already updated
+    await loadFullTicketDetails(
+      provider,
+      activeTicket.posAddress,
+      POS_ABI,
+      activeTicket.id,
+      dispatch
+    );
+  } catch (error) {
+    console.error('Error ringing items:', error);
+  } finally {
+    setRingInProgress(false);
   }
+};
 
-  // 4) Gather the orders from activeTicket (populated in loadFullTicketDetails)
-  const currentOrders = activeTicket.orders || [];
-  const subtotal = currentOrders.reduce((acc, item) => acc + item.cost, 0);
-
-  // Example: If you want to handle adding items to the ticket, you might do:
-  // const handleAddItemToTicket = async (menuItem) => {
-  //   const provider = new ethers.BrowserProvider(window.ethereum);
-  //   await addTicketOrders(
-  //     provider,
-  //     activeTicket.posAddress,
-  //     POS_ABI.abi,
-  //     activeTicket.id,
-  //     [{ cost: ethers.parseUnits(menuItem.cost.toString(), 'ether'), name: menuItem.name }],
-  //     dispatch
-  //   );
-  //   // Then re-load the full ticket details to see the updated orders
-  //   await loadFullTicketDetails(provider, activeTicket.posAddress, POS_ABI.abi, activeTicket.id, dispatch);
-  // };
+  if (!activeTicket) {
+    return <div style={{ color: '#fff', textAlign: 'center' }}>Redirecting...</div>;
+  }
 
   return (
     <div
@@ -112,12 +144,11 @@ export default function Micros() {
         padding: '70px'
       }}
     >
-      {/* Outer White Box */}
       <div
         style={{
           height: '100%',
           width: '100%',
-          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          backgroundColor: 'rgba(255,255,255,0.1)',
           border: '1px solid white',
           borderRadius: '10px',
           padding: '20px',
@@ -136,7 +167,7 @@ export default function Micros() {
 
         <hr style={{ borderColor: '#fff' }} />
 
-        {/* SECTION A: Display the POS Menu */}
+        {/* SECTION A: The POS Menu (but we are not ringing them instantly) */}
         <h3 style={{ color: '#fff', textAlign: 'center' }}>POS Menu</h3>
         <div
           style={{
@@ -158,22 +189,7 @@ export default function Micros() {
                 borderRadius: '5px',
                 cursor: 'pointer'
               }}
-              onClick={async () => {
-  const provider = new ethers.BrowserProvider(window.ethereum);
-  await addTicketOrders(
-    provider,
-    activeTicket.posAddress,
-    POS_ABI,
-    activeTicket.id,
-    [
-      {
-        cost: ethers.parseUnits(menuItem.cost.toString(), 'ether'),
-        name: menuItem.name
-      }
-    ],
-    dispatch
-  );
-}}
+              onClick={() => handleAddItemToBuffer(menuItem)}
             >
               {menuItem.name} <br />
               ${menuItem.cost}
@@ -183,42 +199,97 @@ export default function Micros() {
 
         <hr style={{ borderColor: '#fff', marginTop: '40px' }} />
 
-        {/* SECTION B: Display the Current Ticket’s Items (the Check) */}
-        <div style={{ maxWidth: '500px', margin: '20px auto' }}>
-          <h3 style={{ color: '#fff', textAlign: 'center' }}>
-            Items in This Ticket
-          </h3>
-          {currentOrders.length > 0 ? (
-            <ul style={{ listStyle: 'none', padding: 0 }}>
-              {currentOrders.map((item, idx) => (
-                <li
-                  key={idx}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    padding: '8px 0',
-                    borderBottom: '1px solid #fff'
-                  }}
-                >
-                  <span style={{ color: '#fff' }}>{item.name}</span>
-                  <span style={{ color: '#fff' }}>
-                    ${item.cost.toFixed(2)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p style={{ color: '#fff', textAlign: 'center' }}>No items yet.</p>
-          )}
+        {/* SECTION B1: Display RUNG items (already on-chain) */}
+        <div style={{ display: 'flex', justifyContent: 'space-around' }}>
+          {/* LEFT half: rung items */}
+          <div style={{ width: '45%' }}>
+            <h3 style={{ color: '#fff', textAlign: 'center' }}>Rung Items</h3>
+            {rungOrders.length > 0 ? (
+              <ul style={{ listStyle: 'none', padding: 0 }}>
+                {rungOrders.map((item, idx) => (
+                  <li
+                    key={idx}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      padding: '8px 0',
+                      borderBottom: '1px solid #fff'
+                    }}
+                  >
+                    <span style={{ color: '#fff' }}>{item.name}</span>
+                    <span style={{ color: '#fff' }}>
+                      ${item.cost.toFixed(2)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p style={{ color: '#fff', textAlign: 'center' }}>
+                No rung items yet.
+              </p>
+            )}
+            <hr style={{ borderColor: '#fff' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <strong style={{ color: '#fff' }}>Subtotal:</strong>
+              <span style={{ color: '#fff' }}>${rungSubtotal.toFixed(2)}</span>
+            </div>
+          </div>
 
-          {/* Subtotal */}
-          <hr style={{ borderColor: '#fff' }} />
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <strong style={{ color: '#fff' }}>Subtotal:</strong>
-            <span style={{ color: '#fff' }}>${subtotal.toFixed(2)}</span>
+          {/* RIGHT half: pending items */}
+          <div style={{ width: '45%' }}>
+            <h3 style={{ color: '#fff', textAlign: 'center' }}>Pending (Not Rung)</h3>
+            {currentPendingItems.length > 0 ? (
+              <ul style={{ listStyle: 'none', padding: 0 }}>
+                {currentPendingItems.map((item, idx) => (
+                  <li
+                    key={idx}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      padding: '8px 0',
+                      borderBottom: '1px solid #fff'
+                    }}
+                  >
+                    <span style={{ color: '#fff' }}>{item.name}</span>
+                    <span style={{ color: '#fff' }}>${item.cost.toFixed(2)}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p style={{ color: '#fff', textAlign: 'center' }}>No pending items.</p>
+            )}
+            <hr style={{ borderColor: '#fff' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <strong style={{ color: '#fff' }}>Pending Subtotal:</strong>
+              <span style={{ color: '#fff' }}>${pendingSubtotal.toFixed(2)}</span>
+            </div>
+
+            {/* The RING button */}
+            <div style={{ textAlign: 'center', marginTop: '20px' }}>
+              <button
+                onClick={handleRing}
+                style={{
+                  padding: '10px 20px',
+                  backgroundColor: 'green',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '5px',
+                  cursor: 'pointer'
+                }}
+                disabled={ringInProgress} // disable if transaction is in progress
+              >
+                {ringInProgress ? 'Ringing...' : 'Ring'}
+              </button>
+              {ringInProgress && (
+                <p style={{ color: '#fff', marginTop: '10px' }}>
+                  Please wait, ringing items...
+                </p>
+              )}
+            </div>
           </div>
         </div>
 
+        {/* Footer / Back button */}
         <div style={{ textAlign: 'center', marginTop: '40px' }}>
           <button
             onClick={handleGoBack}

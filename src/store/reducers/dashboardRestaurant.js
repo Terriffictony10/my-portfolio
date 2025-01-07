@@ -32,6 +32,8 @@ const DEFAULT_DASHBOARD_RESTAURANTS_STATE = {
     loaded: false,
     data: [],
   },
+  kitchenTickets: {},    // We'll store rung items here (per your request)
+  pendingOrderBuffer: {},
   allMenuItems: { data: [], loaded: false, loading: false },
   currentRelevantPOS: [],
   posCreationInProgress: false,
@@ -95,7 +97,7 @@ const dashboardRestaurantReducer = (state = DEFAULT_DASHBOARD_RESTAURANTS_STATE,
     case 'LOAD_ALL_MENU_ITEMS_SUCCESS':
       return {
         ...state,
-        allMenuItems: { data: action.payload, loaded: true, loading: false },
+        allMenuItems: { data: action.payload.posArray, loaded: true, loading: false },
       };
     case 'TICKETS_LOADED': {
   const newTickets = action.payload && action.payload.tickets
@@ -143,6 +145,89 @@ case 'ACTIVE_TICKET_DETAILS_FAIL':
     ...state,
     activeTicket: null
   };
+case 'ADD_ITEM_TO_PENDING_BUFFER': {
+  const { ticketId, item } = action.payload
+  // Always use a string key
+  const stringId = ticketId.toString()
+
+  const pending = state.pendingOrderBuffer || {}
+  const currentBuffer = pending[stringId] || []
+
+  const updatedBuffer = currentBuffer.length > 0 ? [...currentBuffer, item] : [item]
+
+  return {
+    ...state,
+    pendingOrderBuffer: {
+      ...pending,
+      [stringId]: updatedBuffer
+    }
+  }
+}
+
+// CLEAR_PENDING_BUFFER remains the same, 
+// but we consistently use a string key.
+
+case 'CLEAR_PENDING_BUFFER': {
+  const { ticketId } = action.payload
+  const stringId = ticketId.toString()
+
+  return {
+    ...state,
+    pendingOrderBuffer: {
+      ...state.pendingOrderBuffer,
+      [stringId]: []
+    }
+  }
+}
+
+case 'ORDER_RING_SUCCESS': {
+  // action.payload: { ticketId, rungItems: [ ... ] }
+  
+  const { ticketId, rungItems } = action.payload;
+  
+  const stringId = ticketId.toString();
+  
+  const orderBuffer = state.pendingOrderBuffer
+  
+  // 1) If your code also saves rung items to "kitchenTickets", keep that logic:
+  const currentKitchenOrders = state.kitchenTickets ? state.kitchenTickets[stringId] : [];
+  
+  const updatedKitchenOrders = currentKitchenOrders ? [...currentKitchenOrders, ...rungItems] : [];
+  
+
+  // 2) Merge rungItems into the "activeTicket" if it matches
+  let newActiveTicket = state.activeTicket;
+  
+  if (newActiveTicket && newActiveTicket.id === stringId) {
+    
+    // existing orders on the left side
+    const existingOrders = newActiveTicket.orders || [];
+    
+    // append the newly rung items
+    const updatedOrders = [...existingOrders, ...rungItems];
+      
+    newActiveTicket = {
+      ...newActiveTicket,
+      orders: updatedOrders, // so left side updates instantly
+    };
+  }
+
+  // 3) Clear the right side (the pending buffer) for this ticket
+  return {
+    ...state,
+    activeTicket: newActiveTicket, // updated left side
+    kitchenTickets: {
+      ...state.kitchenTickets,
+      [stringId]: updatedKitchenOrders,
+    },
+    pendingOrderBuffer: {
+      ...orderBuffer,
+      [ticketId] : {}
+    }
+  };
+}
+
+
 
     default:
       return state;

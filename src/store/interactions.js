@@ -247,6 +247,7 @@ export const loadAllJobs = async (provider, contractAddress, abi, dispatch) => {
     const jobIds = await contract.getJobIds();
 
     const jobsArray = [];
+    console.log('hello')
     for (let i = 0; i < jobIds.length; i++) {
       const jobId = Number(jobIds[i]); // Convert BigNumber to Number
       const job = await contract.jobs(jobId);
@@ -377,7 +378,7 @@ export const loadAllPOS = async (provider, contractAddress, abi, dispatch) => {
       const posAddress = await contract.POSMapping(posId);
       const posContract = await new ethers.Contract(posAddress, POS_ABI, signer)
       const posName = await posContract.getName()
-      console.log(posName)
+      
 
       posArray.push({
         id: posId.toString(),
@@ -464,6 +465,7 @@ export const loadEmployeeRelevantPOS = async (provider, restaurantAddress, dispa
     const signer = await provider.getSigner();
     const restaurantContract = new ethers.Contract(restaurantAddress, RESTAURANT_ABI, signer);
     const posIds = await restaurantContract.getPOSIds();
+    
     const posArray = [];
 
     for (let i = 0; i < posIds.length; i++) {
@@ -476,7 +478,9 @@ export const loadEmployeeRelevantPOS = async (provider, restaurantAddress, dispa
         address: posAddress,
         name: posName.toString()
       });
+      console.log('1')
     }
+    console.log(posArray)
 
     // Dispatch an action that specifically stores POS addresses relevant to the current employee's restaurant
     dispatch({ type: 'RELEVANT_POS_LOADED_FOR_EMPLOYEE', payload: posArray });
@@ -524,7 +528,6 @@ export const loadAllTicketsForPOS = async (provider, posAddress, posAbi, dispatc
   try {
     const signer = await provider.getSigner();
     const posContract = new ethers.Contract(posAddress, POS_ABI, signer);
-    console.log()
     // The POS contract (via MenuTicketBase) has an array TicketIds, so we read that
     const ticketIds = await posContract.getTicketIds();
     const ticketsArray = [];
@@ -678,3 +681,67 @@ export const loadFullTicketDetails = async (
     dispatch({ type: 'ACTIVE_TICKET_DETAILS_FAIL', error });
   }
 };
+
+export const bufferItemForTicket = (ticketId, item) => {
+  return (dispatch) => {
+    dispatch({
+      type: 'ADD_ITEM_TO_PENDING_BUFFER',
+      payload: { ticketId, item }
+    });
+  };
+};
+
+// 2) A function that *rings* all buffered items for a given ticketId
+//    by calling `addTicketOrders` in the POS contract.
+
+export const ringBufferedItems = async (
+  provider,
+  posAddress,
+  pendingOrderBuffer,
+  posAbi,
+  ticketId,       // could be a number or string
+  dispatch,
+  getState
+) => {
+  try {
+    const stringId = ticketId.toString()
+
+    // Get the entire pending buffer
+   
+    const itemsToRing = pendingOrderBuffer[stringId] || []
+
+    if (itemsToRing.length === 0) {
+      console.log('No items to ring for this ticket.')
+      return
+    }
+
+    // Format them for the contract
+    const rungItems = itemsToRing.map((item) => ({
+      cost: ethers.parseUnits(item.cost.toString(), 'ether'),
+      name: item.name
+    }))
+
+    const signer = await provider.getSigner()
+    const posContract = new ethers.Contract(posAddress, posAbi, signer)
+
+    // Send transaction
+    console.log('fun')
+    const tx = await posContract.addTicketOrders(ticketId, rungItems)
+    await tx.wait()
+    console.log('fun')
+
+    // Now tell Redux we succeeded
+    dispatch({
+      type: 'ORDER_RING_SUCCESS',
+      payload: { 
+        ticketId: ticketId,  // pass a string
+        rungItems: itemsToRing
+      }
+
+    })
+      
+    console.log(`Successfully rang items for ticket: ${stringId}`)
+  } catch (error) {
+    console.error('Error in ringBufferedItems:', error)
+  }
+}

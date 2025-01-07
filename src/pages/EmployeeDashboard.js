@@ -4,6 +4,10 @@ import { useSelector } from 'react-redux';
 import { ethers } from 'ethers'
 import Image from 'next/image';
 
+import {
+  loadAllJobs
+} from '../store/interactions';
+
 import EmployeeDashboardBody from "../components/EmployeeDashboardBody.js"
 import { useRouter } from 'next/router';
 
@@ -12,6 +16,9 @@ export default function Home() {
 
   const account = useSelector((state) => state.provider.account);
   const dashboardRestaurant = useSelector((state) => state.DashboardRestaurant);
+
+  const contractAddress = useSelector(state => state.DashboardRestaurant.contractAddress)
+  const abi = useSelector(state => state.DashboardRestaurant.abi)
 
   const [myJobs, setMyJobs] = useState([]);
 

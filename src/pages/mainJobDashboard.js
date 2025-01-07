@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useRouter } from 'next/router';
+import { ethers } from 'ethers';
 import Image from 'next/image';
 import {
   loadEmployeeRelevantPOS,
@@ -17,7 +18,11 @@ export default function EmployeePage() {
   const restaurantAddress = dashboardRestaurant.contractAddress;
 
   useEffect(() => {
-    
+    const ethersProvider = new ethers.BrowserProvider(window.ethereum);
+    async function loadData() {
+      await loadEmployeeRelevantPOS(ethersProvider, restaurantAddress, dispatch);
+    }
+    loadData()
   }, []);
 
    const handleOpenPOS = async () => {

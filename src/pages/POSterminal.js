@@ -12,7 +12,8 @@ import Image from 'next/image';
 import { 
   createTicketForPOS, 
   loadAllTicketsForPOS,
-  setActiveTicket
+  setActiveTicket,
+  loadEmployeeRelevantPOS
 } from '../store/interactions';
 
 import POS_ABI from '../abis/POS.json';  // If you need the ABI locally for reference
@@ -24,7 +25,7 @@ export default function POSterminal() {
   const dispatch = useDispatch();
 
   // Grab the POS array from Redux
-  const posArray = useSelector((state) => state.DashboardRestaurant.currentRelevantPOS);
+  const posArray = useSelector((state) => state.DashboardRestaurant?.currentRelevantPOS || []);
   // Grab all tickets from Redux
   const allTickets = useSelector(
   (state) => state.DashboardRestaurant.allTickets?.data || []
@@ -60,8 +61,7 @@ export default function POSterminal() {
     const loadTickets = async () => {
       // if (!provider || !posArray || posArray.length === 0) return;
       for (let pos of posArray) {
-        
-        await loadAllTicketsForPOS(ethersProvider, pos.address, POS_ABI.abi, dispatch);
+        await loadAllTicketsForPOS(ethersProvider, pos.address, POS_ABI, dispatch);
       }
     };
     loadTickets();
