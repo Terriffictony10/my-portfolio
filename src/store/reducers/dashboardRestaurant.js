@@ -31,8 +31,7 @@ const DEFAULT_DASHBOARD_RESTAURANTS_STATE = {
   allServices: {
     loaded: false,
     data: [],
-  },
-  kitchenTickets: {},    // We'll store rung items here (per your request)
+  },   // We'll store rung items here (per your request)
   pendingOrderBuffer: {},
   allMenuItems: { data: [], loaded: false, loading: false },
   currentRelevantPOS: [],
@@ -216,18 +215,12 @@ case 'ORDER_RING_SUCCESS': {
   return {
     ...state,
     activeTicket: newActiveTicket, // updated left side
-    kitchenTickets: {
-      ...state.kitchenTickets,
-      [stringId]: updatedKitchenOrders,
-    },
     pendingOrderBuffer: {
-      ...orderBuffer,
-      [ticketId] : {}
     }
   };
 }
 
-
+ 
 
     default:
       return state;

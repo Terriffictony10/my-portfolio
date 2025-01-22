@@ -1,12 +1,13 @@
-// src/components/MainDashboardRestaurantBody.js
-
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ethers, isAddress } from 'ethers';
 import Loading from '../components/Loading.js';
 import { useRouter } from 'next/router';
 import { useProvider } from '../context/ProviderContext';
-import RESTAURANT_ABI from "../abis/Restaurant.json";
+
+// Make sure this Restaurant ABI matches the "new" contract version
+import RESTAURANT_ABI from '../abis/Restaurant.json'; 
+
 import {
   loadAllJobs,
   hireNewEmployee,
@@ -17,25 +18,33 @@ import {
   createPOS,
   loadAllPOS,
   loadAllMenuItems,
-  addNewMenuItem // Import the new interaction
+  addNewMenuItem
 } from '../store/interactions';
 
 function MainDashboardRestaurantBody() {
   const { provider, setProvider } = useProvider();
   const [isLoading, setIsLoading] = useState(true);
+
+  // Local state for the Restaurant contract's on-chain balance
+  const [contractBalance, setContractBalance] = useState('0');
+
+  // Redux: basic info about the restaurant
   const account = useSelector((state) => state.provider.account);
   const name = useSelector((state) => state.DashboardRestaurant.name);
-  const cash = useSelector((state) => state.DashboardRestaurant.cash);
   const contractAddress = useSelector((state) => state.DashboardRestaurant.contractAddress);
   const abi = useSelector((state) => state.DashboardRestaurant.abi);
+
+  // Redux: loaded data
   const jobs = useSelector((state) => state.DashboardRestaurant.allJobs.data || []);
   const employees = useSelector((state) => state.DashboardRestaurant.allEmployees.data || []);
   const services = useSelector((state) => state.DashboardRestaurant.allServices.data || []);
   const posDevices = useSelector((state) => state.DashboardRestaurant.allPOS.data || []);
-  const menuItems = useSelector((state) => state.DashboardRestaurant.allMenuItems.data || []); 
+  const menuItems = useSelector((state) => state.DashboardRestaurant.allMenuItems.data || []);
+
   const dispatch = useDispatch();
   const router = useRouter();
 
+  // Modals & Forms
   const [showMenuItemForm, setShowMenuItemForm] = useState(false);
   const [menuItemName, setMenuItemName] = useState('');
   const [menuItemCost, setMenuItemCost] = useState('');
@@ -48,47 +57,46 @@ function MainDashboardRestaurantBody() {
   const [employeeJobId, setEmployeeJobId] = useState('');
   const [employeeAddress, setEmployeeAddress] = useState('');
 
-  // State variables for service management
+  // Service State
   const [serviceActive, setServiceActive] = useState(false);
   const [serviceStart, setServiceStart] = useState(null);
   const [serviceElapsedTime, setServiceElapsedTime] = useState(0);
   const [serviceLoading, setServiceLoading] = useState(false);
 
-  // Handlers for employee form
-  const employeeNameHandler = (e) => {
-    setEmployeeName(e.target.value);
+  // Handlers for forms
+  const openPOSForm = () => setShowPOSForm(true);
+  const closePOSForm = () => setShowPOSForm(false);
+  const addMenuItemHandler = () => setShowMenuItemForm(true);
+  const closeMenuItemForm = () => setShowMenuItemForm(false);
+  const addEmployeeHandler = () => setShowEmployeeForm(true);
+  const closeEmployeeForm = () => setShowEmployeeForm(false);
+
+  const posNameHandler = (e) => setPOSName(e.target.value);
+  const menuItemNameHandler = (e) => setMenuItemName(e.target.value);
+  const menuItemCostHandler = (e) => setMenuItemCost(e.target.value);
+  const employeeNameHandler = (e) => setEmployeeName(e.target.value);
+  const employeeJobIdHandler = (e) => setEmployeeJobId(e.target.value);
+  const employeeAddressHandler = (e) => setEmployeeAddress(e.target.value);
+
+  // Just an example for a future Job creation popup
+  const addNewJobHandler = async () => {
+     const modalBackground = document.querySelector('.newJobForm');
+  const modalContainer = document.querySelector('.newJobFormContainer');
+
+  if (modalBackground) {
+    modalBackground.style.zIndex = '500';
+  }
+  if (modalContainer) {
+    modalContainer.style.zIndex = '501';
+  }
   };
 
-   const posNameHandler = (e) => {
-    setPOSName(e.target.value);
-  };
-
-  const employeeJobIdHandler = (e) => {
-    setEmployeeJobId(e.target.value);
-  };
-
-  const employeeAddressHandler = (e) => {
-    setEmployeeAddress(e.target.value);
-  };
-
-  // Handler to add new job (you can implement this as needed)
-  const addNewJobHandler = async (e) => {
-    const _Background = document.querySelector('.newJobForm');
-    _Background.style.zIndex = '500';
-    const _Form = document.querySelector('.newJobFormContainer');
-    _Form.style.zIndex = '501';
-  };
-
+  // Create a new POS device on-chain
   const addPOSHandler = async (e) => {
     e.preventDefault();
-    if (!provider) {
-      console.error('Provider not initialized');
-      return;
-    }
-
+    if (!provider) return;
     try {
       await createPOS(provider, contractAddress, RESTAURANT_ABI, posName, dispatch);
-      // Reset form fields
       setPOSName('');
       setShowPOSForm(false);
     } catch (error) {
@@ -96,24 +104,16 @@ function MainDashboardRestaurantBody() {
     }
   };
 
-   const openPOSForm = () => {
-    setShowPOSForm(true);
-  };
-
-  const closePOSForm = () => {
-    setShowPOSForm(false);
-  };
-
+  // Hire a new employee
   const hireEmployeeHandler = async (e) => {
     e.preventDefault();
-    if (!provider) {
-      console.error('Provider not initialized');
-      return;
-    }
+    if (!provider) return;
+
     if (!isAddress(employeeAddress)) {
       alert('Invalid Ethereum address');
       return;
     }
+
     await hireNewEmployee(
       provider,
       contractAddress,
@@ -123,69 +123,26 @@ function MainDashboardRestaurantBody() {
       employeeAddress,
       dispatch
     );
-    // Reset form fields
+
     setEmployeeName('');
     setEmployeeJobId('');
     setEmployeeAddress('');
     setShowEmployeeForm(false);
   };
 
-  const addEmployeeHandler = () => {
-    setShowEmployeeForm(true);
-  };
-
-  const closeEmployeeForm = () => {
-    setShowEmployeeForm(false);
-  };
-
-  // Function to toggle service
-  const toggleServiceHandler = async () => {
-    if (!provider) {
-      console.error('Provider not initialized');
-      return;
-    }
-    setServiceLoading(true);
-    try {
-      if (serviceActive) {
-        // Stop the service
-        await endService(provider, contractAddress, RESTAURANT_ABI, dispatch);
-      } else {
-        // Start the service
-        await startService(provider, contractAddress, RESTAURANT_ABI, dispatch);
-      }
-      // After starting/stopping service, refresh the service status
-      await getServiceStatus();
-    } catch (error) {
-      console.error('Error toggling service:', error);
-    }
-    setServiceLoading(false);
-  };
-
-  const addMenuItemHandler = () => {
-    setShowMenuItemForm(true);
-  };
-
-  const closeMenuItemForm = () => {
-    setShowMenuItemForm(false);
-  };
-
-  const menuItemNameHandler = (e) => {
-    setMenuItemName(e.target.value);
-  };
-
-  const menuItemCostHandler = (e) => {
-    setMenuItemCost(e.target.value);
-  };
-
+  // Add a new menu item to all POS devices
   const addMenuItemSubmitHandler = async (e) => {
     e.preventDefault();
-    if (!provider) {
-      console.error('Provider not initialized');
-      return;
-    }
+    if (!provider) return;
     try {
-      await addNewMenuItem(provider, contractAddress, RESTAURANT_ABI, menuItemCost, menuItemName, dispatch);
-      // Reset form fields
+      await addNewMenuItem(
+        provider,
+        contractAddress,
+        RESTAURANT_ABI,
+        menuItemCost,
+        menuItemName,
+        dispatch
+      );
       setMenuItemName('');
       setMenuItemCost('');
       setShowMenuItemForm(false);
@@ -194,291 +151,337 @@ function MainDashboardRestaurantBody() {
     }
   };
 
-  // Function to get the service status
-  const getServiceStatus = async () => {
-    if (provider && contractAddress) {
-      try {
-        const user = await provider.getSigner();
-        const contract = new ethers.Contract(contractAddress, RESTAURANT_ABI, user);
-        const service = await contract.service();
-        const serviceStartTime = await contract.serviceStart();
-
-        setServiceActive(service);
-        if (service) {
-          setServiceStart(Number(serviceStartTime));
-        } else {
-          setServiceStart(null);
-        }
-      } catch (error) {
-        console.error('Error getting service status:', error);
+  // Start or stop the Restaurant service
+  const toggleServiceHandler = async () => {
+    if (!provider) return;
+    setServiceLoading(true);
+    try {
+      if (serviceActive) {
+        // Stop service
+        await endService(provider, contractAddress, RESTAURANT_ABI, dispatch);
+      } else {
+        // Start service
+        await startService(provider, contractAddress, RESTAURANT_ABI, dispatch);
       }
+      await getServiceStatus(); // Reload local service state
+    } catch (error) {
+      console.error('Error toggling service:', error);
+    }
+    setServiceLoading(false);
+  };
+
+  // Read the "service" bool and "serviceStart" from the contract
+  const getServiceStatus = async () => {
+    if (!provider || !contractAddress) return;
+    try {
+      const user = await provider.getSigner();
+      const contract = new ethers.Contract(contractAddress, RESTAURANT_ABI, user);
+
+      const service = await contract.service();
+      const serviceStartTime = await contract.serviceStart();
+
+      setServiceActive(service);
+      setServiceStart(service ? Number(serviceStartTime) : null);
+    } catch (error) {
+      console.error('Error getting service status:', error);
     }
   };
 
+  // Helper to format HH:MM:SS from total seconds
   const formatElapsedTime = (elapsedSeconds) => {
-    if (elapsedSeconds < 0) elapsedSeconds = 0; // Prevent negative time
-
-    const hours = Math.floor(elapsedSeconds / 3600);
-    const minutes = Math.floor((elapsedSeconds % 3600) / 60);
-    const seconds = elapsedSeconds % 60;
-
-    // Pad with zeros to ensure two digits
-    const hoursDisplay = String(hours).padStart(2, '0');
-    const minutesDisplay = String(minutes).padStart(2, '0');
-    const secondsDisplay = String(seconds).padStart(2, '0');
-
-    return `${hoursDisplay}:${minutesDisplay}:${secondsDisplay}`;
+    if (elapsedSeconds < 0) elapsedSeconds = 0;
+    const hours = Math.floor(elapsedSeconds / 3600).toString().padStart(2, '0');
+    const minutes = Math.floor((elapsedSeconds % 3600) / 60).toString().padStart(2, '0');
+    const seconds = (elapsedSeconds % 60).toString().padStart(2, '0');
+    return `${hours}:${minutes}:${seconds}`;
   };
 
-  // First useEffect: Load blockchain data on mount
+  // Initial load: connect to contract & load all data
   useEffect(() => {
     const loadBlockchainData = async () => {
       if (typeof window.ethereum !== 'undefined' && contractAddress) {
         try {
           const ethersProvider = new ethers.BrowserProvider(window.ethereum);
           setProvider(ethersProvider);
+
+          // Request accounts if not already connected
           await ethersProvider.send('eth_requestAccounts', []);
 
+          // Fetch & store the contract’s current balance
+          const balance = await ethersProvider.getBalance(contractAddress);
+          setContractBalance(balance);
+
+          // Load needed data from the contract
           await loadAllJobs(ethersProvider, contractAddress, RESTAURANT_ABI, dispatch);
           await loadAllEmployees(ethersProvider, contractAddress, RESTAURANT_ABI, dispatch);
           await loadAllServices(ethersProvider, contractAddress, RESTAURANT_ABI, dispatch);
           await loadAllPOS(ethersProvider, contractAddress, RESTAURANT_ABI, dispatch);
-          await loadAllMenuItems(ethersProvider, contractAddress, RESTAURANT_ABI, dispatch); // Load menu items
+          await loadAllMenuItems(ethersProvider, contractAddress, RESTAURANT_ABI, dispatch);
+
+          // Check if service is active
           await getServiceStatus();
         } catch (error) {
           console.error('Error loading blockchain data:', error.message);
         } finally {
           setIsLoading(false);
         }
-      } else if (!contractAddress) {
-        console.error('Contract address is null');
       } else {
-        console.error('MetaMask not detected');
+        // No Ethereum provider or no contract address found
         setIsLoading(false);
       }
     };
-
     loadBlockchainData();
   }, [contractAddress, dispatch]);
 
-  // Second useEffect: Set up interval to refresh data
+  // Auto-refresh data every 10 seconds
   useEffect(() => {
-    if (provider) {
-      const refreshData = () => {
+    if (provider && contractAddress) {
+      const refreshData = async () => {
+        // Re-check contract balance
+        const balance = await provider.getBalance(contractAddress);
+        setContractBalance(balance);
+
+        // Refresh all loaded data
         loadAllPOS(provider, contractAddress, RESTAURANT_ABI, dispatch);
         loadAllJobs(provider, contractAddress, RESTAURANT_ABI, dispatch);
         loadAllEmployees(provider, contractAddress, RESTAURANT_ABI, dispatch);
         loadAllServices(provider, contractAddress, RESTAURANT_ABI, dispatch);
-        loadAllMenuItems(provider, contractAddress, RESTAURANT_ABI, dispatch); 
+        loadAllMenuItems(provider, contractAddress, RESTAURANT_ABI, dispatch);
         getServiceStatus();
       };
 
-      // Initial call to refresh data
       refreshData();
-
-      // Set up periodic refresh every second
-      const interval = setInterval(refreshData, 10000); // Refresh every 10 seconds to reduce load
-
-      // Clear interval on cleanup
+      const interval = setInterval(refreshData, 10000);
       return () => clearInterval(interval);
     }
   }, [provider, contractAddress, dispatch]);
 
-  // useEffect to update service elapsed time
+  // If service is active, track elapsed time
   useEffect(() => {
     let interval;
     if (!serviceLoading && serviceActive && serviceStart) {
-      // Update elapsed time every second
       interval = setInterval(() => {
-        const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
-        let elapsedTime = currentTime - serviceStart;
-        if (elapsedTime < 0) elapsedTime = 0; // Prevent negative time
-        setServiceElapsedTime(elapsedTime);
+        const currentTime = Math.floor(Date.now() / 1000);
+        setServiceElapsedTime(currentTime - serviceStart);
       }, 1000);
     } else {
       setServiceElapsedTime(0);
     }
-
-    return () => {
-      if (interval) {
-        clearInterval(interval);
-      }
-    };
+    return () => interval && clearInterval(interval);
   }, [serviceLoading, serviceActive, serviceStart]);
 
+  if (isLoading) {
+    return <Loading />;
+  }
+
   return (
-    <div>
-      {isLoading ? (
-        <Loading />
-      ) : (
-        <div className="main-dashboard-container">
-          {/* Left Side Content */}
-          <div className="left-side-content">
-            {/* Account Information */}
-            <p className="MainDashboardAccount">
-              <strong className="account-label">Account :</strong> {account || 'No account detected'}
-            </p>
-
-            {/* Restaurant Data */}
-            <div className="MainDashboardRestaurantBox">
-              <div className="restaurant-text">Restaurant Data</div>
-              <div className="MainDashboardRestaurantDataBox">
-                <p>
-                  <strong className="account-label">Name :</strong> {name || 'No name found'}
-                </p>
-                <p>
-                  <strong className="account-label">Cash :</strong> {cash ? cash / 1e18 : 'No cash found'} ETH
-                </p>
-              </div>
-            </div>
-
-            {/* Jobs Section */}
-            <div className="MainDashboardRestaurantJobsBox">
-              <h2>All Jobs</h2>
-              <button className="addJobButton" onClick={addNewJobHandler}>
-                Add Job
-              </button>
-            </div>
-            <div className="MainDashboardRestaurantJobsContainer">
-              {jobs.length > 0 ? (
-                jobs.map((job, index) => (
-                  <div key={index} className="job">
-                    <p>Job ID: {job.id}</p>
-                    <p>Job Name: {job.jobName}</p>
-                    <p>Hourly Wage (in Wei): {job.hourlyWageInWei}</p>
-                  </div>
-                ))
-              ) : (
-                <p>No jobs available</p>
-              )}
-            </div>
-
-            {/* Employees Section */}
-            <div className="MainDashboardRestaurantEmployeesBox">
-              <h2>Employees</h2>
-              <button className="addEmployeeButton" onClick={addEmployeeHandler}>
-                Hire Employee
-              </button>
-            </div>
-            <div className="MainDashboardRestaurantEmployeesContainer">
-              {employees.length > 0 ? (
-                employees.map((employee, index) => (
-                  <div key={index} className="employee">
-                    <p>Employee ID: {employee.id}</p>
-                    <p>Name: {employee.name}</p>
-                    <p>Job ID: {employee.jobId}</p>
-                    <p>Address: {employee.address}</p>
-                  </div>
-                ))
-              ) : (
-                <p>No employees available</p>
-              )}
-            </div>
-          </div>
-
-          {/* Menu Items Section */}
-            <div className="MainDashboardRestaurantMenuBox">
-              <h2>Menu</h2>
-              <button className="addMenuItemButton" onClick={addMenuItemHandler}>
-                Add Menu Item
-              </button>
-            </div>
-            <div className="MainDashboardRestaurantMenuContainer">
-              {menuItems.length > 0 ? (
-                menuItems.map((menuItem, index) => (
-                  <div key={index} className="menuItem">
-                    <p>Item ID: {menuItem.id}</p>
-                    <p>Name: {menuItem.name}</p>
-                    <p>Cost: {menuItem.cost} ETH</p>
-                  </div>
-                ))
-              ) : (
-                <p>No menu items available</p>
-              )}
-            </div>
-          
-
-          {/* Right Side Content */}
-          <div className="right-side-content">
-            {/* Service Control */}
-            <div className="service-control">
-              <button
-                className={`service-button ${serviceActive ? 'stop' : 'start'}`}
-                onClick={toggleServiceHandler}
-                disabled={serviceLoading}
-              >
-                {serviceLoading ? 'Processing...' : serviceActive ? 'Stop Service' : 'Start Service'}
-              </button>
-              {serviceActive && (
-                <div className="service-timer">
-                  Service Time: {formatElapsedTime(serviceElapsedTime)}
-                </div>
-              )}
-            </div>
-
-            <div className="MainDashboardRestaurantPOSBox">
-              <h2>POS Terminals</h2>
-              <button className="addPOSButton" onClick={openPOSForm}>
-                Add POS
-              </button>
-            </div>
-            <div className="MainDashboardRestaurantPOSContainer">
-              {posDevices.length > 0 ? (
-                posDevices.map((pos, index) => (
-                  <div key={index} className="pos">
-                    <p>POS ID: {pos.id}</p>
-                    <p>Address: {pos.address}</p>
-                  </div>
-                ))
-              ) : (
-                <p>No POS terminals available</p>
-              )}
-            </div>
-
-            {/* Services List */}
-            <div className="services-list">
-              <h3>Service History</h3>
-              {services.length > 0 ? (
-                <table className="services-table">
-                  <thead>
-                    <tr>
-                      <th>Start Time</th>
-                      <th>Financials</th>
-                      <th>#</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {services
-                      .slice()
-                      .reverse()
-                      .map((service, index) => (
-                        <tr key={service.id}>
-                          <td>{new Date(service.startTime * 1000).toLocaleString()}</td>
-                          <td className="financials-cell">
-                            <div className="financials-item cost">
-                              Cost: {Number(ethers.formatEther(service.cost)).toFixed(4)} ETH
-                            </div>
-                            <div className="financials-item profit">
-                              Profit: {Number(ethers.formatEther(service.profit)).toFixed(4)} ETH
-                            </div>
-                            <div className="financials-item revenue">
-                              Revenue: {Number(ethers.formatEther(service.revenue)).toFixed(4)} ETH
-                            </div>
-                          </td>
-                          <td>{service.id}</td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-              ) : (
-                <p>No services recorded yet.</p>
-              )}
-            </div>
-          </div>
+    <div className="main-dashboard-container">
+      {/* ========== TOP ROW (Account & Restaurant Info) ========== */}
+      <section className="dashboard-section">
+        <div className="section-navbar">
+          <h2>Account Info</h2>
         </div>
-      )}
+        <p><strong>Account:</strong> {account || "No account detected"}</p>
+        <p><strong>Restaurant Name:</strong> {name || "No name found"}</p>
+        <p>
+          <strong>Balance:</strong>{" "}
+          {ethers.formatEther(contractBalance || 0)} ETH
+        </p>
+      </section>
 
-          {/* Menu Item Form Modal */}
+      {/* ========== SERVICE CONTROL ========== */}
+      <section className="dashboard-section">
+        <div className="section-navbar">
+          <h2>Service Control</h2>
+        </div>
+        <button
+          className={`service-button ${serviceActive ? 'stop' : 'start'}`}
+          onClick={toggleServiceHandler}
+          disabled={serviceLoading}
+        >
+          {serviceLoading
+            ? 'Processing...'
+            : serviceActive
+              ? 'Stop Service'
+              : 'Start Service'
+          }
+        </button>
+        {serviceActive && (
+          <div className="service-timer">
+            Service Time: {formatElapsedTime(serviceElapsedTime)}
+          </div>
+        )}
+      </section>
+
+      {/* ========== JOBS ========== */}
+      <section className="dashboard-section">
+        <div className="section-navbar">
+          <h2>All Jobs</h2>
+          <button onClick={addNewJobHandler}>Add Job</button>
+        </div>
+
+        <div className="table-scroll">
+          {jobs.length > 0 ? (
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Job ID</th>
+                  <th>Job Name</th>
+                  <th>Hourly Wage (Wei)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {jobs.map((job, index) => (
+                  <tr key={index}>
+                    <td>{job.id}</td>
+                    <td>{job.jobName}</td>
+                    <td>{job.hourlyWageInWei}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p>No jobs available</p>
+          )}
+        </div>
+      </section>
+
+      {/* ========== EMPLOYEES ========== */}
+      <section className="dashboard-section">
+        <div className="section-navbar">
+          <h2>Employees</h2>
+          <button onClick={addEmployeeHandler}>Hire Employee</button>
+        </div>
+
+        <div className="table-scroll">
+          {employees.length > 0 ? (
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Employee ID</th>
+                  <th>Name</th>
+                  <th>Job ID</th>
+                  <th>Address</th>
+                </tr>
+              </thead>
+              <tbody>
+                {employees.map((employee, index) => (
+                  <tr key={index}>
+                    <td>{employee.id}</td>
+                    <td>{employee.name}</td>
+                    <td>{employee.jobId}</td>
+                    <td>{employee.address}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p>No employees available</p>
+          )}
+        </div>
+      </section>
+
+      {/* ========== MENU ITEMS ========== */}
+      <section className="dashboard-section">
+        <div className="section-navbar">
+          <h2>Menu Items</h2>
+          <button onClick={addMenuItemHandler}>Add Menu Item</button>
+        </div>
+
+        <div className="table-scroll">
+          {menuItems.length > 0 ? (
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Item ID</th>
+                  <th>Name</th>
+                  <th>Cost (ETH)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {menuItems.map((item, index) => (
+                  <tr key={index}>
+                    <td>{item.id}</td>
+                    <td>{item.name}</td>
+                    <td>{item.cost}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p>No menu items available</p>
+          )}
+        </div>
+      </section>
+
+      {/* ========== POS DEVICES ========== */}
+      <section className="dashboard-section">
+        <div className="section-navbar">
+          <h2>POS Terminals</h2>
+          <button onClick={openPOSForm}>Add POS</button>
+        </div>
+
+        <div className="table-scroll">
+          {posDevices.length > 0 ? (
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>POS ID</th>
+                  <th>Address</th>
+                </tr>
+              </thead>
+              <tbody>
+                {posDevices.map((pos, index) => (
+                  <tr key={index}>
+                    <td>{pos.id}</td>
+                    <td>{pos.address}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p>No POS devices available</p>
+          )}
+        </div>
+      </section>
+
+      {/* ========== SERVICE HISTORY ========== */}
+      <section className="dashboard-section">
+        <div className="section-navbar">
+          <h2>Service History</h2>
+        </div>
+
+        <div className="table-scroll">
+          {services.length > 0 ? (
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Start Time</th>
+                  <th>Cost (ETH)</th>
+                  <th>Profit (ETH)</th>
+                  <th>Revenue (ETH)</th>
+                  <th>ID</th>
+                </tr>
+              </thead>
+              <tbody>
+                {services.slice().reverse().map((service) => (
+                  <tr key={service.id}>
+                    <td>{new Date(service.startTime * 1000).toLocaleString()}</td>
+                    <td>{Number(ethers.formatEther(service.cost)).toFixed(4)}</td>
+                    <td>{Number(ethers.formatEther(service.profit)).toFixed(4)}</td>
+                    <td>{Number(ethers.formatEther(service.revenue)).toFixed(4)}</td>
+                    <td>{service.id}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p>No services recorded yet.</p>
+          )}
+        </div>
+      </section>
+
+      {/* ========== MODALS ========== */}
       {showMenuItemForm && (
         <div className="menuItemFormOverlay">
           <div className="menuItemFormContainer">
@@ -486,57 +489,48 @@ function MainDashboardRestaurantBody() {
               <p>
                 <input
                   type="text"
-                  id="menuItemName"
-                  placeholder="Enter the Menu Item Name"
+                  placeholder="Menu Item Name"
                   value={menuItemName}
                   onChange={menuItemNameHandler}
+                  required
                 />
               </p>
               <p>
                 <input
                   type="text"
-                  id="menuItemCost"
-                  placeholder="Enter the Menu Item Cost in ETH"
+                  placeholder="Menu Item Cost (ETH)"
                   value={menuItemCost}
                   onChange={menuItemCostHandler}
+                  required
                 />
               </p>
-              <button className="button" type="submit">
-                Add Menu Item
-              </button>
-              <button className="button" type="button" onClick={closeMenuItemForm}>
-                Cancel
-              </button>
+              <button type="submit">Add Menu Item</button>
+              <button type="button" onClick={closeMenuItemForm}>Cancel</button>
             </form>
           </div>
         </div>
       )}
 
-               {showPOSForm && (
+      {showPOSForm && (
         <div className="posFormOverlay">
           <div className="posFormContainer">
             <form onSubmit={addPOSHandler}>
               <p>
                 <input
                   type="text"
-                  id="posName"
-                  placeholder="Enter the POS Name"
+                  placeholder="POS Name"
                   value={posName}
                   onChange={posNameHandler}
+                  required
                 />
               </p>
-              <button className="button-POS" type="submit">
-                Create POS
-              </button>
-              <button className="button" type="button" onClick={closePOSForm}>
-                Cancel
-              </button>
+              <button type="submit">Create POS</button>
+              <button type="button" onClick={closePOSForm}>Cancel</button>
             </form>
           </div>
         </div>
       )}
 
-      {/* Employee Form Modal */}
       {showEmployeeForm && (
         <div className="employeeFormOverlay">
           <div className="employeeFormContainer">
@@ -544,36 +538,32 @@ function MainDashboardRestaurantBody() {
               <p>
                 <input
                   type="text"
-                  id="employeeName"
-                  placeholder="Enter the Employee's Name"
+                  placeholder="Employee Name"
                   value={employeeName}
                   onChange={employeeNameHandler}
+                  required
                 />
               </p>
               <p>
                 <input
                   type="number"
-                  id="employeeJobId"
-                  placeholder="Enter the Job ID"
+                  placeholder="Job ID"
                   value={employeeJobId}
                   onChange={employeeJobIdHandler}
+                  required
                 />
               </p>
               <p>
                 <input
                   type="text"
-                  id="employeeAddress"
-                  placeholder="Enter the Employee's Address"
+                  placeholder="Employee Address"
                   value={employeeAddress}
                   onChange={employeeAddressHandler}
+                  required
                 />
               </p>
-              <button className="button" type="submit">
-                Hire Employee
-              </button>
-              <button className="button" type="button" onClick={closeEmployeeForm}>
-                Cancel
-              </button>
+              <button type="submit">Hire Employee</button>
+              <button type="button" onClick={closeEmployeeForm}>Cancel</button>
             </form>
           </div>
         </div>

@@ -159,52 +159,62 @@ contract Restaurant is Ownable {
     }
 
     function endService() public onlyOwner {
-        require(service, "Service is not active");
-        service = false;
+    require(service, "Service is not active");
+    service = false;
 
-        // Set the end time of the current service
-        Service storage currentService = services[nextServiceId];
-        currentService.endTime = block.timestamp;
-
-        // Calculate cost as total employee pensions
-        uint256 totalCost = 0;
-        for (uint256 i = 0; i < employeeIds.length; i++) {
-            uint256 empId = employeeIds[i];
-            Employee storage emp = employees[empId];
-            if (emp.employeePension > 0) {
-                totalCost += emp.employeePension;
-                payable(emp.employeeAddress).transfer(emp.employeePension);
-                emp.employeePension = 0;
-            }
-        }
-
-        // Calculate revenue as the difference in balance
-        uint256 serviceEndBalance = address(this).balance;
-        uint256 totalRevenue = serviceEndBalance - serviceStartBalance;
-
-        // Calculate profit
-        uint256 totalProfit = 0;
-        if (totalRevenue > totalCost) {
-            totalProfit = totalRevenue - totalCost;
-        }
-
-        // Update the currentService
-        currentService.cost = totalCost;
-        currentService.revenue = totalRevenue;
-        currentService.profit = totalProfit;
-
-        // Reset serviceStartBalance
-        serviceStartBalance = 0;
-
-        emit ServiceEnded(
-            currentService.id,
-            currentService.startTime,
-            currentService.endTime,
-            currentService.cost,
-            currentService.profit,
-            currentService.revenue
-        );
+    // 1) Collect balances from each POS before distributing to employees
+    for (uint256 i = 0; i < POSIds.length; i++) {
+        address posAddress = POSMapping[POSIds[i]];
+        IPOS(posAddress).payRestaurant(); 
+        // ^ calls the payRestaurant function in each POS, 
+        //   transferring its balance to this Restaurant contract
     }
+
+    // 2) Now proceed with your existing endService logic
+    //    Set the end time of the current service
+    Service storage currentService = services[nextServiceId];
+    currentService.endTime = block.timestamp;
+
+    // 3) Pay employees (cost)
+    uint256 totalCost = 0;
+    for (uint256 i = 0; i < employeeIds.length; i++) {
+        uint256 empId = employeeIds[i];
+        Employee storage emp = employees[empId];
+        if (emp.employeePension > 0) {
+            totalCost += emp.employeePension;
+            payable(emp.employeeAddress).transfer(emp.employeePension);
+            emp.employeePension = 0;
+        }
+    }
+
+    // 4) Calculate revenue from difference in balances
+    uint256 serviceEndBalance = address(this).balance;
+    uint256 totalRevenue = serviceEndBalance - serviceStartBalance;
+
+    // 5) Calculate profit
+    uint256 totalProfit = 0;
+    if (totalRevenue > totalCost) {
+        totalProfit = totalRevenue - totalCost;
+    }
+
+    // 6) Update the currentService data
+    currentService.cost = totalCost;
+    currentService.revenue = totalRevenue;
+    currentService.profit = totalProfit;
+
+    // 7) Reset serviceStartBalance
+    serviceStartBalance = 0;
+
+    // 8) Emit the ServiceEnded event
+    emit ServiceEnded(
+        currentService.id,
+        currentService.startTime,
+        currentService.endTime,
+        currentService.cost,
+        currentService.profit,
+        currentService.revenue
+    );
+}
 
     function getJobIds() public view returns (uint256[] memory) {
         return jobIds;

@@ -2,7 +2,7 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/EmployeeDashboard": "pages/EmployeeDashboard.js",
-  "/POSterminal": "pages/POSterminal.js",
-  "/micros": "pages/micros.js"
+  "/Crowdsale": "pages/Crowdsale.js",
+  "/Dashboard": "pages/Dashboard.js",
+  "/RestaurantDashboard": "pages/RestaurantDashboard.js"
 }

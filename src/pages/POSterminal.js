@@ -92,6 +92,8 @@ export default function POSterminal() {
     }
   };
 
+  const openTickets = allTickets.filter(ticket => !ticket.paid);
+  
   return (
     <div className="BlueBackground" style={{ width: '100%', height: '100vh', position: 'relative' }}>
       
@@ -140,8 +142,8 @@ export default function POSterminal() {
 
         <div style={{ marginTop: '20px' }}>
           <h4 style={{ color: 'white' }}>Open Tickets:</h4>
-          {allTickets && allTickets.length > 0 ? (
-            allTickets.map((ticket) => (
+          {openTickets && openTickets.length > 0 ? (
+            openTickets.map((ticket) => (
               <div 
                 key={`${ticket.posAddress}-${ticket.id}`} 
                 style={{ display: 'inline-block', margin: '10px' }}

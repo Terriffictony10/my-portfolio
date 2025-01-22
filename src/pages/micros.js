@@ -1,9 +1,10 @@
-// pages/micros.js
-
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useRouter } from 'next/router';
 import { ethers } from 'ethers';
+
+import Modal from 'react-modal';
+import { QRCodeSVG } from 'qrcode.react'; // Using the named import for an SVG
 
 // Interactions
 import {
@@ -22,38 +23,37 @@ export default function Micros() {
   const router = useRouter();
 
   const activeTicket = useSelector((state) => state.DashboardRestaurant.activeTicket);
-
-  // We’ll read from Redux the array of pending items for this ticket
+  const kitchenTickets = useSelector((state) => state.DashboardRestaurant.kitchenTickets);
   const pendingOrderBuffer = useSelector(
-  (state) => state.DashboardRestaurant.pendingOrderBuffer
-) || {};
+    (state) => state.DashboardRestaurant.pendingOrderBuffer
+  ) || {};
 
-const ticketStringId = activeTicket ? activeTicket.id.toString() : null;
-const currentPendingItems = ticketStringId
-  ? pendingOrderBuffer[ticketStringId] || []
-  : [];
+  // For referencing pending items
+  const ticketStringId = activeTicket ? activeTicket.id.toString() : null;
+  const currentPendingItems = ticketStringId
+    ? pendingOrderBuffer[ticketStringId] || []
+    : [];
 
-  // Local state for the POS menu
+  // Local states
   const [posMenuItems, setPosMenuItems] = useState([]);
-
-  // Local state to track if we’re in the middle of a ring transaction
   const [ringInProgress, setRingInProgress] = useState(false);
+  const [isPayModalOpen, setIsPayModalOpen] = useState(false);
 
-  // 1) If there's no activeTicket, redirect to /POSterminal
+  // 1) If there's no activeTicket, go back to /POSterminal
   useEffect(() => {
     if (!activeTicket) {
       router.replace('/POSterminal');
     }
   }, [activeTicket, router]);
 
-  // 2) Load full ticket + menu
+  // 2) Load the ticket + menu
   useEffect(() => {
     if (!activeTicket) return;
 
     (async () => {
       try {
         const provider = new ethers.BrowserProvider(window.ethereum);
-        
+
         // Load the full ticket details:
         await loadFullTicketDetails(
           provider,
@@ -61,9 +61,9 @@ const currentPendingItems = ticketStringId
           POS_ABI,
           activeTicket.id,
           dispatch
-        )
+        );
 
-        // Load the menu for the given POS
+        // Load the menu
         const items = await loadMenuItemsForPOS(
           provider,
           activeTicket.posAddress,
@@ -75,60 +75,89 @@ const currentPendingItems = ticketStringId
         console.error('Error loading data:', error);
       }
     })();
-  }, [activeTicket, dispatch]);
+  }, [activeTicket, kitchenTickets, dispatch]);
 
-  // 3) If user wants to go back
+  // 3) Go back handler
   const handleGoBack = async () => {
     await clearActiveTicket(dispatch);
     router.push('/POSterminal');
   };
 
-  // Helper to sum up the rung items (on the left)
+  // Summation of rung items
   const rungOrders = activeTicket?.orders || [];
   const rungSubtotal = rungOrders.reduce((acc, item) => acc + item.cost, 0);
 
-  // Helper to sum up the *pending* items (on the right)
+  // Summation of pending items
   let pendingSubtotal = 0;
-for (let i = 0; i < currentPendingItems.length; i++) {
-  pendingSubtotal += currentPendingItems[i].cost;
-}
+  for (let i = 0; i < currentPendingItems.length; i++) {
+    pendingSubtotal += currentPendingItems[i].cost;
+  }
 
-  // For adding an item to the “pending” list
+  // Add item to buffer
   const handleAddItemToBuffer = (menuItem) => {
     dispatch(bufferItemForTicket(activeTicket.id, menuItem));
   };
 
-  // For “ringing” all items that are in the buffer:
+  // RING the buffered items
   const handleRing = async () => {
-  try {
-    setRingInProgress(true);
-    const provider = new ethers.BrowserProvider(window.ethereum);
+    try {
+      setRingInProgress(true);
+      const provider = new ethers.BrowserProvider(window.ethereum);
 
-    // 1) ring in the items => dispatch ORDER_RING_SUCCESS => merges items
-    await ringBufferedItems(
-      provider,
-      activeTicket.posAddress,
-      pendingOrderBuffer,
-      POS_ABI,
-      activeTicket.id,
-      dispatch,
-      () => ({ DashboardRestaurant: { pendingOrderBuffer } })
-    );
+      // 1) "Ring" on chain
+      await ringBufferedItems(
+        provider,
+        activeTicket.posAddress,
+        pendingOrderBuffer,
+        POS_ABI,
+        activeTicket.id,
+        dispatch,
+        () => ({ DashboardRestaurant: { pendingOrderBuffer } })
+      );
 
-    // 2) Optionally reload the chain data, though the reducer has already updated
-    await loadFullTicketDetails(
-      provider,
-      activeTicket.posAddress,
-      POS_ABI,
-      activeTicket.id,
-      dispatch
-    );
-  } catch (error) {
-    console.error('Error ringing items:', error);
-  } finally {
-    setRingInProgress(false);
-  }
-};
+      // 2) POST to Next.js (kitchenTickets)
+      const itemsToRing = currentPendingItems;
+      if (itemsToRing.length > 0) {
+        await fetch('/api/kitchenTickets', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            posTicketId: activeTicket.id.toString(),
+            posTicketName: activeTicket.name,
+            items: itemsToRing,
+          }),
+        });
+      }
+
+      // 3) Clear local buffer
+      dispatch({
+        type: 'CLEAR_PENDING_BUFFER',
+        payload: { ticketId: activeTicket.id },
+      });
+
+      // 4) Reload the chain data
+      await loadFullTicketDetails(
+        provider,
+        activeTicket.posAddress,
+        POS_ABI,
+        activeTicket.id,
+        dispatch
+      );
+    } catch (error) {
+      console.error('Error ringing items:', error);
+    } finally {
+      setRingInProgress(false);
+    }
+  };
+
+  // Payment link for scanning or direct navigation
+  const payUrl = activeTicket
+    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/pay?posAddress=${activeTicket.posAddress}&ticketId=${activeTicket.id}`
+    : '';
+
+  // Modal toggles
+  const handleOpenPayModal = () => setIsPayModalOpen(true);
+  const handleClosePayModal = () => setIsPayModalOpen(false);
 
   if (!activeTicket) {
     return <div style={{ color: '#fff', textAlign: 'center' }}>Redirecting...</div>;
@@ -167,7 +196,7 @@ for (let i = 0; i < currentPendingItems.length; i++) {
 
         <hr style={{ borderColor: '#fff' }} />
 
-        {/* SECTION A: The POS Menu (but we are not ringing them instantly) */}
+        {/* SECTION A: POS Menu */}
         <h3 style={{ color: '#fff', textAlign: 'center' }}>POS Menu</h3>
         <div
           style={{
@@ -199,9 +228,9 @@ for (let i = 0; i < currentPendingItems.length; i++) {
 
         <hr style={{ borderColor: '#fff', marginTop: '40px' }} />
 
-        {/* SECTION B1: Display RUNG items (already on-chain) */}
+        {/* SECTION B: Rung items vs. Pending items */}
         <div style={{ display: 'flex', justifyContent: 'space-around' }}>
-          {/* LEFT half: rung items */}
+          {/* LEFT: Rung items */}
           <div style={{ width: '45%' }}>
             <h3 style={{ color: '#fff', textAlign: 'center' }}>Rung Items</h3>
             {rungOrders.length > 0 ? (
@@ -235,7 +264,7 @@ for (let i = 0; i < currentPendingItems.length; i++) {
             </div>
           </div>
 
-          {/* RIGHT half: pending items */}
+          {/* RIGHT: Pending items */}
           <div style={{ width: '45%' }}>
             <h3 style={{ color: '#fff', textAlign: 'center' }}>Pending (Not Rung)</h3>
             {currentPendingItems.length > 0 ? (
@@ -276,7 +305,7 @@ for (let i = 0; i < currentPendingItems.length; i++) {
                   borderRadius: '5px',
                   cursor: 'pointer'
                 }}
-                disabled={ringInProgress} // disable if transaction is in progress
+                disabled={ringInProgress}
               >
                 {ringInProgress ? 'Ringing...' : 'Ring'}
               </button>
@@ -288,6 +317,80 @@ for (let i = 0; i < currentPendingItems.length; i++) {
             </div>
           </div>
         </div>
+
+        <hr style={{ borderColor: '#fff', marginTop: '40px' }} />
+
+        {/* Pay Ticket Button */}
+        <div style={{ textAlign: 'center', marginTop: '20px' }}>
+          <button
+            onClick={handleOpenPayModal}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: '#007bff',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer'
+            }}
+          >
+            Pay Ticket
+          </button>
+        </div>
+
+        {/* Pay Modal with QR Code */}
+        <Modal
+          isOpen={isPayModalOpen}
+          onRequestClose={handleClosePayModal}
+          contentLabel="Pay Ticket Modal"
+          style={{
+            content: {
+              maxWidth: '400px',
+              margin: 'auto',
+              height: 'auto',
+              textAlign: 'center'
+            }
+          }}
+        >
+          <h2>Scan to Pay</h2>
+          <p>Use your mobile device to scan and pay this ticket:</p>
+          {/* Render the QR code */}
+          {payUrl && <QRCodeSVG value={payUrl} size={256} />}
+
+          {/* 
+            NEW BUTTON: This will navigate the user directly
+            to the pay page, skipping scanning the QR code. 
+          */}
+          <div style={{ marginTop: '20px' }}>
+            <button
+              onClick={handleClosePayModal}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: 'red',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '4px',
+                marginRight: '10px',
+                cursor: 'pointer'
+              }}
+            >
+              Close
+            </button>
+
+            <button
+              onClick={() => router.push("./pay")}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: 'green',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              Go to Pay Page
+            </button>
+          </div>
+        </Modal>
 
         {/* Footer / Back button */}
         <div style={{ textAlign: 'center', marginTop: '40px' }}>

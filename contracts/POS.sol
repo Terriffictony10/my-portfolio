@@ -47,6 +47,8 @@ contract POS is Ownable, MenuTicketBase {
     }
 
     function payTicket(uint256 ticketId, address _customer) public payable {
+        require(!tickets[ticketId].paid, "Ticket has already been paid");
+
         uint256 _balance = 0;
         Ticket storage ticket = tickets[ticketId];
         for (uint256 i = 0; i < ticket.orders.length; i++) {

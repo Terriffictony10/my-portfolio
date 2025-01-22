@@ -251,7 +251,7 @@ nav li:first-child {
   background-image: url('DashboardBackground.jpg');
 }
 
-/* Account Information */
+/* Old "Account" section (kept for reference if needed) */
 .DashboardAccount {
   display: flex;
   justify-content: flex-end;
@@ -259,179 +259,101 @@ nav li:first-child {
   padding: 60px 50px 0 0;
   font-family: 'CrowdsaleBuyBox';
 }
-.MainDashboardAccount {
-  position: absolute;
-  top: 1;
-  right: 0;
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-start;
-  padding: 60px 50px 0 0;
-  font-family: 'CrowdsaleBuyBox';
+
+/* ========================================================= */
+/*              NEW GRID LAYOUT FOR DASHBOARD               */
+/* ========================================================= */
+
+/* The main container for the dashboard in a 2-column grid */
+.main-dashboard-container {
+  display: grid;                  /* Enable CSS Grid */
+  grid-template-columns: 1fr 1fr; /* Two columns of equal width */
+  grid-gap: 20px;                 /* Spacing between grid items */
+  padding: 20px;
 }
 
-/* Restaurant Data Box */
-.MainDashboardRestaurantBox {
-  width: 525px;
-  height: 200px;
-  position: absolute;
-  top: 90px;
-  right: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  border: 1px solid white;
-  font-family: 'CrowdsaleBuyBox';
-  text-align: center;
+/* Each box/section in the grid */
+.dashboard-section {
   background-color: rgba(255, 255, 255, 0.1);
-}
-.restaurant-text {
-  padding: 0 0 180px 0;
-}
-.account-label {
-  margin-right: 4px;
-  position: relative;
-}
-
-/* Add Job Button */
-.addJobButton {
-  width: 80px;
-  height: 40px;
-  position: relative;
-  top: -30px;
-  left: 440px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
   border: 1px solid white;
-  font-size: 0.85rem;
-  font-family: 'CrowdsaleBuyBox';
-  text-align: center;
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-.right-side-content {
-  position: absolute;
-  top:120px;
-  left: 50px; /* Adjust this value to move the right-side content horizontally */
-  width: 300px; /* Adjust the width as needed */
-  /* You can add more styles here to customize the positioning */
-}
-
-
-/* Jobs Section */
-.MainDashboardRestaurantJobsBox {
-  width: 525px;
-  height: 600px;
-  position: absolute;
-  top: 290px;
-  right: 50px;
-  display: flex;
-  flex-direction: column;
-  padding: 10px 0 0 0;
-  border: 1px solid white;
-  font-family: 'CrowdsaleBuyBox';
-  text-align: center;
-  background-color: rgba(255, 255, 255, 0.1);
-}
-.MainDashboardRestaurantJobsContainer {
-  width: 525px;
-  height: 550px;
-  position: absolute;
-  top: 340px;
-  right: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  border: 1px solid white;
-  font-family: 'CrowdsaleBuyBox';
-  text-align: center;
-  background-color: rgba(255, 255, 255, 0.1);
-}
-.job {
-  /* Add any specific styles for job items here */
-}
-
-/* Restaurant Data Box Inner */
-.MainDashboardRestaurantDataBox {
-  width: 300px;
-  height: 150px;
-  position: absolute;
-  display: flex;
-  text-align: center;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  border-color: white;
-  border-width: 1px;
   border-radius: 5px;
+  padding: 20px;
+  color: #fff;
   font-family: 'CrowdsaleBuyBox';
-  top: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
-/* Employee Section */
-.MainDashboardRestaurantEmployeesBox {
-  width: 525px;
-  height: 500px;
-  position: absolute;
-  top: 90px;
-  left: 44%;
-  transform: translateX(-50%);
+/* Section Navbar: Title + Buttons at the top of each .dashboard-section */
+.section-navbar {
   display: flex;
-  flex-direction: column;
-  padding: 10px 0 0 0;
-  border: 1px solid white;
-  font-family: 'CrowdsaleBuyBox';
-  text-align: center;
-  background-color: rgba(255, 255, 255, 0.1);
-}
-.addEmployeeButton {
-  width: 80px;
-  height: 40px;
-  position: relative;
-  top: -30px;
-  left: 440px;
-  display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  border: 1px solid white;
-  font-size: 0.85rem;
-  font-family: 'CrowdsaleBuyBox';
-  text-align: center;
-  background-color: rgba(255, 255, 255, 0.1);
-}
-.MainDashboardRestaurantEmployeesContainer {
-  width: 525px;
-  height: 450px;
-  position: absolute;
-  top: 140px;
-  left: 44%;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  border: 1px solid white;
-  font-family: 'CrowdsaleBuyBox';
-  text-align: center;
-  background-color: rgba(255, 255, 255, 0.1);
-}
-.employee {
-  background-color: #444;
-  padding: 10px;
   margin-bottom: 10px;
-  border-radius: 5px;
-  width: 90%;
 }
-.employee p {
-  margin: 5px 0;
+.section-navbar h2 {
+  margin: 0;
+  font-size: 1.25rem;
 }
 
-/* Employee Form Modal */
+/* Data table for Jobs, Employees, etc. */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  color: #fff;
+}
+.data-table th,
+.data-table td {
+  border: 1px solid #444;
+  padding: 8px;
+  text-align: center;
+}
+.data-table th {
+  background-color: #333;
+  color: #fff;
+}
+.data-table tr:nth-child(even) {
+  background-color: #2a2a2a;
+}
+.data-table tr:nth-child(odd) {
+  background-color: #1e1e1e;
+}
+
+/* Service Start/Stop Buttons */
+.service-button.start {
+  background-color: #28a745;
+}
+.service-button.stop {
+  background-color: #dc3545;
+}
+.service-button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+.service-timer {
+  margin-top: 10px;
+  font-size: 16px;
+}
+
+/* ========================================================= */
+/*      REPLACED/REMOVED OLD ABSOLUTE-POSITIONED BOXES       */
+/* ========================================================= */
+/* The following were replaced by the new grid-based sections.
+   They are commented out here for reference. Remove or leave
+   commented if you no longer need them. */
+
+/*
+.MainDashboardRestaurantBox,
+.MainDashboardRestaurantJobsBox,
+.MainDashboardRestaurantEmployeesBox {
+  position: absolute;
+  /* ... old absolute positioning styles ...
+}
+*/
+
+/* Employee Modals, etc. */
 .employeeFormOverlay {
   position: fixed;
   top: 0;
@@ -475,7 +397,7 @@ nav li:first-child {
   background-color: #218838;
 }
 
-/* Buttons */
+/* General Buttons */
 .button {
   padding: 8px 16px;
   margin-right: 10px;
@@ -489,50 +411,24 @@ nav li:first-child {
   background-color: #218838;
 }
 
-/* Service Control Styles */
+/* Service control container (optional) */
 .service-control {
   text-align: center;
   margin-bottom: 20px;
 }
-.service-button {
-  padding: 15px 30px;
-  font-size: 18px;
-  border: none;
-  cursor: pointer;
-  color: #fff;
-  border-radius: 5px;
-}
-.service-button.start {
-  background-color: #28a745;
-}
-.service-button.stop {
-  background-color: #dc3545;
-}
-.service-button:disabled {
-  background-color: #6c757d;
-  cursor: not-allowed;
-}
-.service-timer {
-  margin-top: 10px;
-  font-size: 16px;
-}
 
-/* Services List */
+/* Additional Service Table styling (if used) */
 .services-list {
   margin-top: 20px;
   width: 100%;
   overflow-x: auto;
 }
-
-/* Services Table Styling */
 .services-table {
   width: 100%;
   border-collapse: collapse;
   margin: 0 auto;
   color: #fff;
 }
-
-/* Table Header Styling */
 .services-table th {
   background-color: #333;
   color: #fff;
@@ -540,42 +436,32 @@ nav li:first-child {
   text-align: center;
   border-bottom: 2px solid #444;
 }
-
-/* Table Body Styling */
 .services-table td {
   padding: 8px;
   border-bottom: 1px solid #444;
   text-align: center;
 }
-
-/* Alternate Row Colors */
 .services-table tr:nth-child(even) {
   background-color: #2a2a2a;
 }
-
 .services-table tr:nth-child(odd) {
   background-color: #1e1e1e;
 }
-
-/* Financials Cell Styling */
+/* Financials cells inside services table */
 .financials-cell {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
 }
-
 .financials-item {
   margin: 2px 0;
 }
-
 .financials-item.cost {
   color: red;
 }
-
 .financials-item.profit {
   color: green;
 }
-
 .financials-item.revenue {
   color: #fff;
 }
@@ -585,7 +471,6 @@ nav li:first-child {
     font-size: 12px;
     padding: 6px;
   }
-
   .financials-cell {
     align-items: center;
   }
@@ -743,8 +628,6 @@ nav li:first-child {
   width: 15vw;
   padding: 0 0 45px 0;
 }
-
-
 .newRestaurantButton:hover,
 .addNewRestaurantButtonAlreadyOwnOne:hover,
 .restaurantButton:hover {
@@ -798,33 +681,27 @@ nav li:first-child {
 .hideOnMobile {
   display: block;
 }
-.menu {
-  display: none;
-  z-index: 10;
-}
 
+/* Menu Items (if needed) */
 .MainDashboardRestaurantMenuBox {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-top: 20px;
-  z-layer: 0;
 }
-
 .addMenuItemButton {
   background-color: #28a745;
   color: #fff;
   border: none;
   padding: 8px 16px;
   cursor: pointer;
-  z-index: 9999999;
-  
 }
-
+.addMenuItemButton:hover {
+  background-color: #218838;
+}
 .MainDashboardRestaurantMenuContainer {
   margin-top: 10px;
 }
-
 .menuItem {
   border: 1px solid #ccc;
   padding: 10px;
@@ -841,7 +718,6 @@ nav li:first-child {
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 9999;
 }
-
 .menuItemFormContainer {
   position: fixed;
   background-color: #fff;
@@ -854,11 +730,73 @@ nav li:first-child {
   z-index: 1001;
   border-radius: 8px;
 }
-
 .menuItemFormContainer form p {
   margin-bottom: 15px;
 }
-
 .menuItemFormContainer .button {
   margin-right: 10px;
+}
+.table-scroll {
+  height: 200px;          /* fixed height so each section has the same box size */
+  overflow-y: auto;       /* vertical scroll if content exceeds 200px */
+  margin-top: 0.5rem;
+  border: 1px solid #333; /* optional border or background color */
+  border-radius: 4px;
+  padding: 0.5rem;
+}
+
+/* For the table itself */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;  /* smaller font size */
+  color: #fff;        /* assume you're using white text on dark background */
+}
+
+.data-table th,
+.data-table td {
+  padding: 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid #444;
+}
+
+/* Make section backgrounds a bit darker if desired */
+.dashboard-section {
+  background-color: #222; 
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+/* Example: Make the headings stand out */
+.section-navbar h2 {
+  color: #fff;
+  margin: 0;
+}
+
+.posFormOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* dark overlay */
+  display: flex;                       /* center the modal */
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;                       /* on top of everything */
+}
+
+.posFormContainer {
+  position: fixed;
+  background-color: #fff;
+  width: 400px;
+  max-width: 80%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px;
+  z-index: 10000; /* or 1001, just ensure it's above the overlay */
+  border-radius: 8px;
+  color: #000;    /* black text so it's readable on white bg */
 }
