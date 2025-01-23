@@ -16,7 +16,7 @@ contract decentratalityServiceFactory is Ownable {
     ERC20 public token;
     IrestaurantDeployer public restaurantDeployer;
     address public posDeployer;
-    uint256 public cost = 30000000000000000;
+    uint256 public cost = 0;
 
     mapping(uint256 => address) public restaurants;
     uint256 public nextRestaurantId;
@@ -41,8 +41,7 @@ contract decentratalityServiceFactory is Ownable {
         ERC20 _token,
         IrestaurantDeployer _restaurantDeployer,
         address _posDeployer
-    ) Ownable(msg.sender)
-    {
+    ) Ownable(msg.sender) {
         token = _token;
         restaurantDeployer = _restaurantDeployer;
         posDeployer = _posDeployer;
@@ -80,50 +79,14 @@ contract decentratalityServiceFactory is Ownable {
         require(sent, "failed to send");
     }
 
-    // ===================== New Functions =====================
-
     /**
-     * @dev Pays out `_value` wei of this contract's native currency to `_recipient`.
-     *      Only callable by the contract's owner.
-     * @param _recipient The address to receive the funds
-     * @param _value The amount in wei to send
+     * @dev Returns an array of all restaurant addresses.
      */
-    function payOut(address payable _recipient, uint256 _value)
-        external
-        onlyOwner
-    {
-        require(
-            address(this).balance >= _value,
-            "Insufficient contract balance"
-        );
-        (bool success, ) = _recipient.call{value: _value}("");
-        require(success, "Transfer failed");
-    }
-
-    /**
-     * @dev Returns the address of the contract's owner (redundant if you want
-     *      to just call the inherited `owner()` from Ownable).
-     */
-    function getFactoryOwner() external view returns (address) {
-        return owner();
-    }
-
-    // ===================== Existing Functions =====================
-
-    function balanceOf(address _address)
-        public
-        view
-        onlyOwner
-        returns (uint256)
-    {
-        return token.balanceOf(_address);
-    }
-
-    function transfer(address _to, uint256 _value)
-        public
-        onlyOwner
-        returns (bool)
-    {
-        return token.transfer(_to, _value);
+    function getAllRestaurants() public view returns (address[] memory) {
+        address[] memory allRestaurants = new address[](nextRestaurantId);
+        for (uint256 i = 1; i <= nextRestaurantId; i++) {
+            allRestaurants[i - 1] = restaurants[i];
+        }
+        return allRestaurants;
     }
 }

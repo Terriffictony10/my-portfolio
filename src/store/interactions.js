@@ -49,36 +49,49 @@ export const loadFactory = async (provider, address, dispatch) => {
     return decentratalityServiceFactory
 }
 export const loadAllRestaurants = async (provider, factory, dispatch) => {
-    let Restaurants = [];
-    let GlobalRestaurants = []; // Ensure this is properly initialized in your application context
-    const blockStep = 10000; // Define a safe block range
-    const block = await provider.getBlockNumber();
+    try {
+        const Restaurants = [];
+        const user = await provider.getSigner();
 
-    // Paginate the query to avoid exceeding block range limits
-    const restaurantStream = [];
-    for (let fromBlock = 0; fromBlock <= block; fromBlock += blockStep) {
-        const toBlock = Math.min(fromBlock + blockStep - 1, block);
-        const events = await factory.queryFilter('RestaurantCreated', fromBlock, toBlock);
-        restaurantStream.push(...events);
+        // Call the `getAllRestaurants` function from the factory contract
+        const restaurantAddresses = await factory.getAllRestaurants();
+
+        // Iterate through the returned restaurant addresses
+        for (let i = 0; i < restaurantAddresses.length; i++) {
+            const restaurantAddress = restaurantAddresses[i];
+
+            // Create a new contract instance for the restaurant
+            const restaurantContract = new ethers.Contract(
+                restaurantAddress,
+                RESTAURANT_ABI,
+                user
+            );
+
+            // Fetch restaurant details
+            const name = await restaurantContract.name();
+            const owner = await restaurantContract.owner();
+            const balance = await provider.getBalance(restaurantAddress);
+
+            // Format the restaurant data
+            Restaurants.push({
+                id: i + 1,
+                address: restaurantAddress,
+                name,
+                owner,
+                balance: Number(ethers.formatEther(balance)), // Convert balance to Ether for easier readability
+            });
+        }
+
+        // Update global state or Redux store
+        dispatch({ type: "ALL_RESTAURANTS_LOADED", Restaurants });
+        return Restaurants;
+    } catch (error) {
+        console.error("Error loading all restaurants:", error);
+        return [];
     }
-
-    const RestaurantsRaw = restaurantStream.map((event) => event.args);
-
-    // Transform raw restaurant data
-    for (let i = 0; i < RestaurantsRaw.length; i++) {
-        const restaurant = RestaurantsRaw[i];
-        const formattedRestaurant = Object.keys(restaurant).reduce((acc, key) => {
-            if (!isNaN(Number(key))) return acc; // Skip numeric keys
-            acc[key] = typeof restaurant[key] === 'bigint' ? Number(restaurant[key]) : restaurant[key];
-            return acc;
-        }, {});
-        Restaurants.push(formattedRestaurant);
-    }
-
-    GlobalRestaurants = Restaurants; // Update global state or context
-    dispatch({ type: 'ALL_RESTAURANTS_LOADED', Restaurants });
-    return Restaurants;
 };
+
+
 
 export const loadMyRestaurants = async (provider, user, Restaurants, dispatch) => {
     const myRestaurants = Restaurants.filter((restaurant) => restaurant.owner === user); // Assuming `owner` is the correct key
@@ -91,45 +104,59 @@ export const loadMyRestaurants = async (provider, user, Restaurants, dispatch) =
 export const decorateMyRestaurants = async (provider, myRestaurants) => {
     const user = provider.getSigner();
     const decoratedRestaurants = [];
-    if(myRestaurants){
-    for (const restaurant of myRestaurants) {
-        try {
-            const contract = new ethers.Contract(restaurant.address, RESTAURANT_ABI, user);
-            const name = await contract.name();
-            const cash = Number(await provider.getBalance(contract.address));
 
-            decoratedRestaurants.push({
-                ...restaurant,
-                name,
-                cash,
-            });
-        } catch (error) {
-            console.error(`Error decorating restaurant ${restaurant.address}:`, error);
+    if (myRestaurants) {
+        for (const restaurant of myRestaurants) {
+            try {
+                const contract = new ethers.Contract(restaurant.address, RESTAURANT_ABI, user);
+                const name = await contract.name; // Use the new getName() function
+                const myName = name.toString()
+                const cash = Number(await provider.getBalance(restaurant.address));
+
+                decoratedRestaurants.push({
+                    ...restaurant,
+                    myName,
+                    cash,
+                });
+            } catch (error) {
+                console.error(`Error decorating restaurant ${restaurant.address}:`, error);
+            }
         }
     }
-  }
 
     return decoratedRestaurants;
 };
+
 export const createNewRestaurant = async (provider, factory, restaurantName, totalCostWei, dispatch) => {
-  const user = await provider.getSigner();
-  console.log(user)
   try {
-    // Ensure the user has enough balance to pay the total cost
-    const balance = await provider.getBalance(user);
-    if (balance < totalCostWei) {
+    const user = await provider.getSigner();
+
+    // Ensure totalCostWei is converted to an integer BigInt by truncating decimals
+    const totalCost = BigInt(Math.floor(Number(totalCostWei)));
+
+    // Check if the user has enough balance
+    const balance = await provider.getBalance(user.getAddress());
+    if (BigInt(balance) < totalCost) {
       alert("Insufficient funds to create restaurant");
       return;
     }
 
-    const tx = await factory.createRestaurant(restaurantName, totalCostWei, { value: totalCostWei });
-    await tx.wait(); // Wait for the transaction to be mined
-    dispatch({ type: 'RESTAURANT_CREATION_SUCCESS', restaurant: tx });
+    // Call the contract function with the converted total cost
+    const tx = await factory.createRestaurant(restaurantName, totalCost, {
+      value: totalCost, // Attach the funds in Wei
+    });
+
+    // Wait for the transaction to be mined
+    await tx.wait();
+
+    // Dispatch success action
+    dispatch({ type: "RESTAURANT_CREATION_SUCCESS", restaurant: tx });
   } catch (error) {
     console.error("Error creating restaurant:", error);
-    dispatch({ type: "RESTAURANT_CREATION_FAIL" });
+    dispatch({ type: "RESTAURANT_CREATION_FAIL", error });
   }
 };
+
 export const loadDashboardRestaurantContractData = async (provider, Restaurant, dispatch) => {
     const user = await provider.getSigner()
     const contractAddress = Restaurant[0]

@@ -21,13 +21,14 @@ interface IPOS {
 }
 
 contract Restaurant is Ownable {
+    // Structs
     struct Job {
         uint256 hourlyWageInWei; // Wage is now in wei
         string jobName;
     }
 
     struct Employee {
-        uint256 jobId; 
+        uint256 jobId;
         string name;
         address employeeAddress;
         uint256 clockStamp;
@@ -43,18 +44,7 @@ contract Restaurant is Ownable {
         uint256 revenue;
     }
 
-    event ServiceEnded(
-        uint256 id,
-        uint256 startTime,
-        uint256 endTime,
-        uint256 cost,
-        uint256 profit,
-        uint256 revenue
-    );
-    event POSCreated(address pos, uint256 id, address owner);
-    event JobAdded(uint256 id, uint256 timestamp, Job job);
-    event EmployeeHired(uint256 id, uint256 timestamp, Employee employee);
-
+    // State variables
     bool public service;
     uint256 public serviceStart;
     uint256 public serviceStop;
@@ -76,13 +66,29 @@ contract Restaurant is Ownable {
 
     IPOSDeployer public posDeployer;
 
+    // Constructor
     constructor(string memory _name, address _owner, IPOSDeployer _posDeployer) Ownable(_owner) {
         name = _name;
         posDeployer = _posDeployer;
     }
 
+    // Receive Ether
     receive() external payable {}
 
+    // Events
+    event ServiceEnded(
+        uint256 id,
+        uint256 startTime,
+        uint256 endTime,
+        uint256 cost,
+        uint256 profit,
+        uint256 revenue
+    );
+    event POSCreated(address pos, uint256 id, address owner);
+    event JobAdded(uint256 id, uint256 timestamp, Job job);
+    event EmployeeHired(uint256 id, uint256 timestamp, Employee employee);
+
+    // Functions
     function createPOS(string memory _name) public payable returns (uint256, address) {
         for (uint256 i = 0; i < POSIds.length; i++) {
             uint256 posId = POSIds[i];
@@ -99,6 +105,10 @@ contract Restaurant is Ownable {
         POSIds.push(nextPOSId);
         emit POSCreated(pos, nextPOSId, IPOS(pos).owner());
         return (nextPOSId, pos);
+    }
+
+    function getName() external view returns (string memory) {
+        return name;
     }
 
     function payOwner(uint256 _amount) public {
@@ -134,87 +144,60 @@ contract Restaurant is Ownable {
         service = true;
         serviceStart = block.timestamp;
 
-        // Increment service ID and create a new service record
         nextServiceId++;
         Service storage newService = services[nextServiceId];
         newService.id = nextServiceId;
         newService.startTime = block.timestamp;
         serviceIds.push(nextServiceId);
 
-        // Record the starting balance
         serviceStartBalance = address(this).balance;
     }
 
-    function clockIn(uint256 _id) public {
-        require(employees[_id].clockStamp == 0, "Already clocked in");
-        employees[_id].clockStamp = block.timestamp;
-    }
-
-    function clockOut(uint256 _id) public {
-        require(employees[_id].clockStamp != 0, "Must clock in first");
-        uint256 timeWorked = block.timestamp - employees[_id].clockStamp; // Seconds worked
-        uint256 amountEarned = (jobs[employees[_id].jobId].hourlyWageInWei * timeWorked) / 3600; // Time to be paid in wei
-        employees[_id].employeePension += amountEarned;
-        employees[_id].clockStamp = 0;
-    }
-
     function endService() public onlyOwner {
-    require(service, "Service is not active");
-    service = false;
+        require(service, "Service is not active");
+        service = false;
 
-    // 1) Collect balances from each POS before distributing to employees
-    for (uint256 i = 0; i < POSIds.length; i++) {
-        address posAddress = POSMapping[POSIds[i]];
-        IPOS(posAddress).payRestaurant(); 
-        // ^ calls the payRestaurant function in each POS, 
-        //   transferring its balance to this Restaurant contract
-    }
-
-    // 2) Now proceed with your existing endService logic
-    //    Set the end time of the current service
-    Service storage currentService = services[nextServiceId];
-    currentService.endTime = block.timestamp;
-
-    // 3) Pay employees (cost)
-    uint256 totalCost = 0;
-    for (uint256 i = 0; i < employeeIds.length; i++) {
-        uint256 empId = employeeIds[i];
-        Employee storage emp = employees[empId];
-        if (emp.employeePension > 0) {
-            totalCost += emp.employeePension;
-            payable(emp.employeeAddress).transfer(emp.employeePension);
-            emp.employeePension = 0;
+        for (uint256 i = 0; i < POSIds.length; i++) {
+            address posAddress = POSMapping[POSIds[i]];
+            IPOS(posAddress).payRestaurant();
         }
+
+        Service storage currentService = services[nextServiceId];
+        currentService.endTime = block.timestamp;
+
+        uint256 totalCost = 0;
+        for (uint256 i = 0; i < employeeIds.length; i++) {
+            uint256 empId = employeeIds[i];
+            Employee storage emp = employees[empId];
+            if (emp.employeePension > 0) {
+                totalCost += emp.employeePension;
+                payable(emp.employeeAddress).transfer(emp.employeePension);
+                emp.employeePension = 0;
+            }
+        }
+
+        uint256 serviceEndBalance = address(this).balance;
+        uint256 totalRevenue = serviceEndBalance - serviceStartBalance;
+        uint256 totalProfit = 0;
+        if (totalRevenue > totalCost) {
+            totalProfit = totalRevenue - totalCost;
+        }
+
+        currentService.cost = totalCost;
+        currentService.revenue = totalRevenue;
+        currentService.profit = totalProfit;
+
+        serviceStartBalance = 0;
+
+        emit ServiceEnded(
+            currentService.id,
+            currentService.startTime,
+            currentService.endTime,
+            currentService.cost,
+            currentService.profit,
+            currentService.revenue
+        );
     }
-
-    // 4) Calculate revenue from difference in balances
-    uint256 serviceEndBalance = address(this).balance;
-    uint256 totalRevenue = serviceEndBalance - serviceStartBalance;
-
-    // 5) Calculate profit
-    uint256 totalProfit = 0;
-    if (totalRevenue > totalCost) {
-        totalProfit = totalRevenue - totalCost;
-    }
-
-    // 6) Update the currentService data
-    currentService.cost = totalCost;
-    currentService.revenue = totalRevenue;
-    currentService.profit = totalProfit;
-
-    // 7) Reset serviceStartBalance
-    serviceStartBalance = 0;
-
-    // 8) Emit the ServiceEnded event
-    emit ServiceEnded(
-        currentService.id,
-        currentService.startTime,
-        currentService.endTime,
-        currentService.cost,
-        currentService.profit,
-        currentService.revenue
-    );
-}
 
     function getJobIds() public view returns (uint256[] memory) {
         return jobIds;
@@ -228,7 +211,6 @@ contract Restaurant is Ownable {
         return serviceIds;
     }
 
-    // New function to retrieve all POS addresses, only callable by the owner
     function getAllPOSAddresses() public view onlyOwner returns (address[] memory) {
         uint256 posCount = POSIds.length;
         address[] memory posAddresses = new address[](posCount);
@@ -238,8 +220,8 @@ contract Restaurant is Ownable {
         }
         return posAddresses;
     }
-    function getPOSIds() public view returns (uint256[] memory) {
-    return POSIds;
-}
 
+    function getPOSIds() public view returns (uint256[] memory) {
+        return POSIds;
+    }
 }
