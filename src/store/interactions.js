@@ -741,3 +741,16 @@ export const ringBufferedItems = async (
     console.error('Error in ringBufferedItems:', error)
   }
 }
+export const clockInEmployee = async (provider, contractAddress, abi, employeeId) => {
+  const signer = await provider.getSigner();
+  const contract = new ethers.Contract(contractAddress, abi, signer);
+  const tx = await contract.clockIn(employeeId);
+  await tx.wait();
+};
+
+export const clockOutEmployee = async (provider, contractAddress, abi, employeeId) => {
+  const signer = await provider.getSigner();
+  const contract = new ethers.Contract(contractAddress, abi, signer);
+  const tx = await contract.clockOut(employeeId);
+  await tx.wait();
+};

@@ -21,18 +21,18 @@ interface IPOS {
 }
 
 contract Restaurant is Ownable {
-    // Structs
+
     struct Job {
-        uint256 hourlyWageInWei; // Wage is now in wei
+        uint256 hourlyWageInWei; // Wage is in wei
         string jobName;
     }
 
     struct Employee {
-        uint256 jobId;
+        uint256 jobId;          // ID references the jobs mapping
         string name;
         address employeeAddress;
-        uint256 clockStamp;
-        uint256 employeePension;
+        uint256 clockStamp;     // Tracks time employee last clocked in
+        uint256 employeePension; // Accumulated wages (paid out on endService)
     }
 
     struct Service {
@@ -44,38 +44,34 @@ contract Restaurant is Ownable {
         uint256 revenue;
     }
 
-    // State variables
-    bool public service;
-    uint256 public serviceStart;
-    uint256 public serviceStop;
+
+    bool public service;           // indicates if service is active
+    uint256 public serviceStart;   // block.timestamp when service last began
+    uint256 public serviceStop;    // block.timestamp when service ended
     uint256 public nextJobId;
     uint256 public nextPOSId;
     uint256 public nextEmployeeId;
-    string public name;
-    uint256 public nextServiceId;
-    mapping(uint256 => Service) public services;
-    uint256[] public serviceIds;
+    string public name;            // Restaurant name
+    uint256 public nextServiceId;  
     uint256 public serviceStartBalance;
 
+    mapping(uint256 => Service) public services;
+    uint256[] public serviceIds;
+
+    // Jobs
     mapping(uint256 => Job) public jobs;
     uint256[] public jobIds;
+
+    // Employees
     mapping(uint256 => Employee) public employees;
     uint256[] public employeeIds;
+
+    // POS
     mapping(uint256 => address) public POSMapping;
     uint256[] public POSIds;
 
     IPOSDeployer public posDeployer;
 
-    // Constructor
-    constructor(string memory _name, address _owner, IPOSDeployer _posDeployer) Ownable(_owner) {
-        name = _name;
-        posDeployer = _posDeployer;
-    }
-
-    // Receive Ether
-    receive() external payable {}
-
-    // Events
     event ServiceEnded(
         uint256 id,
         uint256 startTime,
@@ -88,8 +84,36 @@ contract Restaurant is Ownable {
     event JobAdded(uint256 id, uint256 timestamp, Job job);
     event EmployeeHired(uint256 id, uint256 timestamp, Employee employee);
 
-    // Functions
-    function createPOS(string memory _name) public payable returns (uint256, address) {
+    // Optional: events for clockIn/clockOut
+    event EmployeeClockedIn(uint256 indexed employeeId, uint256 timestamp);
+    event EmployeeClockedOut(
+        uint256 indexed employeeId, 
+        uint256 timestamp, 
+        uint256 shiftSeconds, 
+        uint256 shiftPay
+    );
+
+
+    constructor(
+        string memory _name,
+        address _owner,
+        IPOSDeployer _posDeployer
+    )
+        Ownable(_owner)
+    {
+        name = _name;
+        posDeployer = _posDeployer;
+    }
+
+
+
+
+    function createPOS(string memory _name)
+        public
+        payable
+        returns (uint256, address)
+    {
+        // Ensure no duplicate POS by name
         for (uint256 i = 0; i < POSIds.length; i++) {
             uint256 posId = POSIds[i];
             address posAddress = POSMapping[posId];
@@ -103,40 +127,112 @@ contract Restaurant is Ownable {
         address pos = posDeployer.deployPOS(_name, owner(), address(this));
         POSMapping[nextPOSId] = pos;
         POSIds.push(nextPOSId);
+
         emit POSCreated(pos, nextPOSId, IPOS(pos).owner());
         return (nextPOSId, pos);
     }
 
-    function getName() external view returns (string memory) {
-        return name;
-    }
 
     function payOwner(uint256 _amount) public {
-        require(address(this).balance >= _amount, "Insufficient contract balance");
+        require(
+            address(this).balance >= _amount,
+            "Insufficient contract balance"
+        );
         (bool sent, ) = owner().call{value: _amount}("");
         require(sent, "Transfer failed");
     }
 
+
     function addJob(uint256 wageInWei, string memory _name) public onlyOwner {
+        // Check for duplicate job name
+        // The test suite expects a revert reason:
+        // "Job with the same name and ID already exists."
         for (uint256 i = 0; i < jobIds.length; i++) {
-            uint256 jobId = jobIds[i];
+            uint256 existingJobId = jobIds[i];
             require(
-                keccak256(bytes(jobs[jobId].jobName)) != keccak256(bytes(_name)),
-                "Job with the same name already exists."
+                keccak256(bytes(jobs[existingJobId].jobName)) 
+                    != keccak256(bytes(_name)),
+                "Job with the same name and ID already exists."
             );
         }
+
         nextJobId++;
-        jobs[nextJobId] = Job(wageInWei, _name); // Wage stored in wei
+        jobs[nextJobId] = Job(wageInWei, _name);
         jobIds.push(nextJobId);
+
         emit JobAdded(nextJobId, block.timestamp, jobs[nextJobId]);
     }
 
-    function hireEmployee(uint256 _jobId, string memory _name, address employeeAddress) public onlyOwner {
-        require(jobs[_jobId].hourlyWageInWei != 0, "Job does not exist");
+
+    function hireEmployee(
+        uint256 _jobId,
+        string memory _name,
+        address employeeAddress
+    ) 
+        public
+        onlyOwner 
+    {
+        
+        require(
+            jobs[_jobId].hourlyWageInWei != 0,
+            "Job does not exist"
+        );
+
         nextEmployeeId++;
-        employees[nextEmployeeId] = Employee(_jobId, _name, employeeAddress, 0, 0);
+        employees[nextEmployeeId] = Employee(
+            _jobId,
+            _name,
+            employeeAddress,
+            0,
+            0
+        );
         employeeIds.push(nextEmployeeId);
+
         emit EmployeeHired(nextEmployeeId, block.timestamp, employees[nextEmployeeId]);
+    }
+
+
+    function clockIn(uint256 _id) public {
+        Employee storage emp = employees[_id];
+        
+        require(
+            emp.employeeAddress == msg.sender, 
+            "Not authorized or employee does not exist"
+        );
+        
+        require(emp.clockStamp == 0, "Employee is already clocked in");
+
+
+        emp.clockStamp = block.timestamp;
+
+        emit EmployeeClockedIn(_id, block.timestamp);
+    }
+
+    function clockOut(uint256 _id) public {
+        Employee storage emp = employees[_id];
+
+        require(
+            emp.employeeAddress == msg.sender, 
+            "Not authorized or employee does not exist"
+        );
+
+        require(emp.clockStamp != 0, "Employee is not clocked in");
+
+        uint256 shiftSeconds = block.timestamp - emp.clockStamp;
+
+        uint256 wagePerHour = jobs[emp.jobId].hourlyWageInWei;
+        uint256 shiftPay = (shiftSeconds * wagePerHour) / 3600;
+
+        emp.employeePension += shiftPay;
+
+        emp.clockStamp = 0;
+
+        emit EmployeeClockedOut(
+            _id, 
+            block.timestamp, 
+            shiftSeconds, 
+            shiftPay
+        );
     }
 
     function startService() public onlyOwner {
@@ -199,6 +295,10 @@ contract Restaurant is Ownable {
         );
     }
 
+    function getName() external view returns (string memory) {
+        return name;
+    }
+
     function getJobIds() public view returns (uint256[] memory) {
         return jobIds;
     }
@@ -211,6 +311,10 @@ contract Restaurant is Ownable {
         return serviceIds;
     }
 
+    function getPOSIds() public view returns (uint256[] memory) {
+        return POSIds;
+    }
+
     function getAllPOSAddresses() public view onlyOwner returns (address[] memory) {
         uint256 posCount = POSIds.length;
         address[] memory posAddresses = new address[](posCount);
@@ -219,9 +323,5 @@ contract Restaurant is Ownable {
             posAddresses[i] = POSMapping[posId];
         }
         return posAddresses;
-    }
-
-    function getPOSIds() public view returns (uint256[] memory) {
-        return POSIds;
     }
 }

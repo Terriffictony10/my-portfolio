@@ -1,62 +1,118 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useRouter } from 'next/router';
 import { ethers } from 'ethers';
 import Image from 'next/image';
+
+// Import your actions
 import {
   loadEmployeeRelevantPOS,
-  loadAllTicketsForPOS
+  loadAllTicketsForPOS,
+  clockInEmployee,
+  clockOutEmployee
 } from '../store/interactions';
 
 export default function EmployeePage() {
   const dispatch = useDispatch();
   const router = useRouter();
-  
+
+  // ----- SELECTORS FROM REDUX -----
   const provider = useSelector((state) => state.provider.connection);
   const dashboardRestaurant = useSelector((state) => state.DashboardRestaurant);
-  // Assume dashboardRestaurant.contractAddress holds the active restaurant's address
   const restaurantAddress = dashboardRestaurant.contractAddress;
+  const restaurantAbi = dashboardRestaurant.abi;
 
+  // You need an actual employee ID for the connected wallet. 
+  // If you haven't set up logic to find that ID, you can hard-code or reference the store. 
+  // For demonstration, we'll assume it's "1":
+  const employeeId = 1;
+
+  // ----- CLOCK-IN LOGIC -----
+  const [isClockedIn, setIsClockedIn] = useState(false);
+  const [clockInTime, setClockInTime] = useState(null);
+  const [clockedInDuration, setClockedInDuration] = useState(0);
+  const clockIntervalRef = useRef(null);
+
+  // Start or clear the timer interval based on isClockedIn
   useEffect(() => {
+    if (isClockedIn && clockInTime) {
+      clockIntervalRef.current = setInterval(() => {
+        const now = Date.now();
+        const diff = Math.floor((now - clockInTime) / 1000);
+        setClockedInDuration(diff);
+      }, 1000);
+    } else {
+      // Clear any existing interval
+      if (clockIntervalRef.current) {
+        clearInterval(clockIntervalRef.current);
+        clockIntervalRef.current = null;
+      }
+      // Reset timer display if you're not clocked in
+      setClockedInDuration(0);
+    }
+
+    return () => {
+      if (clockIntervalRef.current) {
+        clearInterval(clockIntervalRef.current);
+      }
+    };
+  }, [isClockedIn, clockInTime]);
+
+  // ----- MOUNT / LOAD DATA -----
+  useEffect(() => {
+    if (!restaurantAddress) return; // If not set yet, skip
     const ethersProvider = new ethers.BrowserProvider(window.ethereum);
     async function loadData() {
       await loadEmployeeRelevantPOS(ethersProvider, restaurantAddress, dispatch);
     }
-    loadData()
-  }, []);
+    loadData();
+  }, [restaurantAddress, dispatch]);
 
-   const handleOpenPOS = async () => {
+  // ----- HANDLERS -----
+  const handleOpenPOS = async () => {
     if (!provider || !restaurantAddress) {
       console.log("Provider or restaurant address not found");
       return;
     }
-
-
-    // After loading is done (the above action dispatches state), navigate to POSterminal
     router.push('/POSterminal');
   };
 
-  const navigateToMainJobDashboard = () => {
-    router.push('/mainJobDashboard');
+  const navigateToIndex = () => router.push('/');
+  const navigateToDashboard = () => router.push('/Dashboard');
+
+  // Clock In / Out button
+  const handleClockButton = async () => {
+    if (!provider || !restaurantAddress || !restaurantAbi) {
+      console.log("Missing provider or contract details");
+      return;
+    }
+
+    try {
+      if (!isClockedIn) {
+        // Clock In
+        await clockInEmployee(provider, restaurantAddress, restaurantAbi, employeeId);
+        setIsClockedIn(true);
+        setClockInTime(Date.now());
+      } else {
+        // Clock Out
+        await clockOutEmployee(provider, restaurantAddress, restaurantAbi, employeeId);
+        setIsClockedIn(false);
+        setClockInTime(null);
+      }
+    } catch (error) {
+      console.error("Clock in/out error:", error);
+    }
   };
 
-  const navigateToIndex = () => {
-    router.push('/');
+  // Format the duration into hh:mm:ss or something similar
+  const formatDuration = (secs) => {
+    const hours = Math.floor(secs / 3600);
+    const minutes = Math.floor((secs % 3600) / 60);
+    const seconds = secs % 60;
+    return `${hours}h ${minutes}m ${seconds}s`;
   };
 
-  const navigateToDashboard = () => {
-    router.push('/Dashboard');
-  };
-
-  const openPOS = () => {
-    router.push('/POSterminal');
-  };
-
-  const clockIn = () => {
-    console.log('Clock In button clicked');
-    // Add any logic for the Clock In functionality here
-  };
-
+  // ----- RENDER -----
   return (
     <div className="BlueBackground" style={{ width: '100%', height: '100vh', position: 'relative' }}>
       {/* Logo */}
@@ -68,15 +124,14 @@ export default function EmployeePage() {
       >
         <Image
           src="/Decentralized.png"
-          alt="Decentralized Image"
+          alt="Decentralized Logo"
           width={250}
           height={250}
           priority={true}
-          style={{ position: 'relative', top: 0, left: 0 }}
         />
       </div>
 
-      {/* Non-symmetrical Grid Layout */}
+      {/* Page Content in Grid Layout */}
       <div
         style={{
           position: 'absolute',
@@ -107,7 +162,7 @@ export default function EmployeePage() {
           }}
         >
           <h3 style={{ color: '#fff' }}>Employee Hours</h3>
-          <p style={{ color: '#aaa' }}>This box will display the employee’s logged hours.</p>
+          <p style={{ color: '#aaa' }}>A table or list of shifts could go here.</p>
         </div>
 
         {/* Employee Schedule Box */}
@@ -122,7 +177,7 @@ export default function EmployeePage() {
           }}
         >
           <h3 style={{ color: '#fff' }}>Employee Schedule</h3>
-          <p style={{ color: '#aaa' }}>This box will show the employee’s upcoming shifts.</p>
+          <p style={{ color: '#aaa' }}>Upcoming shifts, if any, appear here.</p>
         </div>
 
         {/* Employee Info Box */}
@@ -137,7 +192,7 @@ export default function EmployeePage() {
           }}
         >
           <h3 style={{ color: '#fff' }}>Employee Info</h3>
-          <p style={{ color: '#aaa' }}>Here you can see general information about the employee.</p>
+          <p style={{ color: '#aaa' }}>General employee info, e.g. name, job title, etc.</p>
         </div>
 
         {/* Open POS Button Box */}
@@ -170,29 +225,37 @@ export default function EmployeePage() {
           </button>
         </div>
 
-        {/* Clock In Button */}
+        {/* Clock In/Out Button + Timer */}
         <div
           style={{
             gridArea: 'clockin',
             display: 'flex',
-            justifyContent: 'center',
+            flexDirection: 'column',
             alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
           <button
-            onClick={clockIn}
+            onClick={handleClockButton}
             style={{
-              backgroundColor: '#28a745',
+              backgroundColor: isClockedIn ? '#dc3545' : '#28a745',
               color: '#fff',
               padding: '15px 30px',
               border: 'none',
               borderRadius: '5px',
               cursor: 'pointer',
               fontSize: '16px',
+              marginBottom: '1rem',
             }}
           >
-            Clock In
+            {isClockedIn ? 'Clock Out' : 'Clock In'}
           </button>
+
+          {isClockedIn && (
+            <div style={{ color: 'white', fontSize: '1.1rem' }}>
+              You have been clocked in for: {formatDuration(clockedInDuration)}
+            </div>
+          )}
         </div>
       </div>
 
@@ -240,4 +303,3 @@ export default function EmployeePage() {
     </div>
   );
 }
-

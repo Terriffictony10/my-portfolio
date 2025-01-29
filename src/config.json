@@ -24,19 +24,19 @@
             "address": "0xc958c48be4D0e407005E3aA64D1c00c67cF9F714"
         },
         "DAO": {
-            "address": "0x57Bb426de52892c1a6a61D5D822580561c0EA132"
+            "address": "0x0c98c0cd17B4B11061C04CBa6F077e5ec78235DC"
         },
         "crowdsale": {
-            "address": "0x1935c34Fd7B5e2bdaaC5F63b1349E1CaBDE1Ce46"
+            "address": "0x4c5574534348C45036aD241298AEaF9Da70037b5"
         },
         "decentratalityServiceFactory": {
-            "address": "0x669BeE1653b6cDd3f3CBfaf111369b2373C999Da"
+            "address": "0xbf3b33e18f4d7833a51C89EcDdFA2E9E5A7fe8F4"
         },
         "POSDeployer": {
-            "address": "0xE9bd7AA9F7432052BB70B85ba7334a34FfF518Ab"
+            "address": "0xD360d1E29706De10FB5B530F4524BC6fDc31de18"
         },
         "restaurantDeployer": {
-            "address": "0x5cb5be19160A10662dE1450b3Cc6699E48A2Cdc2"
+            "address": "0xa67cAc39D9D20d7A8aC60A3d0FC43D0F943c1a20"
         }
     }
 }
