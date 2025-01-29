@@ -34,7 +34,7 @@ function RestaurantSelectionDashboardBody({ onclick, fun }) {
     router.push('/mainRestaurantDashboard');
     const index = myRestaurants.indexOf(restaurant);
     await setDashboardRestaurant(restaurant);
-    await loadDashboardRestaurantContractData(provider, restaurant, dispatch, index);
+    await loadDashboardRestaurantContractData(provider, restaurant, dispatch);
   };
 
   const loadBlockchainData = async () => {

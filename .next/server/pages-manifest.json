@@ -2,7 +2,7 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/Dashboard": "pages/Dashboard.js",
-  "/mainRestaurantDashboard": "pages/mainRestaurantDashboard.js",
-  "/RestaurantDashboard": "pages/RestaurantDashboard.js"
+  "/": "pages/index.js",
+  "/Kitchen": "pages/Kitchen.js",
+  "/micros": "pages/micros.js"
 }

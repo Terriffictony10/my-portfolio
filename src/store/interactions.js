@@ -159,7 +159,7 @@ export const createNewRestaurant = async (provider, factory, restaurantName, tot
 
 export const loadDashboardRestaurantContractData = async (provider, Restaurant, dispatch) => {
     const user = await provider.getSigner()
-    const contractAddress = Restaurant[0]
+    const contractAddress = Restaurant.address
     const abi = RESTAURANT_ABI
     const contract = await new ethers.Contract(contractAddress, abi, user)
     const name = await contract.name()
@@ -242,7 +242,7 @@ export const loadAllJobs = async (provider, contractAddress, abi, dispatch) => {
     const jobIds = await contract.getJobIds();
 
     const jobsArray = [];
-    console.log('hello')
+    
     for (let i = 0; i < jobIds.length; i++) {
       const jobId = Number(jobIds[i]); // Convert BigNumber to Number
       const job = await contract.jobs(jobId);
@@ -390,11 +390,12 @@ export const loadAllPOS = async (provider, contractAddress, abi, dispatch) => {
 };
   export const loadAllMenuItems = async (provider, contractAddress, abi, dispatch) => {
   try {
-    const restaurantContract = new ethers.Contract(contractAddress, abi, provider);
+    const user = await provider.getSigner()
+    const restaurantContract = new ethers.Contract(contractAddress, RESTAURANT_ABI, user);
 
     // Get all POS addresses associated with the restaurant
     const posAddresses = await restaurantContract.getAllPOSAddresses();
-
+    console.log('hello')
     if (posAddresses.length === 0) {
       dispatch({ type: 'LOAD_ALL_MENU_ITEMS_SUCCESS', payload: [] });
       return;
@@ -428,7 +429,7 @@ export const loadAllPOS = async (provider, contractAddress, abi, dispatch) => {
 export const addNewMenuItem = async (provider, contractAddress, abi, cost, name, dispatch) => {
   try {
     const signer = await provider.getSigner();
-    const restaurantContract = new ethers.Contract(contractAddress, RESTAURANT_ABI, provider);
+    const restaurantContract = new ethers.Contract(contractAddress, RESTAURANT_ABI, signer);
 
     // Get all POS addresses from the restaurant contract
     const posAddresses = await restaurantContract.getAllPOSAddresses();

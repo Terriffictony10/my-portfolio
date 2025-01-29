@@ -9,10 +9,15 @@ self.__BUILD_MANIFEST = {
   "lowPriorityFiles": [],
   "rootMainFiles": [],
   "pages": {
-    "/RestaurantDashboard": [
+    "/": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/RestaurantDashboard.js"
+      "static/chunks/pages/index.js"
+    ],
+    "/Kitchen": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/Kitchen.js"
     ],
     "/_app": [
       "static/chunks/webpack.js",
@@ -23,11 +28,6 @@ self.__BUILD_MANIFEST = {
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
-    ],
-    "/mainRestaurantDashboard": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/mainRestaurantDashboard.js"
     ]
   },
   "ampFirstPages": []

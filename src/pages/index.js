@@ -1,117 +1,25 @@
-import { useEffect } from 'react';
+import React from 'react';
+import CrowdsaleBody from '../components/crowdsaleBody.js';
 
 export default function Home() {
-  const showSidebar = () => {
-    const sidebar = document.querySelector('.sidebar');
-    const menu = document.querySelector('.menu');
-    sidebar.style.display = 'flex';
-    menu.style.display = 'hidden'; 
-  };
-
-  const hideSidebar = () => {
-    const sidebar = document.querySelector('.sidebar');
-    const menu = document.querySelector('.menu');
-    sidebar.style.display = 'none';
-    menu.style.display = 'flex';
-  };
-
-  // Detect when screen size changes and reset the inline styles
-  useEffect(() => {
-    const handleResize = () => {
-      const menu = document.querySelector('.menu');
-      if (menu && window.innerWidth > 800) {
-        menu.style.display = ''; // Reset inline style to let CSS handle it
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
-  const navigateToCrowdsale = () => {
-    window.location.href = '/Crowdsale';
-  };
-  const navigateToNFT = () => {
-    window.location.href = '/NFT';
-  };
   const navigateToDemo = () => {
-    window.location.href = '/Demo';
+    window.location.href = '/Dashboard';
   };
 
   return (
-    <div className="body">
-    <div>
-      <title>Decentratatlity</title>
-      <nav>
-        <ul className="sidebar">
-          <li onClick={hideSidebar}>
-            <a href="#" className="centered">
-              <svg xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="15 -960 960 960" width="48px" fill="white">
-                <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
-              </svg>
-            </a>
-          </li>
-          <li onClick={navigateToCrowdsale}><a href="#">Crowdsale</a></li>
-          <li onClick={navigateToNFT}><a href="#">NFT</a></li>
-          <li><a href="#">DAO</a></li>
-          <li><a href="#">About</a></li>
-          <li><a href="#">Project</a></li>
-          <li onClick={navigateToDemo}><a href="#">Demo</a></li>
-        </ul>
-        <ul>
-          <li><a href="#" className="big">Decentratality</a></li>
-          <li className="hideOnMobile" onClick={navigateToCrowdsale}><a href="#">Crowdsale</a></li>
-          <li className="hideOnMobile" onClick={navigateToNFT}><a href="#">NFT</a></li>
-          <li className="hideOnMobile"><a href="#">DAO</a></li>
-          <li className="hideOnMobile"><a href="#">About</a></li>
-          <li className="hideOnMobile"><a href="#">Project</a></li>
-          <li className="hideOnMobile" onClick={navigateToDemo}><a href="#">Demo</a></li>
-          <li onClick={showSidebar} className="menu"> 
-            <a href="#">
-              <svg xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 -960 960 960" width="48px" fill="white">
-                <path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z" />
-              </svg>
-            </a>
-          </li>
-        </ul>
-      </nav>
-    </div>
+    <div className="home-container">
+      {/* Title / Heading */}
+      <h1 className="site-title">Decentratality</h1>
 
-    <div className="text-body">
-      
-        <div className="video">
-          <video autoPlay muted loop disablePictureInPicture controlsList="nodownload" className='video-specs'>
-          
-            <source src="/text-pane.mp4" type="video/mp4" />
+      {/* Crowdsale Pane */}
+      <div className="crowdsale-section">
+        <CrowdsaleBody />
+      </div>
 
-          </video>
-        
-        <div className="page-text">
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;What is Decentratality? Well right now, not much, but it is the launchpad for an idea that could redefine Hospitality forever.            
-  The name comes from putting the words &quot;Decentralized&quot; and &quot;Hospitality&quot; together.
-  <br />
-  <br />
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  The goal is to build an app that can be a launchpad for business owners and employees to access the world of hospitality in a completely redefined way. We will do this by giving prospective restaurant 
-  (or any other facility that provides &quot;hospitality&quot;) owners a platform designed from scratch to house all of the functionality of their payroll, and Inventory management. The app will have built in software similar to micros or jonas for
-  more &quot;FINE DINING&quot; settings.
-  <br />
-  <br />
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  This is just the beginning though, one day, we plan to connect vendors to markets, markets to customers, and customers to well designed approaches to world class hospitality,  all over the world.
-  <br />
-  <br />
-  If that sounds good to you, I would recommend first reading the about section, for a more comprehensive look under the hood, if you do decide to support the project, Welcome to decentratality, lets change the world.
-</div>
-
-        
-
-
-        
-        </div>
-    </div>
+      {/* Demo Navigation Button */}
+      <button className="demo-button" onClick={navigateToDemo}>
+        Go to Demo
+      </button>
     </div>
   );
 }
