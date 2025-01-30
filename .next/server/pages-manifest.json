@@ -2,5 +2,13 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/": "pages/index.js"
+  "/POSterminal": "pages/POSterminal.js",
+  "/api/kitchenTickets": "pages/api/kitchenTickets.js",
+  "/Kitchen": "pages/Kitchen.js",
+  "/micros": "pages/micros.js",
+  "/pay": "pages/pay.js",
+  "/": "pages/index.js",
+  "/Dashboard": "pages/Dashboard.js",
+  "/RestaurantDashboard": "pages/RestaurantDashboard.js",
+  "/mainRestaurantDashboard": "pages/mainRestaurantDashboard.js"
 }

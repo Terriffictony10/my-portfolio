@@ -754,3 +754,43 @@ export const clockOutEmployee = async (provider, contractAddress, abi, employeeI
   const tx = await contract.clockOut(employeeId);
   await tx.wait();
 };
+
+
+// In store/interactions.js
+
+// store/interactions.js
+export const fetchEmployeeStatusFromServer =
+  ({ signer, contractAddress, abi, jobName }) =>
+  async (dispatch, getState) => {
+    try {
+      // 1) The public address of the user
+      const userAddress = await signer.getAddress();
+
+      // 2) Build the payload
+      const payload = {
+        contractAddress,
+        userAddress,
+        abi,
+        jobName
+      };
+
+      // 3) POST to your custom route
+      const response = await fetch('/api/employeeStatus', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      // 4) Dispatch if you want to store in Redux
+      dispatch({ type: 'EMPLOYEE_STATUS_FROM_SERVER', payload: data });
+    } catch (error) {
+      console.error('Error in fetchEmployeeStatusFromServer:', error);
+      dispatch({ type: 'EMPLOYEE_STATUS_FROM_SERVER_ERROR', error });
+    }
+  };

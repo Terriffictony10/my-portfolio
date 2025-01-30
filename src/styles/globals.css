@@ -152,9 +152,9 @@ nav li:first-child {
 }
 .crowdsaleUi {
   font-family: 'CrowdsaleBuyBox';
-  color: black;
+  color: yellow;
   font-size: 2rem;
-  background-image: url('buyBackground.png');
+  background-color: blue;
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;

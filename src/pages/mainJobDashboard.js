@@ -7,7 +7,6 @@ import Image from 'next/image';
 // Import your actions
 import {
   loadEmployeeRelevantPOS,
-  loadAllTicketsForPOS,
   clockInEmployee,
   clockOutEmployee
 } from '../store/interactions';
@@ -16,38 +15,83 @@ export default function EmployeePage() {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  // ----- SELECTORS FROM REDUX -----
+  // 1) Grab user address, plus contract from Redux
+  const userAddress = useSelector((state) => state.provider.account);
   const provider = useSelector((state) => state.provider.connection);
   const dashboardRestaurant = useSelector((state) => state.DashboardRestaurant);
+
   const restaurantAddress = dashboardRestaurant.contractAddress;
   const restaurantAbi = dashboardRestaurant.abi;
 
-  // You need an actual employee ID for the connected wallet. 
-  // If you haven't set up logic to find that ID, you can hard-code or reference the store. 
-  // For demonstration, we'll assume it's "1":
-  const employeeId = 1;
-
-  // ----- CLOCK-IN LOGIC -----
+  // ----- CLOCK-IN STATE -----
   const [isClockedIn, setIsClockedIn] = useState(false);
-  const [clockInTime, setClockInTime] = useState(null);
+  const [clockInTime, setClockInTime] = useState(null); // a JS timestamp in ms
   const [clockedInDuration, setClockedInDuration] = useState(0);
   const clockIntervalRef = useRef(null);
 
-  // Start or clear the timer interval based on isClockedIn
+  // ***************************
+  // 2) On page load, once we have userAddress, contract, and ABI, fetch chain status
+  // ***************************
+  useEffect(() => {
+    if (!userAddress || !restaurantAddress || !restaurantAbi) return;
+
+    async function fetchChainStatus() {
+      try {
+        // POST to /api/employeeStatus
+        const res = await fetch('/api/employeeStatus', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userAddress,
+            contractAddress: restaurantAddress,
+            abi: restaurantAbi
+          }),
+        });
+        const data = await res.json();
+
+        if (data.isClockedIn) {
+          // The contract says user is clocked in
+          // data.clockInTime is a "block.timestamp" in seconds
+          // Convert to ms
+          const blockTimeMs = data.clockInTime * 1000;
+
+          setIsClockedIn(true);
+          setClockInTime(blockTimeMs);
+
+          // If you want to set an initial "clockedInDuration" right away:
+          if (data.shiftSeconds) {
+            setClockedInDuration(data.shiftSeconds);
+          }
+        } else {
+          setIsClockedIn(false);
+          setClockInTime(null);
+          setClockedInDuration(0);
+        }
+      } catch (error) {
+        console.error('Error fetching chain status:', error);
+      }
+    }
+
+    fetchChainStatus();
+  }, [userAddress, restaurantAddress, restaurantAbi]);
+
+  // ***************************
+  // 3) Start an interval if clocked in
+  // ***************************
   useEffect(() => {
     if (isClockedIn && clockInTime) {
       clockIntervalRef.current = setInterval(() => {
-        const now = Date.now();
-        const diff = Math.floor((now - clockInTime) / 1000);
+        const nowMs = Date.now();
+        // difference in seconds
+        const diff = Math.floor((nowMs - clockInTime) / 1000);
         setClockedInDuration(diff);
       }, 1000);
     } else {
-      // Clear any existing interval
+      // Clear interval
       if (clockIntervalRef.current) {
         clearInterval(clockIntervalRef.current);
         clockIntervalRef.current = null;
       }
-      // Reset timer display if you're not clocked in
       setClockedInDuration(0);
     }
 
@@ -58,20 +102,41 @@ export default function EmployeePage() {
     };
   }, [isClockedIn, clockInTime]);
 
-  // ----- MOUNT / LOAD DATA -----
+  // ***************************
+  // 4) Once loaded, optionally load relevant POS, etc.
+  // ***************************
   useEffect(() => {
-    if (!restaurantAddress) return; // If not set yet, skip
+    if (!restaurantAddress) return;
     const ethersProvider = new ethers.BrowserProvider(window.ethereum);
-    async function loadData() {
-      await loadEmployeeRelevantPOS(ethersProvider, restaurantAddress, dispatch);
-    }
-    loadData();
+    loadEmployeeRelevantPOS(ethersProvider, restaurantAddress, dispatch);
   }, [restaurantAddress, dispatch]);
 
+  // Utility: Save local changes to your own API, if needed
+  const persistClockStatus = async (currentIsClockedIn, currentClockInTime) => {
+    // only do this if you have a route expecting these fields
+    // or you can remove this altogether if your chain is the only source of truth
+    try {
+      await fetch('/api/employeeStatus', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userAddress,
+          contractAddress: restaurantAddress,
+          abi: restaurantAbi,
+          // plus your local fields:
+          isClockedIn: currentIsClockedIn,
+          clockInTime: currentClockInTime,
+        }),
+      });
+    } catch (error) {
+      console.error('Error persisting clock-in status to API:', error);
+    }
+  };
+
   // ----- HANDLERS -----
-  const handleOpenPOS = async () => {
+  const handleOpenPOS = () => {
     if (!provider || !restaurantAddress) {
-      console.log("Provider or restaurant address not found");
+      console.log('Provider or restaurant address not found');
       return;
     }
     router.push('/POSterminal');
@@ -80,31 +145,40 @@ export default function EmployeePage() {
   const navigateToIndex = () => router.push('/');
   const navigateToDashboard = () => router.push('/Dashboard');
 
-  // Clock In / Out button
+  // Clock in/out
   const handleClockButton = async () => {
     if (!provider || !restaurantAddress || !restaurantAbi) {
-      console.log("Missing provider or contract details");
+      console.log('Missing provider or contract details');
       return;
     }
 
     try {
       if (!isClockedIn) {
-        // Clock In
-        await clockInEmployee(provider, restaurantAddress, restaurantAbi, employeeId);
+        // Clock in on-chain
+        await clockInEmployee(provider, restaurantAddress, restaurantAbi, 1); // or find employeeId
+
+        const nowMs = Date.now();
         setIsClockedIn(true);
-        setClockInTime(Date.now());
+        setClockInTime(nowMs);
+
+        // Optionally persist to your API
+        persistClockStatus(true, nowMs);
       } else {
-        // Clock Out
-        await clockOutEmployee(provider, restaurantAddress, restaurantAbi, employeeId);
+        // Clock out on-chain
+        await clockOutEmployee(provider, restaurantAddress, restaurantAbi, 1); // or find employeeId
+
         setIsClockedIn(false);
         setClockInTime(null);
+        setClockedInDuration(0);
+
+        // Optionally persist to your API
+        persistClockStatus(false, null);
       }
     } catch (error) {
-      console.error("Clock in/out error:", error);
+      console.error('Clock in/out error:', error);
     }
   };
 
-  // Format the duration into hh:mm:ss or something similar
   const formatDuration = (secs) => {
     const hours = Math.floor(secs / 3600);
     const minutes = Math.floor((secs % 3600) / 60);
@@ -112,9 +186,12 @@ export default function EmployeePage() {
     return `${hours}h ${minutes}m ${seconds}s`;
   };
 
-  // ----- RENDER -----
+  // Render
   return (
-    <div className="BlueBackground" style={{ width: '100%', height: '100vh', position: 'relative' }}>
+    <div
+      className="BlueBackground"
+      style={{ width: '100%', height: '100vh', position: 'relative' }}
+    >
       {/* Logo */}
       <div
         width={250}
@@ -127,11 +204,11 @@ export default function EmployeePage() {
           alt="Decentralized Logo"
           width={250}
           height={250}
-          priority={true}
+          priority
         />
       </div>
 
-      {/* Page Content in Grid Layout */}
+      {/* Page Content */}
       <div
         style={{
           position: 'absolute',
@@ -162,7 +239,9 @@ export default function EmployeePage() {
           }}
         >
           <h3 style={{ color: '#fff' }}>Employee Hours</h3>
-          <p style={{ color: '#aaa' }}>A table or list of shifts could go here.</p>
+          <p style={{ color: '#aaa' }}>
+            A table or list of shifts could go here.
+          </p>
         </div>
 
         {/* Employee Schedule Box */}
@@ -177,7 +256,9 @@ export default function EmployeePage() {
           }}
         >
           <h3 style={{ color: '#fff' }}>Employee Schedule</h3>
-          <p style={{ color: '#aaa' }}>Upcoming shifts, if any, appear here.</p>
+          <p style={{ color: '#aaa' }}>
+            Upcoming shifts, if any, appear here.
+          </p>
         </div>
 
         {/* Employee Info Box */}
@@ -192,10 +273,12 @@ export default function EmployeePage() {
           }}
         >
           <h3 style={{ color: '#fff' }}>Employee Info</h3>
-          <p style={{ color: '#aaa' }}>General employee info, e.g. name, job title, etc.</p>
+          <p style={{ color: '#aaa' }}>
+            General employee info, e.g. name, job title, etc.
+          </p>
         </div>
 
-        {/* Open POS Button Box */}
+        {/* Open POS Button */}
         <div
           style={{
             gridArea: 'pos',
@@ -225,7 +308,7 @@ export default function EmployeePage() {
           </button>
         </div>
 
-        {/* Clock In/Out Button + Timer */}
+        {/* Clock In/Out Box */}
         <div
           style={{
             gridArea: 'clockin',
@@ -272,7 +355,6 @@ export default function EmployeePage() {
         }}
       >
         <button
-          className="clean-button-home-RestaurantSelector"
           onClick={navigateToIndex}
           style={{
             backgroundColor: '#6c757d',
@@ -286,7 +368,6 @@ export default function EmployeePage() {
           Go to Main Page
         </button>
         <button
-          className="clean-button-home-Dashboard"
           onClick={navigateToDashboard}
           style={{
             backgroundColor: '#6c757d',
