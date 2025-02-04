@@ -35,7 +35,7 @@ const AdminSchedule = ({ provider }) => {
         }
       });
     }
-  }, []);
+  }, [startDate, endDate]);
 
   const handleSchedule = async (e) => {
     e.preventDefault();

@@ -1,5 +1,5 @@
-// components/WalletConnector.js
-import React, { useState, useEffect } from 'react';
+// src/components/WalletConnector.js
+import React, { useState, useEffect, useCallback } from 'react';
 import WalletConnectProvider from '@walletconnect/web3-provider';
 import Web3Modal from 'web3modal';
 import { ethers } from 'ethers';
@@ -8,27 +8,23 @@ const WalletConnector = () => {
   const [provider, setProvider] = useState(null);
   const [account, setAccount] = useState(null);
 
-  // Configure provider options
   const providerOptions = {
     walletconnect: {
       package: WalletConnectProvider,
       options: {
-        // Replace with your own Infura ID or another RPC endpoint if desired
-        infuraId: "f35a83b4eba0446989ef9be5172774a5"
+        infuraId: "YOUR_INFURA_ID" // Replace with your Infura ID
       }
     }
   };
 
-  // Initialize Web3Modal
   const web3Modal = new Web3Modal({
     cacheProvider: true,
     providerOptions
   });
 
-  const connectWallet = async () => {
+  const connectWallet = useCallback(async () => {
     try {
       const instance = await web3Modal.connect();
-      // Ethers v6 uses BrowserProvider:
       const ethersProvider = new ethers.BrowserProvider(instance);
       setProvider(ethersProvider);
       const signer = await ethersProvider.getSigner();
@@ -37,14 +33,13 @@ const WalletConnector = () => {
     } catch (error) {
       console.error("Wallet connection failed", error);
     }
-  };
+  }, [web3Modal]);
 
-  // If a cached provider exists, connect automatically.
   useEffect(() => {
     if (web3Modal.cachedProvider) {
       connectWallet();
     }
-  }, []);
+  }, [connectWallet, web3Modal.cachedProvider]);
 
   return (
     <div style={{ textAlign: 'center', marginBottom: '1rem' }}>

@@ -1,11 +1,13 @@
+// src/pages/index.js
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
+import Image from 'next/image';
 import WalletConnector from '../components/WalletConnector';
 import AdminSchedule from '../components/AdminSchedule';
 import CrowdsaleBody from '../components/crowdsaleBody';
 import CrowdsaleExplanation from '../components/CrowdsaleExplanation';
 
-// Inline InfoAccordion component
+// Inline InfoAccordion component using const arrow syntax
 const AccordionItem = ({ title, children }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
@@ -69,7 +71,7 @@ const InfoAccordion = () => {
       </AccordionItem>
       <AccordionItem title="Employee Onboarding">
         <p>
-          Our innovative onboarding system links blockchain accounts to real-life identities, ensuring payroll processes remain secure and compliant while giving employees a customizable public profile.
+          Our innovative onboarding system links blockchain accounts to real-life identities, ensuring that payroll processes remain secure and compliant while giving employees a customizable public profile.
         </p>
       </AccordionItem>
       <AccordionItem title="Support the Future">
@@ -130,10 +132,10 @@ const LearnMoreModal = ({ isOpen, onClose }) => {
       >
         <h2>About Decentratality</h2>
         <p>
-          Tired of malicious developers scamming you with meme-coins? Look no further—Decentratality is the stable crypto project you’ve been waiting for. Don’t miss your chance to be an early investor in essentially the "Facebook of Food."
+          Tired of malicious developers scamming you with meme-coins? Look no further &mdash; Decentratality is the stable crypto project you&apos;ve been waiting for. Don&apos;t miss your chance to be an early investor in essentially the &quot;Facebook of Food.&quot;
         </p>
         <p>
-          Our vision is to create a secure environment where employees can store all employment-related information safely—shielded from seizure—while linking that data to a public, customizable profile that highlights their strengths in the hospitality industry. Within the Decentratality Hub, users can take professional classes with tracked progress, engage in community conversations, and enjoy an all-in-one web app that handles POS transactions, employee payments, and document management.
+          Our vision is to create a secure environment where employees can store all employment-related information safely &mdash; shielded from seizure &mdash; while linking that data to a public, customizable profile that highlights their strengths in the hospitality industry. Within the Decentratality Hub, users can take professional classes with tracked progress, engage in community conversations, and enjoy an all-in-one web app that handles POS transactions, employee payments, and document management.
         </p>
         <button
           onClick={onClose}
@@ -192,10 +194,12 @@ export default function Home() {
     >
       <WalletConnector />
       <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-        <img
+        <Image
           src="/logo.png"
           alt="Decentratality"
-          style={{ maxWidth: '100%', height: 'auto' }}
+          width={300}
+          height={100}
+          style={{ margin: '0 auto' }}
         />
       </div>
       {isAdmin && (
