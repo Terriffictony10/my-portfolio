@@ -9,7 +9,7 @@ import { cookieToInitialState, WagmiProvider, type Config } from 'wagmi'
 
 // Set up queryClient
 const queryClient = new QueryClient()
-const projectId = "f35a83b4eba0446989ef9be5172774a5"
+const projectId = "6df9df8b72567f05d2f0d1503b13538f"
 if (!projectId) {
   throw new Error('Project ID is not defined')
 }
