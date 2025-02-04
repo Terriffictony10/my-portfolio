@@ -2,11 +2,13 @@
 
 import React, { type ReactNode } from 'react';
 import { createAppKit } from '@reown/appkit/react';
-import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
+import { EthersAdapter } from '@reown/appkit-adapter-wagmi';
 import { mainnet, arbitrum } from '@reown/appkit/networks';
-import { networks } from '@/config';
+import { projectId, networks } from '@/config';
 
-
+if (!projectId) {
+  throw new Error('Project ID is not defined');
+}
 
 // Set up metadata with redirect so that MetaMask is one of the wallet options.
 const metadata = {
@@ -22,8 +24,8 @@ const metadata = {
 };
 
 export const modal = createAppKit({
-  adapters: [new WagmiAdapter()],
-  "6df9df8b72567f05d2f0d1503b13538f",
+  adapters: [new EthersAdapter()],
+  projectId,
   networks,
   metadata,
   themeMode: 'light',
@@ -31,7 +33,7 @@ export const modal = createAppKit({
     analytics: true
   },
   themeVariables: {
-    '--w3m-accent': '#000000',
+    '--w3m-accent': '#000000'
   }
 });
 

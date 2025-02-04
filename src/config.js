@@ -4,9 +4,7 @@ import { mainnet, arbitrum } from '@reown/appkit/networks';
 
 export const projectId = '6df9df8b72567f05d2f0d1503b13538f';
 
-if (!projectId) {
-  throw new Error('Project ID is not defined');
-}
+
 
 export const networks = [mainnet, arbitrum];
 
