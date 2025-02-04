@@ -7,9 +7,10 @@ import AdminSchedule from '../components/AdminSchedule';
 import CrowdsaleBody from '../components/crowdsaleBody';
 import CrowdsaleExplanation from '../components/CrowdsaleExplanation';
 
-// Inline InfoAccordion component using const arrow syntax
+// Inline InfoAccordion component using arrow functions (with fluid transitions)
 const AccordionItem = ({ title, children }) => {
   const [isOpen, setIsOpen] = useState(false);
+
   return (
     <div
       style={{
@@ -100,7 +101,7 @@ const InfoAccordion = () => {
   );
 };
 
-// Inline LearnMoreModal component
+// Inline LearnMoreModal component with fade-in animation using keyframes via inline styles
 const LearnMoreModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
   return (
