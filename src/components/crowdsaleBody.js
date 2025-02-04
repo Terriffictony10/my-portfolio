@@ -1,6 +1,6 @@
 // src/components/crowdsaleBody.js
-import { useEffect, useState, useCallback } from 'react';
-import { ethers } from 'ethers';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { ethers, BrowserProvider, JsonRpcSigner } from 'ethers';
 import Loading from './Loading';
 import Buy from './crowdsaleBuy';
 import CrowdsaleProgress from './crowdsaleProgress';
@@ -8,9 +8,70 @@ import AutoFinalize from './AutoFinalize';
 import CROWDSALE_ABI from '../abis/Crowdsale.json';
 import TOKEN_ABI from '../abis/Token.json';
 import config from '../config.json';
+import { useWalletInfo } from '@reown/appkit/react';
+import wagmi from "../context/appkit/index.tsx";
+import { useAppKitAccount } from '@reown/appkit/react';
+import { useClient, useConnectorClient } from 'wagmi';
+
+/** Convert a viem Client to an ethers.js Provider. */
+export function clientToProvider(client) {
+  const { chain, transport } = client;
+  const network = {
+    chainId: chain.id,
+    name: chain.name,
+    ensAddress: chain.contracts?.ensRegistry?.address,
+  };
+
+  // Use the RPC URL provided by the transport.
+  return new ethers.JsonRpcProvider(transport.url, network);
+}
+
+/** Hook to convert a viem Client to an ethers.js Provider. */
+export function useEthersProvider({ chainId } = {}) {
+  const client = useClient({ chainId });
+  return useMemo(() => (client ? clientToProvider(client) : undefined), [client]);
+}
+
+/** Convert a viem Wallet Client to an ethers.js Signer. */
+export function clientToSigner(client) {
+  const { account, chain, transport } = client;
+  const network = {
+    chainId: chain.id,
+    name: chain.name,
+    ensAddress:
+      chain.contracts && chain.contracts.ensRegistry
+        ? chain.contracts.ensRegistry.address
+        : undefined,
+  };
+  const provider = new ethers.BrowserProvider(transport, network);
+  const signer = new ethers.JsonRpcSigner(provider, account.address);
+  return signer;
+}
+
+/**
+ * Hook to convert a viem Wallet Client to an ethers.js Signer.
+ * This hook uses internal state and an effect to compute the signer.
+ */
+export function useEthersSigner({ chainId } = {}) {
+  const { data: client } = useConnectorClient({ chainId });
+  const [signer, setSigner] = useState(undefined);
+
+  useEffect(() => {
+    if (client) {
+      try {
+        const s = clientToSigner(client);
+        setSigner(s);
+      } catch (error) {
+        console.error('Error converting client to signer:', error);
+      }
+    }
+  }, [client]);
+
+  return signer;
+}
 
 function CrowdsaleBody() {
-  const [provider, setProvider] = useState(null);
+  // Local component state
   const [crowdsale, setCrowdsale] = useState(null);
   const [account, setAccount] = useState(null);
   const [owner, setOwner] = useState(null);
@@ -24,51 +85,78 @@ function CrowdsaleBody() {
   const [finalized, setFinalized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [finalizeLoading, setFinalizeLoading] = useState(false);
+  const [myprovider, setProvider] = useState(null);
+
+  // Get the ethers provider and signer via our custom hooks
+  const ethersProvider = useEthersProvider({ chainId: 84532 });
+  const ethersSigner = useEthersSigner({ chainId: 84532 });
+  const { isConnected } = useAppKitAccount();
 
   useEffect(() => {
-    if (isLoading) {
-      const loadBlockchainData = async () => {
+    async function loadBlockchainData() {
+      if (isConnected && ethersSigner && ethersProvider) {
         try {
-          const provider = new ethers.BrowserProvider(window.ethereum);
+          // Get the signer's address
+          const { provider, address} = await ethersSigner;
+          
+         
+          
+         
+          setAccount(address)
+          // Note: some implementations of JsonRpcSigner might expose the address via _address; otherwise use getAddress().
+          // Set the provider (from our hook) into state
           setProvider(provider);
-          const { chainId } = await provider.getNetwork();
-          const token = new ethers.Contract(config[chainId].token.address, TOKEN_ABI, provider);
-          const crowdsale = new ethers.Contract(config[chainId].crowdsale.address, CROWDSALE_ABI, provider);
-          setCrowdsale(crowdsale);
-          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-          const account = ethers.getAddress(accounts[0]);
-          setAccount(account);
-          const balance = await token.balanceOf(account);
+          
+          console.log()
+          // Retrieve the network and chainId
+          const mynetwork = await provider.getNetwork();
+          const chainId = mynetwork.chainId;
+          console.log(chainId)
+          // Instantiate the Token and Crowdsale contracts using the signer
+          const token = new ethers.Contract(config[chainId].token.address, TOKEN_ABI, ethersSigner);
+          
+          const crowdsaleContract = new ethers.Contract(
+            config[chainId].crowdsale.address,
+            CROWDSALE_ABI,
+            ethersSigner
+          );
+          
+          
+          setCrowdsale(crowdsaleContract);
+          
+
+          const balance = await token.balanceOf(address);
+          console.log(balance)
           setAccountBalance(ethers.formatUnits(balance, 18));
-          const price = ethers.formatUnits(await crowdsale.price(), 18);
-          setPrice(price);
-          const maxTokens = ethers.formatUnits(await crowdsale.maxTokens(), 18);
-          setMaxTokens(maxTokens);
-          const tokensSold = ethers.formatUnits(await crowdsale.tokensSold(), 18);
-          setTokensSold(tokensSold);
-          const fundingGoalWei = await crowdsale.fundingGoal();
+          const priceVal = ethers.formatUnits(await crowdsaleContract.price(), 18);
+          setPrice(priceVal);
+          const maxTokensVal = ethers.formatUnits(await crowdsaleContract.maxTokens(), 18);
+          setMaxTokens(maxTokensVal);
+          const tokensSoldVal = ethers.formatUnits(await crowdsaleContract.tokensSold(), 18);
+          setTokensSold(tokensSoldVal);
+          const fundingGoalWei = await crowdsaleContract.fundingGoal();
           setFundingGoal(ethers.formatUnits(fundingGoalWei, 18));
-          const saleStartTimestamp = await crowdsale.saleStart();
+          const saleStartTimestamp = await crowdsaleContract.saleStart();
           setSaleStart(Number(saleStartTimestamp));
-          const saleEndTimestamp = await crowdsale.saleEnd();
+          const saleEndTimestamp = await crowdsaleContract.saleEnd();
           setSaleEnd(Number(saleEndTimestamp));
-          const finalizedStatus = await crowdsale.finalized();
+          const finalizedStatus = await crowdsaleContract.finalized();
           setFinalized(finalizedStatus);
-          const ownerAddress = await crowdsale.owner();
+          const ownerAddress = await crowdsaleContract.owner();
           setOwner(ownerAddress);
         } catch (error) {
           console.error('Error loading blockchain data:', error);
         }
         setIsLoading(false);
-      };
-      loadBlockchainData();
+      }
     }
-  }, [isLoading]);
+    loadBlockchainData();
+  }, [isConnected, ethersSigner, ethersProvider]);
 
   const handleFinalize = useCallback(async () => {
     try {
       setFinalizeLoading(true);
-      const signer = await provider.getSigner();
+      const signer = provider.getSigner();
       const tx = await crowdsale.connect(signer).finalize();
       await tx.wait();
       alert('Crowdsale finalized successfully!');
@@ -78,7 +166,7 @@ function CrowdsaleBody() {
       alert('Error finalizing crowdsale. See console for details.');
     }
     setFinalizeLoading(false);
-  }, [provider, crowdsale]);
+  }, [ crowdsale]);
 
   const isLive = Date.now() / 1000 >= saleStart;
 
@@ -117,8 +205,7 @@ function CrowdsaleBody() {
         }}
       >
         <p style={{ margin: '0.9rem 0' }}>
-          <strong>About Your Contribution:</strong> By purchasing tokens in our crowdsale, you are directly
-          contributing to the development of <em>Decentratality</em>.
+          <strong>About Your Contribution:</strong> By purchasing tokens in our crowdsale, you are directly contributing to the development of <em>Decentratality</em>.
         </p>
       </div>
       <div className="crowdsaleUi">
@@ -141,10 +228,10 @@ function CrowdsaleBody() {
               <p style={{ margin: '0.2rem 0' }}>
                 <strong>Funding Goal:</strong> {fundingGoal} ETH
               </p>
-              <Buy provider={provider} price={price} crowdsale={crowdsale} setIsLoading={setIsLoading} />
+              <Buy provider={myprovider} price={price} crowdsale={crowdsale} setIsLoading={setIsLoading} />
               <CrowdsaleProgress maxTokens={maxTokens} tokensSold={tokensSold} fundingGoal={fundingGoal} />
-              {provider && crowdsale && <AutoFinalize provider={provider} crowdsale={crowdsale} />}
-              {provider && crowdsale && account && owner && account.toLowerCase() === owner.toLowerCase() && (
+              {myprovider && crowdsale && <AutoFinalize provider={myprovider} crowdsale={crowdsale} />}
+              {myprovider && crowdsale && account && owner && account.toLowerCase() === owner.toLowerCase() && (
                 <div style={{ textAlign: 'center', marginTop: '1rem' }}>
                   <button
                     onClick={handleFinalize}
