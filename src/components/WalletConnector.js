@@ -34,7 +34,7 @@ const WalletConnector = () => {
     iframe.src = 'metamask://';
     document.body.appendChild(iframe);
     // Wait a short time (e.g., 800ms) to allow the scheme to trigger.
-    await new Promise(resolve => setTimeout(resolve, 80000));
+    await new Promise(resolve => setTimeout(resolve, 800));
     // document.body.removeChild(iframe);
   };
 
