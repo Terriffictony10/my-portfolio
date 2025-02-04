@@ -7,6 +7,7 @@ import ReactModal from 'react-modal';
 // If you use absolute import '@', make sure it's configured in your jsconfig.json/tsconfig.json
 import store, { persistor } from '@/store';
 import { ProviderContextProvider } from '@/context/ProviderContext';
+import AppKitProvider from '../context/appkit'; // Your provider context file
 
 // CSS imports here
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -16,6 +17,7 @@ ReactModal.setAppElement('#__next'); // For react-modal accessibility
 
 export default function MyApp({ Component, pageProps }) {
   return (
+    <AppKitProvider>
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <ProviderContextProvider>
@@ -23,5 +25,6 @@ export default function MyApp({ Component, pageProps }) {
         </ProviderContextProvider>
       </PersistGate>
     </Provider>
+    </AppKitProvider>
   );
 }
