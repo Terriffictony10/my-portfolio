@@ -2,6 +2,12 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
+  "/": "pages/index.js",
+  "/Dashboard": "pages/Dashboard.js",
+  "/RestaurantDashboard": "pages/RestaurantDashboard.js",
+  "/api/checkAdmin": "pages/api/checkAdmin.js",
+  "/mainRestaurantDashboard": "pages/mainRestaurantDashboard.js",
+  "/EmployeeDashboard": "pages/EmployeeDashboard.js",
   "/mainJobDashboard": "pages/mainJobDashboard.js",
-  "/": "pages/index.js"
+  "/api/employeeStatus": "pages/api/employeeStatus.js"
 }

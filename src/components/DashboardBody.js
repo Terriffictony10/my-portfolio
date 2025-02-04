@@ -47,7 +47,7 @@ function DashboardBody({ onclick2, onclick3}) {
   }
     }
     loadProvider()
-  }, []);
+  }, [isConnected]);
 
  
   const navigateToCrowdsale = () => {
