@@ -1,4 +1,3 @@
-// src/config.js
 import { cookieStorage, createStorage } from '@wagmi/core';
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
 import { mainnet, arbitrum } from '@reown/appkit/networks';

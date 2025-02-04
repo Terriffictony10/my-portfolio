@@ -2,11 +2,12 @@
 
 import React from 'react';
 
-// This component simply renders the Reown AppKit custom wallet connect button.
-// Reown AppKit automatically handles the modal and wallet connection when this button is clicked.
+// This component renders the Reown AppKit custom wallet connect button.
+// When the user clicks the button, the AppKit logic opens a modal with wallet options (including MetaMask).
 const WalletConnector = () => {
   return (
     <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+      {/* The custom element below is provided by Reown AppKit */}
       <appkit-button
         style={{
           padding: '0.75rem 1.5rem',
