@@ -1,0 +1,90 @@
+import { useState, useRef, useEffect } from 'react';
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.css';
+import { ethers } from 'ethers';
+import CROWDSALE_ABI from '../abis/Crowdsale.json';
+import config from '../config.json';
+
+const AdminSchedule = ({ provider }) => {
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date(Date.now() + 3600 * 1000));
+  const [fundingGoalEth, setFundingGoalEth] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const startDateInputRef = useRef(null);
+  const endDateInputRef = useRef(null);
+
+  useEffect(() => {
+    if (startDateInputRef.current) {
+      flatpickr(startDateInputRef.current, {
+        enableTime: true,
+        dateFormat: 'Y-m-d H:i',
+        defaultDate: startDate,
+        onChange: (selectedDates) => {
+          if (selectedDates.length > 0) setStartDate(selectedDates[0]);
+        }
+      });
+    }
+    if (endDateInputRef.current) {
+      flatpickr(endDateInputRef.current, {
+        enableTime: true,
+        dateFormat: 'Y-m-d H:i',
+        defaultDate: endDate,
+        onChange: (selectedDates) => {
+          if (selectedDates.length > 0) setEndDate(selectedDates[0]);
+        }
+      });
+    }
+  }, []);
+
+  const handleSchedule = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const signer = await provider.getSigner();
+      const network = await provider.getNetwork();
+      const chainId = network.chainId;
+      const crowdsale = new ethers.Contract(config[chainId].crowdsale.address, CROWDSALE_ABI, signer);
+      const saleStartTimestamp = Math.floor(startDate.getTime() / 1000);
+      const saleEndTimestamp = Math.floor(endDate.getTime() / 1000);
+      const fundingGoalWei = ethers.parseUnits(fundingGoalEth.toString(), 'ether');
+      const tx = await crowdsale.scheduleCrowdsale(saleStartTimestamp, saleEndTimestamp, fundingGoalWei);
+      await tx.wait();
+      alert('Crowdsale scheduled successfully!');
+    } catch (error) {
+      console.error('Error scheduling crowdsale:', error);
+      alert('Error scheduling crowdsale. See console for details.');
+    }
+    setIsSubmitting(false);
+  };
+
+  return (
+    <form onSubmit={handleSchedule} style={{ marginTop: '20px' }}>
+      <div style={{ marginBottom: '15px' }}>
+        <label style={{ display: 'block', marginBottom: '5px' }}>Start Date:</label>
+        <input type="text" ref={startDateInputRef} style={{ padding: '8px', width: '100%' }} />
+      </div>
+      <div style={{ marginBottom: '15px' }}>
+        <label style={{ display: 'block', marginBottom: '5px' }}>End Date:</label>
+        <input type="text" ref={endDateInputRef} style={{ padding: '8px', width: '100%' }} />
+      </div>
+      <div style={{ marginBottom: '15px' }}>
+        <label style={{ display: 'block', marginBottom: '5px' }}>Funding Goal (ETH):</label>
+        <input
+          type="number"
+          step="0.01"
+          placeholder="Enter funding goal in ETH"
+          value={fundingGoalEth}
+          onChange={(e) => setFundingGoalEth(e.target.value)}
+          style={{ padding: '8px', width: '100%' }}
+          required
+        />
+      </div>
+      <button type="submit" disabled={isSubmitting} style={{ padding: '10px 20px' }}>
+        {isSubmitting ? 'Scheduling...' : 'Schedule Crowdsale'}
+      </button>
+    </form>
+  );
+};
+
+export default AdminSchedule;

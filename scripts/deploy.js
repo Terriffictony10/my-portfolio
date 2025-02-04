@@ -1,79 +1,94 @@
 const hre = require("hardhat");
-const config = require('../src/config.json')
+const config = require('../src/config.json'); // if needed for additional configuration
+// Helper functions for unit conversions.
 const tokens = (n) => {
-  return ethers.parseUnits(n.toString(), 'ether')
-}
-
-const ether = tokens
+  return ethers.parseUnits(n.toString(), 'ether');
+};
+const ether = tokens;
 
 async function main() {
-	const SYMBOL = 'DHPT'
-	const MAX_SUPPLY = '1000000'
-	const PRICE = ethers.parseUnits('0.025', 'ether') 
+  // Get the deployer account (the first signer)
+  const accounts = await ethers.getSigners();
+  const funder = accounts[0];
+  console.log("Deploying contracts with account:", funder.address);
 
+  // ====================================================
+  // 1. Deploy the Decentratality token contract.
+  // (Our current token contract is named "Decentratality")
+  // ====================================================
+  const Token = await hre.ethers.getContractFactory("Decentratality");
+  const decentratality = await Token.deploy();
+  await decentratality.waitForDeployment();
+  console.log(`Decentratality Token deployed to: ${decentratality.target}\n`);
 
-	const accounts = await ethers.getSigners()
-  	const funder = accounts[0]
-  	const investor1 = accounts[1]
-  	const investor2 = accounts[2]
-  	const investor3 = accounts[3]
-  	const recipient = accounts[4]
+  // ====================================================
+  // 2. Deploy auxiliary contracts.
+  // ====================================================
+  // Deploy POSDeployer.
+  // const POSDeployer = await ethers.getContractFactory('POSDeployer');
+  // const posDeployer = await POSDeployer.deploy();
+  // await posDeployer.waitForDeployment();
+  // console.log(`POSDeployer deployed to: ${posDeployer.target}\n`);
 
+  // // Deploy RestaurantDeployer.
+  // const RestaurantDeployer = await ethers.getContractFactory('RestaurantDeployer');
+  // const restaurantDeployer = await RestaurantDeployer.deploy();
+  // await restaurantDeployer.waitForDeployment();
+  // console.log(`RestaurantDeployer deployed to: ${restaurantDeployer.target}\n`);
 
-	const Token = await hre.ethers.getContractFactory("Decentratality")
-	const decentratality = await Token.deploy()
-	
-	
-	const POSDeployer = await ethers.getContractFactory('POSDeployer');
-  posDeployer = await POSDeployer.deploy();
+  // // Deploy decentratalityServiceFactory.
+  // const Factory = await ethers.getContractFactory('decentratalityServiceFactory');
+  // const decentratalityAddress = decentratality.target;
+  // const restaurantDeployerAddress = restaurantDeployer.target;
+  // const posDeployerAddress = posDeployer.target;
+  // const decentratalityServiceFactory = await Factory.deploy(
+  //   decentratalityAddress,
+  //   restaurantDeployerAddress,
+  //   posDeployerAddress
+  // );
+  // await decentratalityServiceFactory.waitForDeployment();
+  // console.log(`decentratalityServiceFactory deployed to: ${decentratalityServiceFactory.target}\n`);
 
-  const RestaurantDeployer = await ethers.getContractFactory('RestaurantDeployer');
-  restaurantDeployer = await RestaurantDeployer.deploy();
+  // ====================================================
+  // 3. Deploy the DAO contract.
+  // ====================================================
+ 
+  // ====================================================
+  // 4. (Crowdsale Deployment Section – Skipped)
+  // ====================================================
+  // Our Crowdsale contract (the one we have been working on) has the following constructor parameters:
+  //    ERC20 _token, uint256 _price, uint256 _maxTokens, bytes32 _merkleRoot
+  // For deployment we set:
+  //    - token: decentratality.token address,
+  //    - price: 0.025 ETH,
+  //    - maxTokens: 1,000,000 tokens,
+  //    - merkleRoot: a dummy value (you can replace it later).
+  const PRICE = ethers.parseUnits('0.0025', 'ether');
+  const MAX_SUPPLY = '1000000'; // as a string
+  const dummyMerkleRoot = "0x" + "0".repeat(64); // dummy merkle root
 
-  const Factory = await ethers.getContractFactory('decentratalityServiceFactory');
-
-  const decentratalityAddress = await decentratality.getAddress();
-  const restaurantDeployerAddress = await restaurantDeployer.getAddress();
-  const posDeployerAddress = await posDeployer.getAddress();
-
-  const decentratalityServiceFactory = await Factory.deploy(
-    decentratalityAddress,
-    restaurantDeployerAddress,
-    posDeployerAddress
-  );
-
-	
-	console.log(`Crowdsale Token deployed to: ${decentratality.target}\n`)
-	console.log(`POSDeployer deployed to: ${posDeployer.target}\n`)
-	console.log(`restaurantDeployer deployed to: ${restaurantDeployer.target}\n`)
-	console.log(`decentratalityServiceFactory Token deployed to: ${decentratalityServiceFactory.target}\n`)
-	
-
-	const Crowdsale = await hre.ethers.getContractFactory('Crowdsale')
-
-	const crowdsale = await Crowdsale.deploy(decentratality.target, PRICE, ethers.parseUnits(MAX_SUPPLY, 'ether'))
-
-	console.log(`Crowdsale deployed to: ${crowdsale.target}\n`)
-
-	let transaction = await decentratality.connect(funder).transfer(crowdsale.target, ethers.parseUnits(MAX_SUPPLY, 'ether'))
-	await transaction.wait()
-
-	console.log('Tokens transferred to Crowdsale')
-
-	const DAO = await hre.ethers.getContractFactory('DAO')
-  const dao = await DAO.deploy(decentratality.target, '500000000000000000000001')
-
-  console.log(`DAO deployed to: ${dao.target}\n`)
-	
-  transaction = await funder.sendTransaction({ to: dao.target, value: ether(1000) }) // 1,000 Ether
-  await transaction.wait()
-
+  // Instead of actually deploying the Crowdsale contract, we skip deployment.
+  // Uncomment the code below if/when you wish to deploy it.
   
+  const Crowdsale = await hre.ethers.getContractFactory('Crowdsale');
+  const crowdsale = await Crowdsale.deploy(
+    decentratality.target,
+    PRICE,
+    ethers.parseUnits(MAX_SUPPLY, 'ether'),
+    dummyMerkleRoot
+  );
+  await crowdsale.waitForDeployment();
+  console.log(`Crowdsale deployed to: ${crowdsale.target}\n`);
 
+  // Transfer the maximum token supply to the Crowdsale contract.
+  transaction = await decentratality.connect(funder).transfer(crowdsale.target, ethers.parseUnits(MAX_SUPPLY, 'ether'));
+  await transaction.wait();
+  console.log('Tokens transferred to Crowdsale');
+  
+  console.log("Crowdsale deployment skipped.\n");
 }
 
-
-main().catch((error => {
-	console.error(error);
-	process.exitCode = 1;
-}))
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

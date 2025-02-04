@@ -21,22 +21,19 @@
     },
     "84532": {
         "token": {
-            "address": "0xED436cC722cCAA33c0797D7946FF5DF2410D298E"
-        },
-        "DAO": {
-            "address": "0x3A07b8B1E392Deae035D6a41C1e2Aef588E94033"
+            "address": "0x88ea9530852dB1b3B9AbB928bD1309803CF1fa8C"
         },
         "crowdsale": {
-            "address": "0x882efC188D61c080103B6425AAB0d87F77F803dB"
+            "address": "0xeA027940532C8Af4fC0E91aB843aA1b0c40a2932"
         },
         "decentratalityServiceFactory": {
-            "address": "0x98fdF8E4DCDEa6Dc52e14cC8D87C9e5401781BD4"
+            "address": "0x777E4c35c7d69bA77927b64822f0a32c66ea8B77"
         },
         "POSDeployer": {
-            "address": "0x2Cfadc849a0B2F65B8B260bC2A090D63E6908d36"
+            "address": "0x963828eE03bAC24f6030fA94B16783398394Baa3"
         },
         "restaurantDeployer": {
-            "address": "0x33cfafb6C079580A9521B6C542a9B40badC86109"
+            "address": "0xcC98e876A27E386Bc363B40B8eBD9F5D72219440"
         }
     }
 }

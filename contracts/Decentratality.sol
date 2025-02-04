@@ -8,20 +8,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract Decentratality is ERC20, Ownable, AccessControl, ReentrancyGuard {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     // Mapping to store restaurant contracts with their IDs
-    mapping(uint256 => Restaurant) public restaurants;
-
-    // Variable to track the next restaurant ID
-    uint256 public nextRestaurantId;
-    
-    event RestaurantCreated(
-        address restaurant, 
-        uint256 id
-    );
-    event fundsAdded(
-        address restaurant, 
-        uint256 id,
-        uint256 timestamp
-    );
 
     modifier onlyInvestor () {
         require(
@@ -30,7 +16,6 @@ contract Decentratality is ERC20, Ownable, AccessControl, ReentrancyGuard {
         );
         _;
     }
-    
     // Constructor to initialize the token with a name, symbol, and total supply
     constructor(
         

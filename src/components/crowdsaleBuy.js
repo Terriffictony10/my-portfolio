@@ -6,50 +6,62 @@ import Spinner from 'react-bootstrap/Spinner';
 import { ethers } from 'ethers';
 
 const Buy = ({ provider, price, crowdsale, setIsLoading }) => {
-    const [amount, setAmount] = useState('0');
-    const [isWaiting, setIsWaiting] = useState(false);
+  const [amount, setAmount] = useState('0');
+  const [isWaiting, setIsWaiting] = useState(false);
 
-    const buyHandler = async (e) => {
-        e.preventDefault();
-        setIsWaiting(true);
+  const buyHandler = async (e) => {
+    e.preventDefault();
+    setIsWaiting(true);
+    try {
+      const signer = await provider.getSigner();
+      const userAddress = await signer.getAddress();
+      const response = await fetch(`/api/merkleProof?address=${userAddress}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch Merkle proof');
+      }
+      const { proof } = await response.json();
+      const value = ethers.parseUnits((amount * price).toString(), 'ether');
+      const formattedAmount = ethers.parseUnits(amount.toString(), 'ether');
+      const transaction = await crowdsale.connect(signer).buyTokens(formattedAmount, proof, { value: value });
+      await transaction.wait();
+    } catch (error) {
+      console.error(error);
+      window.alert('User rejected or transaction reverted');
+    }
+    setIsLoading(true);
+    setIsWaiting(false);
+  };
 
-        try {
-            const signer = await provider.getSigner();
-
-            // We need to calculate the required ETH in order to buy the tokens...
-            const value = ethers.parseUnits((amount * price).toString(), 'ether');
-            const formattedAmount = ethers.parseUnits(amount.toString(), 'ether');
-
-            const transaction = await crowdsale.connect(signer).buyTokens(formattedAmount, { value: value });
-            await transaction.wait();
-        } catch {
-            window.alert('User rejected or transaction reverted');
-        }
-
-        setIsLoading(true);
-        setIsWaiting(false); // Reset isWaiting after the transaction
-    };
-
-    return (
-        <Form onSubmit={buyHandler}>
-            <Form.Group as={Row}>
-                <Col>
-                    <Form.Control
-                        type="number"
-                        placeholder="Enter amount"
-                        onChange={(e) => setAmount(e.target.value)}
-                    />
-                </Col>
-                <Col>
-                    {isWaiting ? (
-                        <Spinner animation="border" />
-                    ) : (
-                        <button type="submit">Buy Tokens</button>
-                    )}
-                </Col>
-            </Form.Group>
-        </Form>
-    );
+  return (
+    <Form onSubmit={buyHandler} style={{ fontSize: '0.6rem' }}>
+      <Form.Group as={Row} style={{ marginBottom: '0.2rem' }}>
+        <Col>
+          <Form.Control
+            type="number"
+            placeholder="Enter token amount"
+            onChange={(e) => setAmount(e.target.value)}
+            style={{ fontSize: '0.6rem', padding: '0.2rem' }}
+          />
+        </Col>
+        <Col>
+          {isWaiting ? (
+            <Spinner animation="border" style={{ width: '0.8rem', height: '0.8rem' }} />
+          ) : (
+            <button
+              type="submit"
+              style={{
+                fontSize: '0.6rem',
+                padding: '0.2rem 0.4rem',
+                cursor: 'pointer'
+              }}
+            >
+              Purchase Tokens
+            </button>
+          )}
+        </Col>
+      </Form.Group>
+    </Form>
+  );
 };
 
 export default Buy;

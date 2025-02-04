@@ -10,13 +10,18 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^5.0.2",
+    "@walletconnect/web3-provider": "^1.8.0",
+    "dotenv": "^16.0.0",
+    "flatpickr": "^4.6.13",
+    "keccak256": "^1.0.6",
+    "merkletreejs": "^0.2.28",
     "next": "^14.2.13",
+    "qrcode.react": "^4.2.0",
     "react": "^18",
     "react-dom": "^18",
     "react-modal": "^3.16.3",
-    "qrcode.react": "^4.2.0",
-    "dotenv": "^16.0.0",
-    "swr": "^2.3.0"
+    "swr": "^2.3.0",
+    "web3modal": "^1.9.12"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
@@ -24,10 +29,10 @@
     "bootstrap": "^5.3.3",
     "eslint": "^8",
     "eslint-config-next": "14.2.10",
-    "react-modal": "^3.16.3",
     "hardhat": "^2.22.10",
     "postcss": "^8",
     "react-bootstrap": "^2.10.4",
+    "react-modal": "^3.16.3",
     "react-redux": "^9.1.2",
     "redux": "^5.0.1",
     "redux-persist": "^6.0.0",

@@ -1,12 +1,19 @@
 import ProgressBar from 'react-bootstrap/ProgressBar';
 
-const CrowdsaleProgress = ({ maxTokens, tokensSold }) => {
-    return (
-        <div className='text-center'>
-            <ProgressBar now={((tokensSold / maxTokens) * 100)} label={`${(tokensSold / maxTokens) * 100}%`} />
-            <p>{tokensSold} / {maxTokens} Tokens sold</p>
-        </div>
-    );
-}
+const CrowdsaleProgress = ({ maxTokens, tokensSold, fundingGoal }) => {
+  const maxTokensNum = parseFloat(maxTokens);
+  const tokensSoldNum = parseFloat(tokensSold);
+  const fundingGoalNum = parseFloat(fundingGoal);
+  const tokenSalePercentage = maxTokensNum > 0 ? (tokensSoldNum / maxTokensNum) * 100 : 0;
+  const fundsRaised = (tokenSalePercentage / 100) * fundingGoalNum;
+  return (
+    <div className="text-center" style={{ fontSize: '0.6rem' }}>
+      <ProgressBar now={tokenSalePercentage} label={`${tokenSalePercentage.toFixed(2)}%`} style={{ height: '0.5rem' }} />
+      <p style={{ marginTop: '0.2rem' }}>
+        {fundsRaised.toFixed(2)} ETH raised out of {fundingGoalNum} ETH
+      </p>
+    </div>
+  );
+};
 
 export default CrowdsaleProgress;
