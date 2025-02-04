@@ -14,13 +14,18 @@ if (!projectId) {
   throw new Error('Project ID is not defined')
 }
 
-// Set up metadata
+
 const metadata = {
-  name: 'appkit-example',
-  description: 'AppKit Example',
-  url: 'https://appkitexampleapp.com', // origin must match your domain & subdomain
-  icons: ['https://avatars.githubusercontent.com/u/179229932']
-}
+  name: 'Decentratality',
+  description: 'Stable crypto project for hospitality',
+  url: 'https://your-project-website.com',
+  icons: ['https://your-project-website.com/logo.png'],
+  redirect: {
+    // On mobile, this tells the wallet connector to open MetaMask
+    native: 'metamask://',
+    universal: 'https://metamask.app.link'
+  }
+};
 
 // Create the modal
 const modal = createAppKit({
