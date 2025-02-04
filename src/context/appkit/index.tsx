@@ -4,7 +4,7 @@ import React, { type ReactNode } from 'react';
 import { createAppKit } from '@reown/appkit/react';
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
 import { mainnet, arbitrum } from '@reown/appkit/networks';
-import { projectId, networks } from '@/config';
+import { networks } from '@/config';
 
 if (!projectId) {
   throw new Error('Project ID is not defined');
@@ -25,7 +25,7 @@ const metadata = {
 
 export const modal = createAppKit({
   adapters: [new WagmiAdapter()],
-  projectId,
+  "6df9df8b72567f05d2f0d1503b13538f",
   networks,
   metadata,
   themeMode: 'light',
