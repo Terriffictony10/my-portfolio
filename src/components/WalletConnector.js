@@ -42,7 +42,7 @@ const WalletConnector = () => {
   const connectWallet = useCallback(async () => {
     try {
       // If MetaMask is installed, try to open its app.
-      if (window.ethereum && !window.ethereum.isMetaMask) {
+      
         await openMetaMaskApp();
         // Then request account access via MetaMask.
         await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -51,18 +51,17 @@ const WalletConnector = () => {
         const signer = await ethersProvider.getSigner();
         const address = await signer.getAddress();
         setAccount(address);
-      } else {
-        // Otherwise, fall back to Web3Modal (which uses WalletConnect).
+      
+    } catch (error) {
+      console.error("Wallet connection failed", error);
+    }
+    // Otherwise, fall back to Web3Modal (which uses WalletConnect).
         const instance = await web3Modal.connect();
         const ethersProvider = new ethers.BrowserProvider(instance);
         setProvider(ethersProvider);
         const signer = await ethersProvider.getSigner();
         const address = await signer.getAddress();
         setAccount(address);
-      }
-    } catch (error) {
-      console.error("Wallet connection failed", error);
-    }
   }, [web3Modal]);
 
   useEffect(() => {
