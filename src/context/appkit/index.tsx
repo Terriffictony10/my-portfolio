@@ -28,25 +28,22 @@ const metadata = {
 };
 
 // Create the modal
-const modal = createAppKit({
-  adapters: [wagmiAdapter],
+export const modal = createAppKit({
+  adapters: [new WagmiAdapter()],
   projectId,
-  networks: [mainnet, arbitrum],
-  defaultNetwork: mainnet,
-  metadata: metadata,
+  networks,
+  metadata,
+  themeMode: 'light',
   features: {
-    analytics: true // Optional - defaults to your Cloud configuration
+    analytics: true
+  },
+  themeVariables: {
+    '--w3m-accent': '#000000'
   }
-})
+});
 
-function ContextProvider({ children, cookies }: { children: ReactNode; cookies: string | null }) {
-  const initialState = cookieToInitialState(wagmiAdapter.wagmiConfig as Config, cookies)
-
-  return (
-    <WagmiProvider config={wagmiAdapter.wagmiConfig as Config} initialState={initialState}>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    </WagmiProvider>
-  )
+function AppKitProvider({ children }: { children: ReactNode }) {
+  return <>{children}</>;
 }
 
-export default ContextProvider
+export default AppKitProvider;
