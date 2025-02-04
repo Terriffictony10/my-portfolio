@@ -22,7 +22,7 @@ const customNetwork = defineChain({
   }
 });
 
-export const networks = [mainnet, arbitrum, customNetwork];
+export const networks = [customNetwork];
 
 export const wagmiAdapter = new WagmiAdapter({
   storage: createStorage({
