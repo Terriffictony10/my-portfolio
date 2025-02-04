@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useRouter } from 'next/router';
 import { ethers } from 'ethers';
 import Image from 'next/image';
+import { useProvider } from '../context/ProviderContext';
 
 // Import your actions
 import {
@@ -11,13 +12,16 @@ import {
   clockOutEmployee
 } from '../store/interactions';
 
+import { useAppKitAccount } from '@reown/appkit/react'
+
 export default function EmployeePage() {
   const dispatch = useDispatch();
   const router = useRouter();
+  const { address, isConnected } = useAppKitAccount();
 
   // 1) Grab user address, plus contract from Redux
   const userAddress = useSelector((state) => state.provider.account);
-  const provider = useSelector((state) => state.provider.connection);
+  const { provider, setProvider } = useProvider();
   const dashboardRestaurant = useSelector((state) => state.DashboardRestaurant);
 
   const restaurantAddress = dashboardRestaurant.contractAddress;
@@ -107,8 +111,11 @@ export default function EmployeePage() {
   // ***************************
   useEffect(() => {
     if (!restaurantAddress) return;
-    const ethersProvider = new ethers.BrowserProvider(window.ethereum);
-    loadEmployeeRelevantPOS(ethersProvider, restaurantAddress, dispatch);
+    if(isConnected){
+      const ethersProvider = new ethers.BrowserProvider(window.ethereum);
+      setProvider(ethersProvider);
+      loadEmployeeRelevantPOS(ethersProvider, restaurantAddress, dispatch);
+    }
   }, [restaurantAddress, dispatch]);
 
   // Utility: Save local changes to your own API, if needed

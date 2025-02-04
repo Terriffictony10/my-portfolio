@@ -6,9 +6,11 @@ import Image from 'next/image';
 import DashboardBody from "../components/DashboardBody.js"
 
 import { useRouter } from 'next/router';
+import { useAppKitAccount } from '@reown/appkit/react'
 
 
 export default function Home() {
+  const { address, isConnected } = useAppKitAccount();
   const router = useRouter();
   const showSidebar = () => {
     const sidebar = document.querySelector('.sidebar');
@@ -37,7 +39,7 @@ export default function Home() {
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, []);
+  }, [isConnected]);
 
   const navigateToCrowdsale = () => {
     router.push('/Crowdsale');

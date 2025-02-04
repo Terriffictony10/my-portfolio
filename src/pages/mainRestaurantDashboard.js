@@ -12,8 +12,12 @@ import { createNewJob } from '../store/interactions';
 import { useProvider } from '../context/ProviderContext';
 import config from '../config.json';
 
+import { useAppKitAccount } from '@reown/appkit/react'
+
+
 export default function Home() {
   const dispatch = useDispatch();
+  const { address, isConnected } = useAppKitAccount();
 
   // Load the provider (browser environment only)
   let provider;
@@ -61,12 +65,11 @@ export default function Home() {
 
   // Request accounts if needed (once) on mount
   useEffect(() => {
-    if (provider) {
-      provider.send('eth_requestAccounts', []).catch((error) => {
-        console.error('User rejected request:', error);
-      });
+    if (isConnected) {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      
     }
-  }, [provider]);
+  }, []);
 
   return (
     <div className="BlueBackground">

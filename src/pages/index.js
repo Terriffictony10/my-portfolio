@@ -6,7 +6,10 @@ import WalletConnector from '../components/WalletConnector';
 import AdminSchedule from '../components/AdminSchedule';
 import CrowdsaleBody from '../components/crowdsaleBody';
 import CrowdsaleExplanation from '../components/CrowdsaleExplanation';
-import MetaMaskDetection from '../components/MetaMaskDetection';
+
+import { useWalletInfo } from '@reown/appkit/react'
+import wagmi from "../context/appkit/index.tsx"
+import { useAppKitAccount } from '@reown/appkit/react'
 
 // Inline InfoAccordion component using arrow functions (with fluid transitions)
 const AccordionItem = ({ title, children }) => {
@@ -162,16 +165,20 @@ const LearnMoreModal = ({ isOpen, onClose }) => {
 };
 
 export default function Home() {
+   const { address, isConnected } = useAppKitAccount();
   const [modalOpen, setModalOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [provider, setProvider] = useState(null);
-
+  
   useEffect(() => {
     async function checkIfAdmin() {
-      if (window.ethereum) {
+      
+      if (isConnected) {
+        
         const provider = new ethers.BrowserProvider(window.ethereum);
         setProvider(provider);
         const signer = await provider.getSigner();
+        console.log(signer)
         const address = await signer.getAddress();
         const response = await fetch(`/api/checkAdmin?address=${address}`);
         const data = await response.json();

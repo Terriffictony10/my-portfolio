@@ -5,17 +5,25 @@ import Loading from "../components/Loading.js";
 import Image from 'next/image';
 
 import { useRouter } from 'next/router';
+import { useAppKitAccount } from '@reown/appkit/react'
 
 function DashboardBody({ onclick2, onclick3}) {
   const [provider, setProvider] = useState(null);
   const [account, setAccount] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { address, isConnected } = useAppKitAccount();
 
-  const loadBlockchainData = async () => {
-  if (typeof window.ethereum !== 'undefined') {
-    try {
+
+  
+
+  useEffect(() => {
+    const loadProvider = async () => {
+    if (isConnected) {
+      try {
+
       const provider = new ethers.BrowserProvider(window.ethereum);
       setProvider(provider);
+      
 
       const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
 
@@ -37,13 +45,9 @@ function DashboardBody({ onclick2, onclick3}) {
     setAccount(null);  // Handle case where MetaMask isn't available
     setIsLoading(false);
   }
-};
-
-  useEffect(() => {
-    if (isLoading) {
-      loadBlockchainData();
     }
-  }, [loadBlockchainData, isLoading]);
+    loadProvider()
+  }, []);
 
  
   const navigateToCrowdsale = () => {

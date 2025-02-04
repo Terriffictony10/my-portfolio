@@ -20,9 +20,10 @@ import {
 } from '../store/interactions'
 import { useProvider } from '../context/ProviderContext';
 import config from '../config.json'
+import { useAppKitAccount } from '@reown/appkit/react'
 
 export default function Home() {
-
+  const { address, isConnected } = useAppKitAccount();
   let dispatch, Factory
   dispatch = useDispatch()
   const { provider, setProvider } = useProvider();
@@ -79,7 +80,7 @@ export default function Home() {
   // Detect when screen size changes and reset the inline styles
   useEffect(() => {
     const loadProvider = async () => {
-      if (typeof window !== 'undefined' && window.ethereum) {
+      if (isConnected) {
         try {
           const ethersProvider = new ethers.BrowserProvider(window.ethereum);
           setProvider(ethersProvider);

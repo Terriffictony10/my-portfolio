@@ -5,7 +5,7 @@ import { mainnet, arbitrum, defineChain } from '@reown/appkit/networks';
 export const projectId = '6df9df8b72567f05d2f0d1503b13538f';
 
 const customNetwork = defineChain({
-  id: 11155111,
+  id: 84532,
   caipNetworkId: 'eip155:84532',
   chainNamespace: 'eip155',
   name: 'BaseSepolia',
@@ -28,7 +28,7 @@ export const wagmiAdapter = new WagmiAdapter({
   storage: createStorage({
     storage: cookieStorage,
   }),
-  ssr: true,
+  ssr: false,
   projectId,
   networks,
 });

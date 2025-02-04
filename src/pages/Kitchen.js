@@ -2,11 +2,13 @@
 import useSWR from 'swr';
 import React from 'react';
 import { useRouter } from 'next/router';
+import { useAppKitAccount } from '@reown/appkit/react'
 
 const fetcher = (url) => fetch(url).then((r) => r.json());
 
 export default function Kitchen() {
   const router = useRouter();
+  const { address, isConnected } = useAppKitAccount();
 
   // Fetch an ARRAY of kitchen tickets
   const { data: kitchenTickets, mutate } = useSWR('/api/kitchenTickets', fetcher);
