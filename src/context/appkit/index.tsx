@@ -6,10 +6,12 @@ import { createAppKit } from '@reown/appkit/react'
 import { mainnet, arbitrum } from '@reown/appkit/networks'
 import React, { type ReactNode } from 'react'
 import { cookieToInitialState, WagmiProvider, type Config } from 'wagmi'
+import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
+import { projectId, networks } from '@/config';
 
 // Set up queryClient
 const queryClient = new QueryClient()
-const projectId = "6df9df8b72567f05d2f0d1503b13538f"
+
 if (!projectId) {
   throw new Error('Project ID is not defined')
 }
@@ -29,7 +31,7 @@ const metadata = {
 
 // Create the modal
 export const modal = createAppKit({
-  adapters: [new WagmiAdapter()],
+  adapters: [wagmiAdapter],
   projectId,
   networks,
   metadata,
