@@ -34,16 +34,16 @@ export const wagmiAdapter = new WagmiAdapter({
   ssr: false,
   projectId,
   networks,
-  // connectors: [
-  //   injected({
-  //     chains: networks, // Provide your supported chains here
-  //     options: {
-  //       name: 'Injected Wallet',
-  //       shimDisconnect: false,
-  //     },
-  //   }),
-  //   // You can add additional connectors if desired
-  // ],
+  connectors: [
+    injected({
+      chains: networks, // Provide your supported chains here
+      options: {
+        name: 'Injected Wallet',
+        shimDisconnect: false,
+      },
+    }),
+    // You can add additional connectors if desired
+  ],
 });
 
 export const config = wagmiAdapter.wagmiConfig;
