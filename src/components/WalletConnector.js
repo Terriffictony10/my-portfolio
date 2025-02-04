@@ -8,25 +8,30 @@ const WalletConnector = () => {
   const [provider, setProvider] = useState(null);
   const [account, setAccount] = useState(null);
 
+  // Configure provider options for Web3Modal.
+  // The mobileLinks option forces WalletConnect to show buttons for the specified wallets
+  // rather than the default QR code modal.
   const providerOptions = {
     walletconnect: {
       package: WalletConnectProvider,
       options: {
-        infuraId: "YOUR_INFURA_ID" // Replace with your Infura ID
+        infuraId: "YOUR_INFURA_ID", // Replace with your actual Infura ID.
+        mobileLinks: ["metamask", "trust", "rainbow"] // List additional wallets as desired.
       }
     }
   };
 
+  // Initialize Web3Modal
   const web3Modal = new Web3Modal({
     cacheProvider: true,
-    providerOptions
+    providerOptions,
+    theme: "light" // You can choose dark/light or use custom theming.
   });
 
   const connectWallet = useCallback(async () => {
     try {
-      // Check if MetaMask is installed.
+      // If MetaMask is installed, use it directly.
       if (window.ethereum && window.ethereum.isMetaMask) {
-        // Prompt MetaMask to connect.
         await window.ethereum.request({ method: 'eth_requestAccounts' });
         const ethersProvider = new ethers.BrowserProvider(window.ethereum);
         setProvider(ethersProvider);
@@ -34,7 +39,7 @@ const WalletConnector = () => {
         const address = await signer.getAddress();
         setAccount(address);
       } else {
-        // Fallback to Web3Modal (and WalletConnect) if MetaMask isn't available.
+        // Otherwise, fall back to Web3Modal (which now uses WalletConnect with mobileLinks)
         const instance = await web3Modal.connect();
         const ethersProvider = new ethers.BrowserProvider(instance);
         setProvider(ethersProvider);
