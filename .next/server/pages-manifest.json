@@ -2,7 +2,8 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/Dashboard": "pages/Dashboard.js",
   "/": "pages/index.js",
+  "/api/checkAdmin": "pages/api/checkAdmin.js",
+  "/Dashboard": "pages/Dashboard.js",
   "/mainJobDashboard": "pages/mainJobDashboard.js"
 }

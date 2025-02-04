@@ -1,42 +1,34 @@
 // pages/_app.js
-
-import { Provider } from 'react-redux';
+import { Provider as ReduxProvider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
-import ReactModal from 'react-modal';
 import { WagmiConfig } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
-// If you use absolute import '@', make sure it's configured in your jsconfig.json/tsconfig.json
-import store, { persistor } from '@/store';
-import { ProviderContextProvider } from '@/context/ProviderContext';
-import AppKitProvider from '../context/appkit'; // Your provider context file
-
-// Import your wagmi configuration (created via the Reown AppKit adapter)
+import AppKitProvider from '../context/appkit';
 import { config } from '@/config';
+import store, { persistor } from '@/store';
+import AssignEthereum from '../components/AssignEthereum'; // import the shim component
 
-// CSS imports here
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@/styles/globals.css';
 
-ReactModal.setAppElement('#__next'); // For react-modal accessibility
+function MyApp({ Component, pageProps }) {
+  const queryClient = new QueryClient();
 
-// Create a QueryClient instance for react-query
-const queryClient = new QueryClient();
-
-export default function MyApp({ Component, pageProps }) {
   return (
     <AppKitProvider>
       <WagmiConfig config={config}>
         <QueryClientProvider client={queryClient}>
-          <Provider store={store}>
+          <ReduxProvider store={store}>
             <PersistGate loading={null} persistor={persistor}>
-              <ProviderContextProvider>
-                <Component {...pageProps} />
-              </ProviderContextProvider>
+              {/* This will assign window.ethereum after connection */}
+              <AssignEthereum />
+              <Component {...pageProps} />
             </PersistGate>
-          </Provider>
+          </ReduxProvider>
         </QueryClientProvider>
       </WagmiConfig>
     </AppKitProvider>
   );
 }
+
+export default MyApp;
