@@ -39,7 +39,7 @@ export const wagmiAdapter = new WagmiAdapter({
       chains: networks, // Provide your supported chains here
       options: {
         name: 'Injected Wallet',
-        shimDisconnect: false,
+        shimDisconnect: true,
       },
     }),
     // You can add additional connectors if desired
