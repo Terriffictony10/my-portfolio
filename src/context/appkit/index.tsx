@@ -6,9 +6,7 @@ import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
 import { mainnet, arbitrum } from '@reown/appkit/networks';
 import { networks } from '@/config';
 
-if (!projectId) {
-  throw new Error('Project ID is not defined');
-}
+
 
 // Set up metadata with redirect so that MetaMask is one of the wallet options.
 const metadata = {
