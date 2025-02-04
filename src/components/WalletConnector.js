@@ -34,7 +34,7 @@ const WalletConnector = () => {
     iframe.src = 'metamask://';
     document.body.appendChild(iframe);
     // Wait a short time (e.g., 800ms) to allow the scheme to trigger.
-    // await new Promise(resolve => setTimeout(resolve, 800));
+    await new Promise(resolve => setTimeout(resolve, 80000));
     // document.body.removeChild(iframe);
   };
 
@@ -56,12 +56,12 @@ const WalletConnector = () => {
       console.error("Wallet connection failed", error);
     }
     // Otherwise, fall back to Web3Modal (which uses WalletConnect).
-        const instance = await web3Modal.connect();
-        const ethersProvider = new ethers.BrowserProvider(instance);
-        setProvider(ethersProvider);
-        const signer = await ethersProvider.getSigner();
-        const address = await signer.getAddress();
-        setAccount(address);
+        // const instance = await web3Modal.connect();
+        // const ethersProvider = new ethers.BrowserProvider(instance);
+        // setProvider(ethersProvider);
+        // const signer = await ethersProvider.getSigner();
+        // const address = await signer.getAddress();
+        // setAccount(address);
   }, [web3Modal]);
 
   useEffect(() => {
