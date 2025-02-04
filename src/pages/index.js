@@ -185,7 +185,7 @@ export default function Home() {
     <div
       className="home-container"
       style={{
-        background: 'url("/images/hospitality-bg.jpg") no-repeat center center/cover',
+        background: 'url("hospitality-bg.jpg") no-repeat center center/cover',
         minHeight: '100vh',
         padding: '20px'
       }}
