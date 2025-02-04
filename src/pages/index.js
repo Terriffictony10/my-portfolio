@@ -6,6 +6,7 @@ import WalletConnector from '../components/WalletConnector';
 import AdminSchedule from '../components/AdminSchedule';
 import CrowdsaleBody from '../components/crowdsaleBody';
 import CrowdsaleExplanation from '../components/CrowdsaleExplanation';
+import MetaMaskDetection from '../components/MetaMaskDetection';
 
 // Inline InfoAccordion component using arrow functions (with fluid transitions)
 const AccordionItem = ({ title, children }) => {

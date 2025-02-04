@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+// src/components/crowdsaleBody.js
+import { useEffect, useState, useCallback } from 'react';
 import { ethers } from 'ethers';
 import Loading from './Loading';
 import Buy from './crowdsaleBuy';
-import CrowdsaleProgress from './crowdsaleProgress.js';
+import CrowdsaleProgress from './crowdsaleProgress';
 import AutoFinalize from './AutoFinalize';
 import CROWDSALE_ABI from '../abis/Crowdsale.json';
 import TOKEN_ABI from '../abis/Token.json';
@@ -12,6 +13,7 @@ function CrowdsaleBody() {
   const [provider, setProvider] = useState(null);
   const [crowdsale, setCrowdsale] = useState(null);
   const [account, setAccount] = useState(null);
+  const [owner, setOwner] = useState(null);
   const [accountBalance, setAccountBalance] = useState(0);
   const [price, setPrice] = useState(0);
   const [maxTokens, setMaxTokens] = useState(0);
@@ -19,40 +21,64 @@ function CrowdsaleBody() {
   const [fundingGoal, setFundingGoal] = useState(0);
   const [saleStart, setSaleStart] = useState(0);
   const [saleEnd, setSaleEnd] = useState(0);
+  const [finalized, setFinalized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [finalizeLoading, setFinalizeLoading] = useState(false);
 
   useEffect(() => {
     if (isLoading) {
       const loadBlockchainData = async () => {
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        setProvider(provider);
-        const { chainId } = await provider.getNetwork();
-        const token = new ethers.Contract(config[chainId].token.address, TOKEN_ABI, provider);
-        const crowdsale = new ethers.Contract(config[chainId].crowdsale.address, CROWDSALE_ABI, provider);
-        setCrowdsale(crowdsale);
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        const account = ethers.getAddress(accounts[0]);
-        setAccount(account);
-        const accountBalance = ethers.formatUnits(await token.balanceOf(account), 18);
-        setAccountBalance(accountBalance);
-        const price = ethers.formatUnits(await crowdsale.price(), 18);
-        setPrice(price);
-        const maxTokens = ethers.formatUnits(await crowdsale.maxTokens(), 18);
-        setMaxTokens(maxTokens);
-        const tokensSold = ethers.formatUnits(await crowdsale.tokensSold(), 18);
-        setTokensSold(tokensSold);
-        const fundingGoalWei = await crowdsale.fundingGoal();
-        const fundingGoal = ethers.formatUnits(fundingGoalWei, 18);
-        setFundingGoal(fundingGoal);
-        const saleStartTimestamp = await crowdsale.saleStart();
-        setSaleStart(Number(saleStartTimestamp));
-        const saleEndTimestamp = await crowdsale.saleEnd();
-        setSaleEnd(Number(saleEndTimestamp));
+        try {
+          const provider = new ethers.BrowserProvider(window.ethereum);
+          setProvider(provider);
+          const { chainId } = await provider.getNetwork();
+          const token = new ethers.Contract(config[chainId].token.address, TOKEN_ABI, provider);
+          const crowdsale = new ethers.Contract(config[chainId].crowdsale.address, CROWDSALE_ABI, provider);
+          setCrowdsale(crowdsale);
+          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+          const account = ethers.getAddress(accounts[0]);
+          setAccount(account);
+          const balance = await token.balanceOf(account);
+          setAccountBalance(ethers.formatUnits(balance, 18));
+          const price = ethers.formatUnits(await crowdsale.price(), 18);
+          setPrice(price);
+          const maxTokens = ethers.formatUnits(await crowdsale.maxTokens(), 18);
+          setMaxTokens(maxTokens);
+          const tokensSold = ethers.formatUnits(await crowdsale.tokensSold(), 18);
+          setTokensSold(tokensSold);
+          const fundingGoalWei = await crowdsale.fundingGoal();
+          setFundingGoal(ethers.formatUnits(fundingGoalWei, 18));
+          const saleStartTimestamp = await crowdsale.saleStart();
+          setSaleStart(Number(saleStartTimestamp));
+          const saleEndTimestamp = await crowdsale.saleEnd();
+          setSaleEnd(Number(saleEndTimestamp));
+          const finalizedStatus = await crowdsale.finalized();
+          setFinalized(finalizedStatus);
+          const ownerAddress = await crowdsale.owner();
+          setOwner(ownerAddress);
+        } catch (error) {
+          console.error('Error loading blockchain data:', error);
+        }
         setIsLoading(false);
       };
       loadBlockchainData();
     }
   }, [isLoading]);
+
+  const handleFinalize = useCallback(async () => {
+    try {
+      setFinalizeLoading(true);
+      const signer = await provider.getSigner();
+      const tx = await crowdsale.connect(signer).finalize();
+      await tx.wait();
+      alert('Crowdsale finalized successfully!');
+      setFinalized(true);
+    } catch (error) {
+      console.error('Error finalizing crowdsale:', error);
+      alert('Error finalizing crowdsale. See console for details.');
+    }
+    setFinalizeLoading(false);
+  }, [provider, crowdsale]);
 
   const isLive = Date.now() / 1000 >= saleStart;
 
@@ -72,8 +98,8 @@ function CrowdsaleBody() {
         top: '10%',
         left: '60%',
         marginBottom: '0.9rem',
-        fontSize: '1.5rem', 
-        }}>
+        fontSize: '1.5rem'
+      }}>
         <p style={{ margin: '0.1rem 0' }}>
           <strong>Account:</strong> {account}
         </p>
@@ -106,7 +132,9 @@ function CrowdsaleBody() {
               </p>
               <p style={{ margin: '0.2rem 0' }}>
                 <strong>Status:</strong>{' '}
-                {isLive
+                {finalized
+                  ? 'Finalized'
+                  : isLive
                   ? 'Ends at: ' + new Date(saleEnd * 1000).toLocaleString()
                   : 'Starts at: ' + new Date(saleStart * 1000).toLocaleString()}
               </p>
@@ -116,6 +144,28 @@ function CrowdsaleBody() {
               <Buy provider={provider} price={price} crowdsale={crowdsale} setIsLoading={setIsLoading} />
               <CrowdsaleProgress maxTokens={maxTokens} tokensSold={tokensSold} fundingGoal={fundingGoal} />
               {provider && crowdsale && <AutoFinalize provider={provider} crowdsale={crowdsale} />}
+              {provider && crowdsale && account && owner && account.toLowerCase() === owner.toLowerCase() && (
+                <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+                  <button
+                    onClick={handleFinalize}
+                    disabled={finalizeLoading}
+                    style={{
+                      padding: '0.75rem 1.5rem',
+                      backgroundColor: '#d32f2f',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontSize: '1rem',
+                      transition: 'background-color 0.3s ease'
+                    }}
+                    onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#b71c1c')}
+                    onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#d32f2f')}
+                  >
+                    {finalizeLoading ? 'Finalizing...' : 'Finalize Crowdsale'}
+                  </button>
+                </div>
+              )}
             </>
           )}
         </div>

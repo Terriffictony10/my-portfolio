@@ -8,15 +8,13 @@ const WalletConnector = () => {
   const [provider, setProvider] = useState(null);
   const [account, setAccount] = useState(null);
 
-  // Configure provider options for Web3Modal.
-  // The mobileLinks option forces WalletConnect to show buttons for the specified wallets
-  // rather than the default QR code modal.
+  // Configure provider options for Web3Modal with WalletConnect.
   const providerOptions = {
     walletconnect: {
       package: WalletConnectProvider,
       options: {
         infuraId: "f35a83b4eba0446989ef9be5172774a5", // Replace with your actual Infura ID.
-        mobileLinks: ["metamask", "trust", "rainbow"] // List additional wallets as desired.
+        mobileLinks: ["metamask", "trust", "rainbow"] // Wallets to display on mobile.
       }
     }
   };
@@ -25,13 +23,28 @@ const WalletConnector = () => {
   const web3Modal = new Web3Modal({
     cacheProvider: true,
     providerOptions,
-    theme: "light" // You can choose dark/light or use custom theming.
+    theme: "light"
   });
 
+  // Function to attempt opening MetaMask via its custom URL scheme using a hidden iframe.
+  const openMetaMaskApp = async () => {
+    // Create a hidden iframe that attempts to open the MetaMask app.
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = 'metamask://';
+    document.body.appendChild(iframe);
+    // Wait a short time (e.g., 800ms) to allow the scheme to trigger.
+    await new Promise(resolve => setTimeout(resolve, 800));
+    document.body.removeChild(iframe);
+  };
+
+  // Main wallet connection function.
   const connectWallet = useCallback(async () => {
     try {
-      // If MetaMask is installed, use it directly.
+      // If MetaMask is installed, try to open its app.
       if (window.ethereum && window.ethereum.isMetaMask) {
+        await openMetaMaskApp();
+        // Then request account access via MetaMask.
         await window.ethereum.request({ method: 'eth_requestAccounts' });
         const ethersProvider = new ethers.BrowserProvider(window.ethereum);
         setProvider(ethersProvider);
@@ -39,7 +52,7 @@ const WalletConnector = () => {
         const address = await signer.getAddress();
         setAccount(address);
       } else {
-        // Otherwise, fall back to Web3Modal (which now uses WalletConnect with mobileLinks)
+        // Otherwise, fall back to Web3Modal (which uses WalletConnect).
         const instance = await web3Modal.connect();
         const ethersProvider = new ethers.BrowserProvider(instance);
         setProvider(ethersProvider);
