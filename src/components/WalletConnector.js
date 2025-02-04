@@ -15,7 +15,7 @@ const WalletConnector = () => {
     walletconnect: {
       package: WalletConnectProvider,
       options: {
-        infuraId: "YOUR_INFURA_ID", // Replace with your actual Infura ID.
+        infuraId: "f35a83b4eba0446989ef9be5172774a5", // Replace with your actual Infura ID.
         mobileLinks: ["metamask", "trust", "rainbow"] // List additional wallets as desired.
       }
     }
