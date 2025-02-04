@@ -2,7 +2,7 @@
 
 import React, { type ReactNode } from 'react';
 import { createAppKit } from '@reown/appkit/react';
-import { EthersAdapter } from '@reown/appkit-adapter-wagmi';
+import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
 import { mainnet, arbitrum } from '@reown/appkit/networks';
 import { projectId, networks } from '@/config';
 
@@ -24,7 +24,7 @@ const metadata = {
 };
 
 export const modal = createAppKit({
-  adapters: [new EthersAdapter()],
+  adapters: [new WagmiAdapter()],
   projectId,
   networks,
   metadata,
@@ -33,7 +33,7 @@ export const modal = createAppKit({
     analytics: true
   },
   themeVariables: {
-    '--w3m-accent': '#000000'
+    '--w3m-accent': '#000000',
   }
 });
 
