@@ -19,12 +19,6 @@ const customNetwork = defineChain({
       http: ['https://base-sepolia.infura.io/v3/f35a83b4eba0446989ef9be5172774a5'],
       webSocket: ['wss://base-sepolia.infura.io/ws/v3/f35a83b4eba0446989ef9be5172774a5']
     }
-  },
-  blockExplorers: {
-    default: { name: 'Basescan', url: 'https://sepolia.basescan.org/' }
-  },
-  contracts: {
-    // Add the contracts here if needed.
   }
 });
 
