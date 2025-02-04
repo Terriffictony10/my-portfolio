@@ -14,7 +14,7 @@ const WalletConnector = () => {
       package: WalletConnectProvider,
       options: {
         // Replace with your own Infura ID or another RPC endpoint if desired
-        infuraId: "YOUR_INFURA_ID"
+        infuraId: "f35a83b4eba0446989ef9be5172774a5"
       }
     }
   };
