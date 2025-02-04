@@ -1,20 +1,38 @@
 // src/pages/index.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ethers } from 'ethers';
 import Image from 'next/image';
 import WalletConnector from '../components/WalletConnector';
 import AdminSchedule from '../components/AdminSchedule';
 import CrowdsaleBody from '../components/crowdsaleBody';
 import CrowdsaleExplanation from '../components/CrowdsaleExplanation';
+import { useWalletInfo } from '@reown/appkit/react';
+import wagmi from "../context/appkit/index.tsx";
+import { useAppKitAccount } from '@reown/appkit/react';
+import { Configure, useClient } from 'wagmi';
 
-import { useWalletInfo } from '@reown/appkit/react'
-import wagmi from "../context/appkit/index.tsx"
-import { useAppKitAccount } from '@reown/appkit/react'
+/** Convert a viem Client to an ethers.js Provider. */
+export function clientToProvider(client) {
+  const { chain, transport } = client;
+  const network = {
+    chainId: chain.id,
+    name: chain.name,
+    ensAddress: chain.contracts?.ensRegistry?.address,
+  };
 
-// Inline InfoAccordion component using arrow functions (with fluid transitions)
+  // Use the RPC URL provided by the transport.
+  // (Make sure your configuration passes a valid URL instead of defaulting to localhost)
+  return new ethers.JsonRpcProvider(transport.url, network);
+}
+
+/** Hook to convert a viem Client to an ethers.js Provider. */
+export function useEthersProvider({ chainId } = {}) {
+  const client = useClient({ chainId });
+  return useMemo(() => (client ? clientToProvider(client) : undefined), [client]);
+}
+
 const AccordionItem = ({ title, children }) => {
   const [isOpen, setIsOpen] = useState(false);
-
   return (
     <div
       style={{
@@ -105,7 +123,6 @@ const InfoAccordion = () => {
   );
 };
 
-// Inline LearnMoreModal component with fade-in animation using keyframes via inline styles
 const LearnMoreModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
   return (
@@ -165,28 +182,40 @@ const LearnMoreModal = ({ isOpen, onClose }) => {
 };
 
 export default function Home() {
-   const { address, isConnected } = useAppKitAccount();
+  const { isConnected } = useAppKitAccount();
+  // Call useClient and useEthersProvider at the top level.
+  const ethersProvider = useEthersProvider({ chainId: 84532 });
   const [modalOpen, setModalOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [provider, setProvider] = useState(null);
-  
+
   useEffect(() => {
     async function checkIfAdmin() {
-      
       if (isConnected) {
-        
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        setProvider(provider);
-        const signer = await provider.getSigner();
-        console.log(signer)
-        const address = await signer.getAddress();
-        const response = await fetch(`/api/checkAdmin?address=${address}`);
-        const data = await response.json();
-        setIsAdmin(data.isAdmin);
+        // Determine which provider to use:
+        // If an injected provider exists, use it; otherwise, use the ethersProvider from our hook.
+        let providerInstance;
+        if (window.ethereum) {
+          providerInstance = new ethers.BrowserProvider(window.ethereum);
+        } else if (ethersProvider) {
+          providerInstance = ethersProvider;
+        }
+        if (providerInstance) {
+          setProvider(providerInstance);
+          try {
+            const signer = await providerInstance.getSigner();
+            const addr = await signer.getAddress();
+            const response = await fetch(`/api/checkAdmin?address=${addr}`);
+            const data = await response.json();
+            setIsAdmin(data.isAdmin);
+          } catch (error) {
+            console.error('Error getting signer or checking admin:', error);
+          }
+        }
       }
     }
     checkIfAdmin();
-  }, []);
+  }, [isConnected, ethersProvider]);
 
   const navigateToDemo = () => {
     window.location.href = '/Dashboard';

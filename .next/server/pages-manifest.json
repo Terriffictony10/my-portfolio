@@ -3,6 +3,7 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
-  "/Dashboard": "pages/Dashboard.js",
-  "/mainJobDashboard": "pages/mainJobDashboard.js"
+  "/mainJobDashboard": "pages/mainJobDashboard.js",
+  "/api/checkAdmin": "pages/api/checkAdmin.js",
+  "/Dashboard": "pages/Dashboard.js"
 }
