@@ -15,18 +15,18 @@ const CrowdsaleExplanation = () => {
           <strong>When the Goal Is Met:</strong> If we hit our funding goal, funds will be allocated as follows:
           <ul>
             <li>
-              <strong>50%</strong> to create a liquidity pool on a decentralized exchange—ensuring you can easily convert your tokens into value.
+              <strong>50%</strong> to create a liquidity pool on a decentralized exchange&mdash;ensuring you can easily convert your tokens into value.
             </li>
             <li>
-              <strong>40%</strong> to hiring additional support staff—providing robust customer and technical support.
+              <strong>40%</strong> to hiring additional support staff&mdash;providing robust customer and technical support.
             </li>
             <li>
-              <strong>10%</strong> to the current development team—fueling continuous innovation.
+              <strong>10%</strong> to the current development team&mdash;fueling continuous innovation.
             </li>
           </ul>
         </li>
         <li>
-          <strong>Future Enhancements:</strong> If you're tired of malicious developers scamming you with meme-coins and want a stable crypto project to invest in, look no further. Don't miss your chance to be an early investor in essentially the "Facebook of Food." Decentratality is designed to be a secure hub where employees can store all their employment-related information safely while building a public profile that highlights their strengths in hospitality. Our platform will also offer professional classes with tracked progress for career advancement, community conversation similar to Reddit/Instagram, and an all-in-one web app for POS transactions, employee payments, and document management.
+          <strong>Future Enhancements:</strong> If you&apos;re tired of malicious developers scamming you with meme-coins and want a stable crypto project to invest in, look no further. Don&apos;t miss your chance to be an early investor in essentially the &quot;Facebook of Food.&quot; Decentratality is designed to be a secure hub where employees can store all their employment-related information safely while building a public profile that highlights their strengths in hospitality. Our platform will also offer professional classes with tracked progress for career advancement, community conversation similar to Reddit/Instagram, and an all-in-one web app for POS transactions, employee payments, and document management.
         </li>
       </ul>
       <p>
@@ -38,7 +38,7 @@ const CrowdsaleExplanation = () => {
         <ProgressBar variant="warning" now={10} key={3} label="10% Dev" />
       </ProgressBar>
       <p>
-        Invest with confidence—if the goal isn’t reached, you get your money back automatically. Join us and be a part of the future of hospitality!
+        Invest with confidence&mdash;if the goal isn&apos;t reached, you get your money back automatically. Join us and be a part of the future of hospitality!
       </p>
     </div>
   );
