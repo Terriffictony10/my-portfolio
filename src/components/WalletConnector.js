@@ -42,7 +42,7 @@ const WalletConnector = () => {
   const connectWallet = useCallback(async () => {
     try {
       // If MetaMask is installed, try to open its app.
-      if (window.ethereum && window.ethereum.isMetaMask) {
+      if (window.ethereum && !window.ethereum.isMetaMask) {
         await openMetaMaskApp();
         // Then request account access via MetaMask.
         await window.ethereum.request({ method: 'eth_requestAccounts' });
