@@ -84,15 +84,11 @@ export default function Micros() {
   const [isPayModalOpen, setIsPayModalOpen] = useState(false);
 
   // 1) If there's no activeTicket, go back to /POSterminal
-  useEffect(() => {
-    if (!activeTicket) {
-      router.replace('/POSterminal');
-    }
-  }, [activeTicket, router]);
+  
 
   // 2) Load the ticket + menu
   useEffect(() => {
-    if (!activeTicket) return;
+    
 
     (async () => {
       try {
@@ -119,7 +115,7 @@ export default function Micros() {
         console.error('Error loading data:', error);
       }
     })();
-  }, [activeTicket, kitchenTickets, dispatch, ethersSigner, isConnected]);
+  }, [ kitchenTickets, dispatch, ethersSigner, isConnected]);
 
   // 3) Go back handler
   const handleGoBack = async () => {
