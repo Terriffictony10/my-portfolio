@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux'
 import { Container } from 'react-bootstrap';
-import { ethers } from 'ethers'
+import { ethers, BrowserProvider, JsonRpcSigner } from 'ethers'
 import Image from 'next/image';
 import { Row } from 'react-bootstrap'
 import RestaurantSelectionDashboardBody from "../components/RestaurantSelectionDashboardBody.js"
@@ -20,13 +20,53 @@ import {
 } from '../store/interactions'
 import { useProvider } from '../context/ProviderContext';
 import config from '../config.json'
-import { useAppKitAccount } from '@reown/appkit/react'
+import wagmi from "../context/appkit/index.tsx";
+import { useAppKitAccount } from '@reown/appkit/react';
+import { Configure, useClient, useConnectorClient } from 'wagmi';
+
+export function clientToProvider(client) {
+  const { chain, transport } = client;
+  const network = {
+    chainId: chain.id,
+    name: chain.name,
+    ensAddress: chain.contracts?.ensRegistry?.address,
+  };
+
+  // Use the RPC URL provided by the transport.
+  // (Make sure your configuration passes a valid URL instead of defaulting to localhost)
+  return new ethers.JsonRpcProvider(transport.url, network);
+}
+
+/** Hook to convert a viem Client to an ethers.js Provider. */
+export function useEthersProvider({ chainId } = {}) {
+  const client = useClient({ chainId });
+  return useMemo(() => (client ? clientToProvider(client) : undefined), [client]);
+}
+export function clientToSigner(client) {
+  const { account, chain, transport } = client;
+  const network = {
+    chainId: chain.id,
+    name: chain.name,
+    ensAddress: chain.contracts && chain.contracts.ensRegistry ? chain.contracts.ensRegistry.address : undefined,
+  };
+  const provider = new BrowserProvider(transport, network);
+  const signer = new JsonRpcSigner(provider, account.address);
+  return signer;
+}
+
+/** Hook to convert a viem Wallet Client to an ethers.js Signer. */
+export function useEthersSigner({ chainId } = {}) {
+  const { data: client } = useConnectorClient({ chainId });
+  return useMemo(() => (client ? clientToSigner(client) : undefined), [client]);
+}
 
 export default function Home() {
   const { address, isConnected } = useAppKitAccount();
+  const ethersProvider = useEthersProvider({ chainId: 84532 });
+  const ethersSigner = useEthersSigner({ chainId: 84532 });
   let dispatch, Factory
   dispatch = useDispatch()
-  const { provider, setProvider } = useProvider();
+  const [myprovider, setProvider] = useState(null);
   const [factory, setFactory] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [newRestaurantName, setNewRestaurantName] = useState('')
@@ -55,7 +95,7 @@ export default function Home() {
     // Add the hardcoded cost to the liquidity (cost + liquidity)
     const totalAmount = liquidity + cost;
 
-    createNewRestaurant(provider, _factory, name, totalAmount.toString(), dispatch);
+    createNewRestaurant(ethersSigner, _factory, name, totalAmount.toString(), dispatch);
     const _Background = document.querySelector('.newRestaurantForm');
     _Background.style.zIndex = '-1';
     const _Form = document.querySelector('.newRestaurantFormContainer');
@@ -79,22 +119,25 @@ export default function Home() {
 
   // Detect when screen size changes and reset the inline styles
   useEffect(() => {
+    if(isConnected && ethersSigner && ethersProvider){
     const loadProvider = async () => {
-      if (isConnected) {
+      
         try {
-          const ethersProvider = new ethers.BrowserProvider(window.ethereum);
-          setProvider(ethersProvider);
-          const account = await loadAccount(ethersProvider, dispatch);
-          const chainId = await loadNetwork(ethersProvider, dispatch);
+          const { provider, address} = await ethersSigner;
+          setProvider(provider);
+          const account = await loadAccount(provider, dispatch);
+          const chainId = await loadNetwork(provider, dispatch);
+          
           const Factory = await loadFactory(
-            ethersProvider,
+            ethersSigner,
             config[chainId].decentratalityServiceFactory.address,
             dispatch
           );
+          
           setFactory(Factory);
 
-          const Restaurants = await loadAllRestaurants(ethersProvider, Factory, dispatch);
-          const myRestaurants = await loadMyRestaurants(ethersProvider, account, Restaurants, dispatch);
+          const Restaurants = await loadAllRestaurants(ethersSigner, Factory, dispatch);
+          const myRestaurants = await loadMyRestaurants(provider, account, Restaurants, dispatch);
 
           setMyRestaurants(myRestaurants);
           subscribeToEvents(Factory, dispatch);
@@ -103,13 +146,20 @@ export default function Home() {
         } finally {
           setIsLoading(false);
         }
-      } else {
-        console.error("MetaMask not detected");
-        setIsLoading(false);
       }
-    };
+      loadProvider();
+    }
+        
+        
+      
+      
 
-    loadProvider(); // Call once without adding to dependencies to prevent re-renders
+    
+    
+  
+    
+
+     // Call once without adding to dependencies to prevent re-renders
 
     const handleResize = () => {
       const menu = document.querySelector('.menu');
@@ -122,7 +172,7 @@ export default function Home() {
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, []); // 
+  }, [ethersSigner]); // 
 
   const navigateToCrowdsale = () => {
     router.push('/Crowdsale');

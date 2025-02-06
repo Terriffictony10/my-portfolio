@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo  } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { ethers, isAddress } from 'ethers';
+import { ethers, isAddress, BrowserProvider, JsonRpcSigner } from 'ethers';
 import Loading from '../components/Loading.js';
 import { useRouter } from 'next/router';
 import { useProvider } from '../context/ProviderContext';
@@ -21,8 +21,52 @@ import {
   addNewMenuItem
 } from '../store/interactions';
 
+import wagmi from "../context/appkit/index.tsx";
+import { useAppKitAccount } from '@reown/appkit/react';
+import { useClient, useConnectorClient } from 'wagmi';
+
+
+export function clientToProvider(client) {
+  const { chain, transport } = client;
+  const network = {
+    chainId: chain.id,
+    name: chain.name,
+    ensAddress: chain.contracts?.ensRegistry?.address,
+  };
+
+  // Use the RPC URL provided by the transport.
+  // (Make sure your configuration passes a valid URL instead of defaulting to localhost)
+  return new ethers.JsonRpcProvider(transport.url, network);
+}
+
+/** Hook to convert a viem Client to an ethers.js Provider. */
+export function useEthersProvider({ chainId } = {}) {
+  const client = useClient({ chainId });
+  return useMemo(() => (client ? clientToProvider(client) : undefined), [client]);
+}
+export function clientToSigner(client) {
+  const { account, chain, transport } = client;
+  const network = {
+    chainId: chain.id,
+    name: chain.name,
+    ensAddress: chain.contracts && chain.contracts.ensRegistry ? chain.contracts.ensRegistry.address : undefined,
+  };
+  const provider = new BrowserProvider(transport, network);
+  const signer = new JsonRpcSigner(provider, account.address);
+  return signer;
+}
+
+/** Hook to convert a viem Wallet Client to an ethers.js Signer. */
+export function useEthersSigner({ chainId } = {}) {
+  const { data: client } = useConnectorClient({ chainId });
+  return useMemo(() => (client ? clientToSigner(client) : undefined), [client]);
+}
+
 function MainDashboardRestaurantBody() {
-  const { provider, setProvider } = useProvider();
+  const { isConnected } = useAppKitAccount();
+  const ethersProvider = useEthersProvider({ chainId: 84532 });
+  const ethersSigner = useEthersSigner({ chainId: 84532 });
+  const [myprovider, setProvider] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Local state for the Restaurant contract's on-chain balance
@@ -94,9 +138,9 @@ function MainDashboardRestaurantBody() {
   // Create a new POS device on-chain
   const addPOSHandler = async (e) => {
     e.preventDefault();
-    if (!provider) return;
+    if (!isConnected) return;
     try {
-      await createPOS(provider, contractAddress, RESTAURANT_ABI, posName, dispatch);
+      await createPOS(etherSigner, contractAddress, RESTAURANT_ABI, posName, dispatch);
       setPOSName('');
       setShowPOSForm(false);
     } catch (error) {
@@ -107,7 +151,7 @@ function MainDashboardRestaurantBody() {
   // Hire a new employee
   const hireEmployeeHandler = async (e) => {
     e.preventDefault();
-    if (!provider) return;
+    if (!isConnected) return;
 
     if (!isAddress(employeeAddress)) {
       alert('Invalid Ethereum address');
@@ -115,7 +159,7 @@ function MainDashboardRestaurantBody() {
     }
 
     await hireNewEmployee(
-      provider,
+      etherSigner,
       contractAddress,
       RESTAURANT_ABI,
       employeeJobId,
@@ -133,10 +177,10 @@ function MainDashboardRestaurantBody() {
   // Add a new menu item to all POS devices
   const addMenuItemSubmitHandler = async (e) => {
     e.preventDefault();
-    if (!provider) return;
+    if (!isConnected) return;
     try {
       await addNewMenuItem(
-        provider,
+        etherSigner,
         contractAddress,
         RESTAURANT_ABI,
         menuItemCost,
@@ -153,15 +197,15 @@ function MainDashboardRestaurantBody() {
 
   // Start or stop the Restaurant service
   const toggleServiceHandler = async () => {
-    if (!provider) return;
+    if (!isConnected) return;
     setServiceLoading(true);
     try {
       if (serviceActive) {
         // Stop service
-        await endService(provider, contractAddress, RESTAURANT_ABI, dispatch);
+        await endService(etherSigner, contractAddress, RESTAURANT_ABI, dispatch);
       } else {
         // Start service
-        await startService(provider, contractAddress, RESTAURANT_ABI, dispatch);
+        await startService(etherSigner, contractAddress, RESTAURANT_ABI, dispatch);
       }
       await getServiceStatus(); // Reload local service state
     } catch (error) {
@@ -172,10 +216,10 @@ function MainDashboardRestaurantBody() {
 
   // Read the "service" bool and "serviceStart" from the contract
   const getServiceStatus = async () => {
-    if (!provider || !contractAddress) return;
+    if (!isConnected) return;
     try {
-      const user = await provider.getSigner();
-      const contract = new ethers.Contract(contractAddress, RESTAURANT_ABI, user);
+      
+      const contract = new ethers.Contract(contractAddress, RESTAURANT_ABI, etherSigner);
 
       const service = await contract.service();
       const serviceStartTime = await contract.serviceStart();
@@ -199,10 +243,11 @@ function MainDashboardRestaurantBody() {
   // Initial load: connect to contract & load all data
   useEffect(() => {
     const loadBlockchainData = async () => {
-      if (typeof window.ethereum !== 'undefined' && contractAddress) {
+      if (isConnected && ethersSigner && ethersProvider && contractAddress) {
         try {
-          const ethersProvider = new ethers.BrowserProvider(window.ethereum);
-          setProvider(ethersProvider);
+          const { provider, address} = await ethersSigner;
+          
+          setProvider(provider);
 
           // Request accounts if not already connected
           await ethersProvider.send('eth_requestAccounts', []);
@@ -212,11 +257,11 @@ function MainDashboardRestaurantBody() {
           setContractBalance(balance);
 
           // Load needed data from the contract
-          await loadAllJobs(ethersProvider, contractAddress, RESTAURANT_ABI, dispatch);
-          await loadAllEmployees(ethersProvider, contractAddress, RESTAURANT_ABI, dispatch);
-          await loadAllServices(ethersProvider, contractAddress, RESTAURANT_ABI, dispatch);
-          await loadAllPOS(ethersProvider, contractAddress, RESTAURANT_ABI, dispatch);
-          await loadAllMenuItems(ethersProvider, contractAddress, RESTAURANT_ABI, dispatch);
+          await loadAllJobs(etherSigner, contractAddress, RESTAURANT_ABI, dispatch);
+          await loadAllEmployees(etherSigner, contractAddress, RESTAURANT_ABI, dispatch);
+          await loadAllServices(etherSigner, contractAddress, RESTAURANT_ABI, dispatch);
+          await loadAllPOS(etherSigner, contractAddress, RESTAURANT_ABI, dispatch);
+          await loadAllMenuItems(etherSigner, contractAddress, RESTAURANT_ABI, dispatch);
 
           // Check if service is active
           await getServiceStatus();
@@ -235,18 +280,19 @@ function MainDashboardRestaurantBody() {
 
   // Auto-refresh data every 10 seconds
   useEffect(() => {
-    if (provider && contractAddress) {
+    if (isConnected && ethersSigner && ethersProvider && contractAddress) {
       const refreshData = async () => {
+        const { provider, address} = await ethersSigner;
         // Re-check contract balance
         const balance = await provider.getBalance(contractAddress);
         setContractBalance(balance);
 
         // Refresh all loaded data
-        loadAllPOS(provider, contractAddress, RESTAURANT_ABI, dispatch);
-        loadAllJobs(provider, contractAddress, RESTAURANT_ABI, dispatch);
-        loadAllEmployees(provider, contractAddress, RESTAURANT_ABI, dispatch);
-        loadAllServices(provider, contractAddress, RESTAURANT_ABI, dispatch);
-        loadAllMenuItems(provider, contractAddress, RESTAURANT_ABI, dispatch);
+        loadAllPOS(ethersSigner, contractAddress, RESTAURANT_ABI, dispatch);
+        loadAllJobs(ethersSigner, contractAddress, RESTAURANT_ABI, dispatch);
+        loadAllEmployees(ethersSigner, contractAddress, RESTAURANT_ABI, dispatch);
+        loadAllServices(ethersSigner, contractAddress, RESTAURANT_ABI, dispatch);
+        loadAllMenuItems(ethersSigner, contractAddress, RESTAURANT_ABI, dispatch);
         getServiceStatus();
       };
 
@@ -254,7 +300,7 @@ function MainDashboardRestaurantBody() {
       const interval = setInterval(refreshData, 10000);
       return () => clearInterval(interval);
     }
-  }, [provider, contractAddress, dispatch]);
+  }, [ethersSigner, contractAddress, dispatch]);
 
   // If service is active, track elapsed time
   useEffect(() => {

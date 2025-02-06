@@ -58,7 +58,7 @@ function DashboardBody({ onclick2, onclick3}) {
 
   useEffect(() => {
     const loadProvider = async () => {
-    if (isConnected) {
+    if (isConnected && ethersSigner && ethersProvider) {
       try {
         const { provider, address} = await ethersSigner;
       

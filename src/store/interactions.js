@@ -42,16 +42,18 @@ export const subscribeToEvents = async (restaurantFactory, dispatch, ...Restaura
         }
     
 }
-export const loadFactory = async (provider, address, dispatch) => {
-    const user = await provider.getSigner()
-    const decentratalityServiceFactory = new ethers.Contract(address, DECENTRATALITYSERVICEFACTORY_ABI.abi, user);
+export const loadFactory = async (user, address1, dispatch) => {
+     const { provider, address } = await user
+    const decentratalityServiceFactory = new ethers.Contract(address1, DECENTRATALITYSERVICEFACTORY_ABI.abi, await provider.getSigner());
+    
     dispatch({ type: 'DECENTRATALITY_SERVICE_FACTORY_LOADED', decentratalityServiceFactory })
     return decentratalityServiceFactory
 }
-export const loadAllRestaurants = async (provider, factory, dispatch) => {
+export const loadAllRestaurants = async (user, factory, dispatch) => {
     try {
+        const { provider, address } = await user
         const Restaurants = [];
-        const user = await provider.getSigner();
+        
 
         // Call the `getAllRestaurants` function from the factory contract
         const restaurantAddresses = await factory.getAllRestaurants();
@@ -94,20 +96,23 @@ export const loadAllRestaurants = async (provider, factory, dispatch) => {
 
 
 export const loadMyRestaurants = async (provider, user, Restaurants, dispatch) => {
-    const myRestaurants = Restaurants.filter((restaurant) => restaurant.owner === user); // Assuming `owner` is the correct key
+    const myRestaurants = Restaurants.filter((restaurant) => restaurant.owner === user); 
+    // Assuming `owner` is the correct key
     if (myRestaurants.length === 0) return;
 
     dispatch({ type: 'MY_RESTAURANTS_LOADED', myRestaurants });
+
     return myRestaurants;
 };
 
-export const decorateMyRestaurants = async (provider, myRestaurants) => {
-    const user = provider.getSigner();
+export const decorateMyRestaurants = async (user, myRestaurants) => {
+    
     const decoratedRestaurants = [];
-
+    console.log(user)
     if (myRestaurants) {
         for (const restaurant of myRestaurants) {
             try {
+              const { provider, address } = await user
                 const contract = new ethers.Contract(restaurant.address, RESTAURANT_ABI, user);
                 const name = await contract.name; // Use the new getName() function
                 const myName = name.toString()
@@ -123,19 +128,21 @@ export const decorateMyRestaurants = async (provider, myRestaurants) => {
             }
         }
     }
-
+    
     return decoratedRestaurants;
 };
 
-export const createNewRestaurant = async (provider, factory, restaurantName, totalCostWei, dispatch) => {
+export const createNewRestaurant = async (user, factory, restaurantName, totalCostWei, dispatch) => {
   try {
-    const user = await provider.getSigner();
-
+    
+    const { provider, address } = await user
+    console.log( factory)
     // Ensure totalCostWei is converted to an integer BigInt by truncating decimals
     const totalCost = BigInt(Math.floor(Number(totalCostWei)));
 
     // Check if the user has enough balance
-    const balance = await provider.getBalance(user.getAddress());
+    
+    const balance = await provider.getBalance(address);
     if (BigInt(balance) < totalCost) {
       alert("Insufficient funds to create restaurant");
       return;
@@ -157,8 +164,8 @@ export const createNewRestaurant = async (provider, factory, restaurantName, tot
   }
 };
 
-export const loadDashboardRestaurantContractData = async (provider, Restaurant, dispatch) => {
-    const user = await provider.getSigner()
+export const loadDashboardRestaurantContractData = async (provider, user, Restaurant, dispatch) => {
+    
     const contractAddress = Restaurant.address
     const abi = RESTAURANT_ABI
     const contract = await new ethers.Contract(contractAddress, abi, user)
@@ -173,8 +180,8 @@ export const loadDashboardRestaurantContractData = async (provider, Restaurant, 
 }
 // interactions.js
 
-export const createNewJob = async (provider, contractAddress, abi, name, wage, dispatch) => {
-  const user = await provider.getSigner();
+export const createNewJob = async (user, contractAddress, abi, name, wage, dispatch) => {
+  
   const contract = new ethers.Contract(contractAddress, abi, user);
 
   // Call the contract function to add a new job
@@ -186,9 +193,9 @@ export const createNewJob = async (provider, contractAddress, abi, name, wage, d
   // Reload all jobs
   await loadAllJobs(provider, contractAddress, abi, dispatch);
 };
-export const hireNewEmployee = async (provider, contractAddress, abi, jobId, name, employeeAddress, dispatch) => {
+export const hireNewEmployee = async (user, contractAddress, abi, jobId, name, employeeAddress, dispatch) => {
   try {
-    const user = await provider.getSigner();
+    
     const contract = new ethers.Contract(contractAddress, abi, user);
 
     // Call the contract function to hire a new employee
@@ -204,9 +211,9 @@ export const hireNewEmployee = async (provider, contractAddress, abi, jobId, nam
   }
 };
 
-export const loadAllEmployees = async (provider, contractAddress, abi, dispatch) => {
+export const loadAllEmployees = async (user, contractAddress, abi, dispatch) => {
   try {
-    const user = await provider.getSigner();
+    
     const contract = new ethers.Contract(contractAddress, abi, user);
 
     // Fetch the array of employee IDs
@@ -233,9 +240,9 @@ export const loadAllEmployees = async (provider, contractAddress, abi, dispatch)
     console.error('Error in loadAllEmployees:', error);
   }
 };
-export const loadAllJobs = async (provider, contractAddress, abi, dispatch) => {
+export const loadAllJobs = async (user, contractAddress, abi, dispatch) => {
   try {
-    const user = await provider.getSigner();
+    
     const contract = new ethers.Contract(contractAddress, abi, user);
 
     // Fetch the array of job IDs
@@ -260,9 +267,9 @@ export const loadAllJobs = async (provider, contractAddress, abi, dispatch) => {
     console.error('Error in loadAllJobs:', error.message);
   }
 };
-export const startService = async (provider, contractAddress, abi, dispatch) => {
+export const startService = async (user, contractAddress, abi, dispatch) => {
   try {
-    const user = await provider.getSigner();
+    
     const contract = new ethers.Contract(contractAddress, abi, user);
 
     const tx = await contract.startService();
@@ -279,9 +286,9 @@ export const startService = async (provider, contractAddress, abi, dispatch) => 
   }
 };
 
-export const loadAllServices = async (provider, contractAddress, abi, dispatch) => {
+export const loadAllServices = async (user, contractAddress, abi, dispatch) => {
   try {
-    const user = await provider.getSigner();
+   
     const contract = new ethers.Contract(contractAddress, abi, user);
 
     // Fetch the array of service IDs
@@ -309,9 +316,9 @@ export const loadAllServices = async (provider, contractAddress, abi, dispatch) 
   }
 };
 
-export const endService = async (provider, contractAddress, abi, dispatch) => {
+export const endService = async (user, contractAddress, abi, dispatch) => {
   try {
-    const user = await provider.getSigner();
+    
     const contract = new ethers.Contract(contractAddress, abi, user);
 
     const tx = await contract.endService();
@@ -324,9 +331,9 @@ export const endService = async (provider, contractAddress, abi, dispatch) => {
   }
 };
 
-export const createPOS = async (provider, contractAddress, abi, name, dispatch) => {
+export const createPOS = async (signer, contractAddress, abi, name, dispatch) => {
   try {
-    const signer = await provider.getSigner();
+    
     const contract = new ethers.Contract(contractAddress, abi, signer);
 
     // Call the createPOS function on the contract
@@ -359,9 +366,9 @@ export const createPOS = async (provider, contractAddress, abi, name, dispatch) 
   }
 };
 
-export const loadAllPOS = async (provider, contractAddress, abi, dispatch) => {
+export const loadAllPOS = async (signer, contractAddress, abi, dispatch) => {
   try {
-    const signer = await provider.getSigner();
+    
     const contract = new ethers.Contract(contractAddress, RESTAURANT_ABI, signer);
 
     // Fetch the array of POS IDs
@@ -388,9 +395,9 @@ export const loadAllPOS = async (provider, contractAddress, abi, dispatch) => {
     console.error('Error in loadAllPOS:', error);
   }
 };
-  export const loadAllMenuItems = async (provider, contractAddress, abi, dispatch) => {
+  export const loadAllMenuItems = async (user, contractAddress, abi, dispatch) => {
   try {
-    const user = await provider.getSigner()
+    c
     const restaurantContract = new ethers.Contract(contractAddress, RESTAURANT_ABI, user);
 
     // Get all POS addresses associated with the restaurant
@@ -426,9 +433,9 @@ export const loadAllPOS = async (provider, contractAddress, abi, dispatch) => {
 };
 
 
-export const addNewMenuItem = async (provider, contractAddress, abi, cost, name, dispatch) => {
+export const addNewMenuItem = async (signer, contractAddress, abi, cost, name, dispatch) => {
   try {
-    const signer = await provider.getSigner();
+    
     const restaurantContract = new ethers.Contract(contractAddress, RESTAURANT_ABI, signer);
 
     // Get all POS addresses from the restaurant contract
@@ -456,9 +463,9 @@ export const addNewMenuItem = async (provider, contractAddress, abi, cost, name,
 };
 
 // In interactions.js (near loadAllPOS or after it):
-export const loadEmployeeRelevantPOS = async (provider, restaurantAddress, dispatch) => {
+export const loadEmployeeRelevantPOS = async (signer, restaurantAddress, dispatch) => {
   try {
-    const signer = await provider.getSigner();
+    
     const restaurantContract = new ethers.Contract(restaurantAddress, RESTAURANT_ABI, signer);
     const posIds = await restaurantContract.getPOSIds();
     
@@ -488,7 +495,7 @@ export const loadEmployeeRelevantPOS = async (provider, restaurantAddress, dispa
 
 
 export const createTicketForPOS = async (
-  provider,
+  signer,
   posAddress,
   posAbi,
   ticketName,
@@ -496,7 +503,7 @@ export const createTicketForPOS = async (
   dispatch
 ) => {
   try {
-    const signer = await provider.getSigner();
+    
     const posContract = new ethers.Contract(posAddress, posAbi, signer);
 
     // The POS contract extends MenuTicketBase, which has createTicket(_server, _name)
@@ -520,9 +527,9 @@ export const createTicketForPOS = async (
  * @param posAbi The ABI for the POS contract
  * @param dispatch Redux dispatch function
  */
-export const loadAllTicketsForPOS = async (provider, posAddress, posAbi, dispatch) => {
+export const loadAllTicketsForPOS = async (signer, posAddress, posAbi, dispatch) => {
   try {
-    const signer = await provider.getSigner();
+    
     const posContract = new ethers.Contract(posAddress, POS_ABI, signer);
     // The POS contract (via MenuTicketBase) has an array TicketIds, so we read that
     const ticketIds = await posContract.getTicketIds();
@@ -580,11 +587,11 @@ export const clearActiveTicket = async (dispatch) => {
  * @param {Object} dispatch Redux dispatch
  * @returns {Array} An array of menu items [{ id, name, cost }, ...]
  */
-export const loadMenuItemsForPOS = async (provider, posAddress, posAbi, dispatch) => {
+export const loadMenuItemsForPOS = async (signer, posAddress, posAbi, dispatch) => {
   try {
     // Optional: dispatch({ type: 'MENU_ITEMS_LOAD_REQUEST' });
 
-    const signer = await provider.getSigner();
+    
     const posContract = new ethers.Contract(posAddress, POS_ABI, signer);
     const menuItemIds = await posContract.getMenuItemIds();
     
