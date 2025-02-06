@@ -10,7 +10,7 @@ import { myJob } from './myJob';
 
 // Root persist configuration
 const rootPersistConfig = {
-  key: 'root',
+  key: 'root/DashboardRestaurant',
   storage,
 };
 

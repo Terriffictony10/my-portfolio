@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useRouter } from 'next/router';
-import { ethers } from 'ethers';
+import { ethers, BrowserProvider, JsonRpcSigner } from 'ethers';
 
 import Modal from 'react-modal';
 import { QRCodeSVG } from 'qrcode.react'; // Using the named import for an SVG
@@ -18,7 +18,51 @@ import {
 // ABIs
 import POS_ABI from '../abis/POS.json';
 
+import wagmi from "../context/appkit/index.tsx";
+import { useAppKitAccount } from '@reown/appkit/react';
+import { Configure, useClient, useConnectorClient } from 'wagmi';
+
+export function clientToProvider(client) {
+  const { chain, transport } = client;
+  const network = {
+    chainId: chain.id,
+    name: chain.name,
+    ensAddress: chain.contracts?.ensRegistry?.address,
+  };
+
+  // Use the RPC URL provided by the transport.
+  // (Make sure your configuration passes a valid URL instead of defaulting to localhost)
+  return new ethers.JsonRpcProvider(transport.url, network);
+}
+
+/** Hook to convert a viem Client to an ethers.js Provider. */
+export function useEthersProvider({ chainId } = {}) {
+  const client = useClient({ chainId });
+  return useMemo(() => (client ? clientToProvider(client) : undefined), [client]);
+}
+export function clientToSigner(client) {
+  const { account, chain, transport } = client;
+  const network = {
+    chainId: chain.id,
+    name: chain.name,
+    ensAddress: chain.contracts && chain.contracts.ensRegistry ? chain.contracts.ensRegistry.address : undefined,
+  };
+  const provider = new BrowserProvider(transport, network);
+  const signer = new JsonRpcSigner(provider, account.address);
+  return signer;
+}
+
+/** Hook to convert a viem Wallet Client to an ethers.js Signer. */
+export function useEthersSigner({ chainId } = {}) {
+  const { data: client } = useConnectorClient({ chainId });
+  return useMemo(() => (client ? clientToSigner(client) : undefined), [client]);
+}
+
 export default function Micros() {
+
+  const { address, isConnected } = useAppKitAccount();
+  const ethersProvider = useEthersProvider({ chainId: 84532 });
+  const ethersSigner = useEthersSigner({ chainId: 84532 });
   const dispatch = useDispatch();
   const router = useRouter();
 
@@ -52,11 +96,11 @@ export default function Micros() {
 
     (async () => {
       try {
-        const provider = new ethers.BrowserProvider(window.ethereum);
+        const { provider, address} = await ethersSigner;
 
         // Load the full ticket details:
         await loadFullTicketDetails(
-          provider,
+          ethersSigner,
           activeTicket.posAddress,
           POS_ABI,
           activeTicket.id,
@@ -65,7 +109,7 @@ export default function Micros() {
 
         // Load the menu
         const items = await loadMenuItemsForPOS(
-          provider,
+          ethersSigner,
           activeTicket.posAddress,
           POS_ABI,
           dispatch
@@ -75,7 +119,7 @@ export default function Micros() {
         console.error('Error loading data:', error);
       }
     })();
-  }, [activeTicket, kitchenTickets, dispatch]);
+  }, [activeTicket, kitchenTickets, dispatch, ethersSigner, isConnected]);
 
   // 3) Go back handler
   const handleGoBack = async () => {
@@ -102,11 +146,11 @@ export default function Micros() {
   const handleRing = async () => {
     try {
       setRingInProgress(true);
-      const provider = new ethers.BrowserProvider(window.ethereum);
+      
 
       // 1) "Ring" on chain
       await ringBufferedItems(
-        provider,
+        ethersSigner,
         activeTicket.posAddress,
         pendingOrderBuffer,
         POS_ABI,
@@ -137,7 +181,7 @@ export default function Micros() {
 
       // 4) Reload the chain data
       await loadFullTicketDetails(
-        provider,
+        ethersSigner,
         activeTicket.posAddress,
         POS_ABI,
         activeTicket.id,

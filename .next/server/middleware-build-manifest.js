@@ -9,15 +9,20 @@ self.__BUILD_MANIFEST = {
   "lowPriorityFiles": [],
   "rootMainFiles": [],
   "pages": {
-    "/": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/index.js"
-    ],
     "/Dashboard": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/Dashboard.js"
+    ],
+    "/EmployeeDashboard": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/EmployeeDashboard.js"
+    ],
+    "/POSterminal": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/POSterminal.js"
     ],
     "/_app": [
       "static/chunks/webpack.js",
@@ -29,10 +34,25 @@ self.__BUILD_MANIFEST = {
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
+    "/mainJobDashboard": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/mainJobDashboard.js"
+    ],
     "/mainRestaurantDashboard": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/mainRestaurantDashboard.js"
+    ],
+    "/micros": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/micros.js"
+    ],
+    "/pay": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/pay.js"
     ]
   },
   "ampFirstPages": []

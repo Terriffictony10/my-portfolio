@@ -1,8 +1,8 @@
 // pages/POSterminal.js
 
 import { useSelector, useDispatch } from 'react-redux';
-import { useState, useEffect } from 'react';
-import { ethers } from 'ethers';
+import { useState, useEffect, useMemo } from 'react';
+import { ethers, BrowserProvider, JsonRpcSigner } from 'ethers';
 import { Modal } from 'react-bootstrap'; // If you have bootstrap
 import { useRouter } from 'next/router';
 import { useProvider } from '../context/ProviderContext';
@@ -16,11 +16,53 @@ import {
   loadEmployeeRelevantPOS
 } from '../store/interactions';
 
-import POS_ABI from '../abis/POS.json';  // If you need the ABI locally for reference
+import POS_ABI from '../abis/POS.json';  
+
+import wagmi from "../context/appkit/index.tsx";
+import { useAppKitAccount } from '@reown/appkit/react';
+import { Configure, useClient, useConnectorClient } from 'wagmi';
+
+export function clientToProvider(client) {
+  const { chain, transport } = client;
+  const network = {
+    chainId: chain.id,
+    name: chain.name,
+    ensAddress: chain.contracts?.ensRegistry?.address,
+  };
+
+  // Use the RPC URL provided by the transport.
+  // (Make sure your configuration passes a valid URL instead of defaulting to localhost)
+  return new ethers.JsonRpcProvider(transport.url, network);
+}
+
+/** Hook to convert a viem Client to an ethers.js Provider. */
+export function useEthersProvider({ chainId } = {}) {
+  const client = useClient({ chainId });
+  return useMemo(() => (client ? clientToProvider(client) : undefined), [client]);
+}
+export function clientToSigner(client) {
+  const { account, chain, transport } = client;
+  const network = {
+    chainId: chain.id,
+    name: chain.name,
+    ensAddress: chain.contracts && chain.contracts.ensRegistry ? chain.contracts.ensRegistry.address : undefined,
+  };
+  const provider = new BrowserProvider(transport, network);
+  const signer = new JsonRpcSigner(provider, account.address);
+  return signer;
+}
+
+/** Hook to convert a viem Wallet Client to an ethers.js Signer. */
+export function useEthersSigner({ chainId } = {}) {
+  const { data: client } = useConnectorClient({ chainId });
+  return useMemo(() => (client ? clientToSigner(client) : undefined), [client]);
+}
 
 export default function POSterminal() {
+  const { address, isConnected } = useAppKitAccount();
+  const ethersProvider = useEthersProvider({ chainId: 84532 });
+  const ethersSigner = useEthersSigner({ chainId: 84532 });
   
-  const { provider, setProvider } = useProvider();
   const router = useRouter();
   const dispatch = useDispatch();
 
@@ -57,15 +99,15 @@ export default function POSterminal() {
    * Load tickets for each POS in posArray
    */
   useEffect(() => {
-    const ethersProvider = new ethers.BrowserProvider(window.ethereum);
+    
     const loadTickets = async () => {
       // if (!provider || !posArray || posArray.length === 0) return;
       for (let pos of posArray) {
-        await loadAllTicketsForPOS(ethersProvider, pos.address, POS_ABI, dispatch);
+        await loadAllTicketsForPOS(ethersSigner, pos.address, POS_ABI, dispatch);
       }
     };
     loadTickets();
-  }, [posArray]);
+  }, [posArray, ethersSigner, isConnected]);
 
   /**
    * Handler for creating a new ticket
@@ -78,7 +120,7 @@ export default function POSterminal() {
     const ethersProvider = new ethers.BrowserProvider(window.ethereum);
     try {
       await createTicketForPOS(
-        ethersProvider, 
+        ethersSigner, 
         posToUse.address, 
         POS_ABI, 
         newTicketName, 
@@ -149,13 +191,7 @@ export default function POSterminal() {
                 style={{ display: 'inline-block', margin: '10px' }}
               >
                 {/* Example icon for each ticket */}
-                <Image 
-                  src="/ticket-icon.png" 
-                  alt="Ticket Icon" 
-                  width={40} 
-                  height={40} 
-                  style={{ display: 'block', margin: '0 auto 5px auto' }}
-                />
+                
                 <button
                   style={{
                     padding: '10px 20px',

@@ -83,7 +83,7 @@ function DashboardBody({ onclick2, onclick3}) {
   }
     }
     loadProvider()
-  }, [isConnected]);
+  }, [isConnected, ethersSigner]);
 
  
   const navigateToCrowdsale = () => {

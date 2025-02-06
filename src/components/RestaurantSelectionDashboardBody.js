@@ -77,9 +77,9 @@ function RestaurantSelectionDashboardBody({ onclick, fun }) {
   const toRestaurantDashHandler = async (e, restaurant, myRestaurants) => {
     e.preventDefault();
     router.push('/mainRestaurantDashboard');
-    const index = myRestaurants.indexOf(restaurant);
+    
     await setDashboardRestaurant(restaurant);
-    await loadDashboardRestaurantContractData(ethersProvider, ethersSigner, restaurant, dispatch);
+    await loadDashboardRestaurantContractData(ethersSigner, restaurant, dispatch);
   };
 
   const loadBlockchainData = async () => {
@@ -94,7 +94,9 @@ function RestaurantSelectionDashboardBody({ onclick, fun }) {
           config[chainId].decentratalityServiceFactory.address,
           dispatch
         );
+
         const Restaurants = await loadAllRestaurants(ethersSigner, Factory, dispatch);
+
 
         const myRestaurants = await loadMyRestaurants(
           ethersProvider,

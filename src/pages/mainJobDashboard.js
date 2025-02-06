@@ -1,7 +1,7 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useRouter } from 'next/router';
-import { ethers } from 'ethers';
+import { ethers, BrowserProvider, JsonRpcSigner } from 'ethers';
 import Image from 'next/image';
 import { useProvider } from '../context/ProviderContext';
 
@@ -12,16 +12,57 @@ import {
   clockOutEmployee
 } from '../store/interactions';
 
-import { useAppKitAccount } from '@reown/appkit/react'
+import wagmi from "../context/appkit/index.tsx";
+import { useAppKitAccount } from '@reown/appkit/react';
+import { Configure, useClient, useConnectorClient } from 'wagmi';
+
+export function clientToProvider(client) {
+  const { chain, transport } = client;
+  const network = {
+    chainId: chain.id,
+    name: chain.name,
+    ensAddress: chain.contracts?.ensRegistry?.address,
+  };
+
+  // Use the RPC URL provided by the transport.
+  // (Make sure your configuration passes a valid URL instead of defaulting to localhost)
+  return new ethers.JsonRpcProvider(transport.url, network);
+}
+
+/** Hook to convert a viem Client to an ethers.js Provider. */
+export function useEthersProvider({ chainId } = {}) {
+  const client = useClient({ chainId });
+  return useMemo(() => (client ? clientToProvider(client) : undefined), [client]);
+}
+export function clientToSigner(client) {
+  const { account, chain, transport } = client;
+  const network = {
+    chainId: chain.id,
+    name: chain.name,
+    ensAddress: chain.contracts && chain.contracts.ensRegistry ? chain.contracts.ensRegistry.address : undefined,
+  };
+  const provider = new BrowserProvider(transport, network);
+  const signer = new JsonRpcSigner(provider, account.address);
+  return signer;
+}
+
+/** Hook to convert a viem Wallet Client to an ethers.js Signer. */
+export function useEthersSigner({ chainId } = {}) {
+  const { data: client } = useConnectorClient({ chainId });
+  return useMemo(() => (client ? clientToSigner(client) : undefined), [client]);
+}
+
 
 export default function EmployeePage() {
   const dispatch = useDispatch();
   const router = useRouter();
   const { address, isConnected } = useAppKitAccount();
+  const ethersProvider = useEthersProvider({ chainId: 84532 });
+  const ethersSigner = useEthersSigner({ chainId: 84532 });
 
   // 1) Grab user address, plus contract from Redux
   const userAddress = useSelector((state) => state.provider.account);
-  const { provider, setProvider } = useProvider();
+  
   const dashboardRestaurant = useSelector((state) => state.DashboardRestaurant);
 
   const restaurantAddress = dashboardRestaurant.contractAddress;
@@ -111,10 +152,9 @@ export default function EmployeePage() {
   // ***************************
   useEffect(() => {
     if (!restaurantAddress) return;
-    if(isConnected){
-      const ethersProvider = new ethers.BrowserProvider(window.ethereum);
-      setProvider(ethersProvider);
-      loadEmployeeRelevantPOS(ethersProvider, restaurantAddress, dispatch);
+    if(isConnected && ethersSigner){
+      
+      loadEmployeeRelevantPOS(ethersSigner, restaurantAddress, dispatch);
     }
   }, [restaurantAddress, dispatch]);
 
@@ -142,11 +182,9 @@ export default function EmployeePage() {
 
   // ----- HANDLERS -----
   const handleOpenPOS = () => {
-    if (!provider || !restaurantAddress) {
-      console.log('Provider or restaurant address not found');
-      return;
-    }
+    
     router.push('/POSterminal');
+    loadEmployeeRelevantPOS(ethersSigner, restaurantAddress, dispatch);
   };
 
   const navigateToIndex = () => router.push('/');
@@ -162,7 +200,7 @@ export default function EmployeePage() {
     try {
       if (!isClockedIn) {
         // Clock in on-chain
-        await clockInEmployee(provider, restaurantAddress, restaurantAbi, 1); // or find employeeId
+        await clockInEmployee(ethersSigner, restaurantAddress, restaurantAbi, 1); // or find employeeId
 
         const nowMs = Date.now();
         setIsClockedIn(true);
@@ -172,7 +210,7 @@ export default function EmployeePage() {
         persistClockStatus(true, nowMs);
       } else {
         // Clock out on-chain
-        await clockOutEmployee(provider, restaurantAddress, restaurantAbi, 1); // or find employeeId
+        await clockOutEmployee(ethersSigner, restaurantAddress, restaurantAbi, 1); // or find employeeId
 
         setIsClockedIn(false);
         setClockInTime(null);

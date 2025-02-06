@@ -4,10 +4,6 @@ const DEFAULT_RESTAURANTS_STATE = {
 	transaction: {
 		isSuccessful: false
 	},
-	allRestaurants: {
-		loaded: false,
-		data: []
-	},
 	restaurantCreationInProgress: false,
 	events: []
 }
@@ -22,12 +18,7 @@ export const Restaurants = (state = DEFAULT_RESTAURANTS_STATE, action) => {
 		case 'All_RESTAURANTS_LOADED':
 			return {
 				...state,
-				allRestaurants: {
-					loaded: true,
-					data : [
-						action.Restaurants
-						]
-				}
+				allRestaurants: action.payload.Restaurants
 			}
 		case 'MY_RESTAURANTS_LOADED':
 			return {
@@ -37,6 +28,10 @@ export const Restaurants = (state = DEFAULT_RESTAURANTS_STATE, action) => {
 		case 'NEW_RESTAURANT_CREATION_SUCCESS':
 			return {
 				...state,
+				transaction: {
+					...transaction,
+					isSuccessful: false
+				},
 				myRestaurants: [
 					...myRestaurants,
 					action.restaurant

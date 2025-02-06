@@ -1,8 +1,8 @@
 // mainRestaurantDashboard.js
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { ethers } from 'ethers';
+import { ethers, BrowserProvider, JsonRpcSigner } from 'ethers';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 
@@ -12,18 +12,56 @@ import { createNewJob } from '../store/interactions';
 import { useProvider } from '../context/ProviderContext';
 import config from '../config.json';
 
-import { useAppKitAccount } from '@reown/appkit/react'
+import wagmi from "../context/appkit/index.tsx";
+import { useAppKitAccount } from '@reown/appkit/react';
+import { Configure, useClient, useConnectorClient } from 'wagmi';
+
+export function clientToProvider(client) {
+  const { chain, transport } = client;
+  const network = {
+    chainId: chain.id,
+    name: chain.name,
+    ensAddress: chain.contracts?.ensRegistry?.address,
+  };
+
+  // Use the RPC URL provided by the transport.
+  // (Make sure your configuration passes a valid URL instead of defaulting to localhost)
+  return new ethers.JsonRpcProvider(transport.url, network);
+}
+
+/** Hook to convert a viem Client to an ethers.js Provider. */
+export function useEthersProvider({ chainId } = {}) {
+  const client = useClient({ chainId });
+  return useMemo(() => (client ? clientToProvider(client) : undefined), [client]);
+}
+export function clientToSigner(client) {
+  const { account, chain, transport } = client;
+  const network = {
+    chainId: chain.id,
+    name: chain.name,
+    ensAddress: chain.contracts && chain.contracts.ensRegistry ? chain.contracts.ensRegistry.address : undefined,
+  };
+  const provider = new BrowserProvider(transport, network);
+  const signer = new JsonRpcSigner(provider, account.address);
+  return signer;
+}
+
+/** Hook to convert a viem Wallet Client to an ethers.js Signer. */
+export function useEthersSigner({ chainId } = {}) {
+  const { data: client } = useConnectorClient({ chainId });
+  return useMemo(() => (client ? clientToSigner(client) : undefined), [client]);
+}
 
 
 export default function Home() {
   const dispatch = useDispatch();
   const { address, isConnected } = useAppKitAccount();
+  const ethersProvider = useEthersProvider({ chainId: 84532 });
+  const ethersSigner = useEthersSigner({ chainId: 84532 });
 
   // Load the provider (browser environment only)
   let provider;
-  if (typeof window !== 'undefined' && window.ethereum) {
-    provider = new ethers.BrowserProvider(window.ethereum);
-  }
+  
 
   // Redux: get the currently connected account
   const account = useSelector((state) => state.provider.account);
@@ -42,11 +80,8 @@ export default function Home() {
   // ============= Handlers =============
   const addNewJob = async (e, name, wage) => {
     e.preventDefault();
-    if (!provider || !contractAddress || !abi) {
-      console.error('Provider, contract, or ABI not available');
-      return;
-    }
-    await createNewJob(provider, contractAddress, abi, name, wage, dispatch);
+    
+    await createNewJob(ethersSigner, contractAddress, abi, name, wage, dispatch);
 
     // Close the "new job" modal
     const _Background = document.querySelector('.newJobForm');
@@ -66,7 +101,7 @@ export default function Home() {
   // Request accounts if needed (once) on mount
   useEffect(() => {
     if (isConnected) {
-      const provider = new ethers.BrowserProvider(window.ethereum);
+      
       
     }
   }, []);

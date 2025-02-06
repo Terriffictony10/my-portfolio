@@ -50,13 +50,14 @@ export const loadFactory = async (user, address1, dispatch) => {
     return decentratalityServiceFactory
 }
 export const loadAllRestaurants = async (user, factory, dispatch) => {
-    try {
+    
         const { provider, address } = await user
         const Restaurants = [];
         
 
         // Call the `getAllRestaurants` function from the factory contract
         const restaurantAddresses = await factory.getAllRestaurants();
+        
 
         // Iterate through the returned restaurant addresses
         for (let i = 0; i < restaurantAddresses.length; i++) {
@@ -68,6 +69,7 @@ export const loadAllRestaurants = async (user, factory, dispatch) => {
                 RESTAURANT_ABI,
                 user
             );
+
 
             // Fetch restaurant details
             const name = await restaurantContract.name();
@@ -85,12 +87,11 @@ export const loadAllRestaurants = async (user, factory, dispatch) => {
         }
 
         // Update global state or Redux store
+            console.log(Restaurants)
+
         dispatch({ type: "ALL_RESTAURANTS_LOADED", Restaurants });
         return Restaurants;
-    } catch (error) {
-        console.error("Error loading all restaurants:", error);
-        return [];
-    }
+    
 };
 
 
@@ -108,7 +109,7 @@ export const loadMyRestaurants = async (provider, user, Restaurants, dispatch) =
 export const decorateMyRestaurants = async (user, myRestaurants) => {
     
     const decoratedRestaurants = [];
-    console.log(user)
+    
     if (myRestaurants) {
         for (const restaurant of myRestaurants) {
             try {
@@ -164,8 +165,8 @@ export const createNewRestaurant = async (user, factory, restaurantName, totalCo
   }
 };
 
-export const loadDashboardRestaurantContractData = async (provider, user, Restaurant, dispatch) => {
-    
+export const loadDashboardRestaurantContractData = async (user, Restaurant, dispatch) => {
+    const { provider, address } = await user
     const contractAddress = Restaurant.address
     const abi = RESTAURANT_ABI
     const contract = await new ethers.Contract(contractAddress, abi, user)
@@ -191,7 +192,7 @@ export const createNewJob = async (user, contractAddress, abi, name, wage, dispa
   await tx.wait();
 
   // Reload all jobs
-  await loadAllJobs(provider, contractAddress, abi, dispatch);
+  await loadAllJobs(user, contractAddress, abi, dispatch);
 };
 export const hireNewEmployee = async (user, contractAddress, abi, jobId, name, employeeAddress, dispatch) => {
   try {
@@ -397,12 +398,12 @@ export const loadAllPOS = async (signer, contractAddress, abi, dispatch) => {
 };
   export const loadAllMenuItems = async (user, contractAddress, abi, dispatch) => {
   try {
-    c
+    
     const restaurantContract = new ethers.Contract(contractAddress, RESTAURANT_ABI, user);
 
     // Get all POS addresses associated with the restaurant
     const posAddresses = await restaurantContract.getAllPOSAddresses();
-    console.log('hello')
+   
     if (posAddresses.length === 0) {
       dispatch({ type: 'LOAD_ALL_MENU_ITEMS_SUCCESS', payload: [] });
       return;
@@ -410,7 +411,7 @@ export const loadAllPOS = async (signer, contractAddress, abi, dispatch) => {
 
     const firstPOSAddress = posAddresses[0];
 
-    const posContract = new ethers.Contract(firstPOSAddress, POS_ABI, provider);
+    const posContract = new ethers.Contract(firstPOSAddress, POS_ABI, user);
 
     const menuItemIds = await posContract.getMenuItemIds();
     let menuItems = [];
@@ -468,6 +469,7 @@ export const loadEmployeeRelevantPOS = async (signer, restaurantAddress, dispatc
     
     const restaurantContract = new ethers.Contract(restaurantAddress, RESTAURANT_ABI, signer);
     const posIds = await restaurantContract.getPOSIds();
+
     
     const posArray = [];
 
@@ -483,7 +485,7 @@ export const loadEmployeeRelevantPOS = async (signer, restaurantAddress, dispatc
       });
       console.log('1')
     }
-    console.log(posArray)
+    
 
     // Dispatch an action that specifically stores POS addresses relevant to the current employee's restaurant
     dispatch({ type: 'RELEVANT_POS_LOADED_FOR_EMPLOYEE', payload: posArray });
@@ -511,7 +513,7 @@ export const createTicketForPOS = async (
     await tx.wait();
 
     // After creation, reload tickets so the UI remains up-to-date
-    await loadAllTicketsForPOS(provider, posAddress, posAbi, dispatch);
+    await loadAllTicketsForPOS(signer, posAddress, posAbi, dispatch);
 
     dispatch({ type: 'CREATE_TICKET_SUCCESS' });
   } catch (error) {
@@ -553,6 +555,7 @@ export const loadAllTicketsForPOS = async (signer, posAddress, posAbi, dispatch)
     // Dispatch to store in Redux. 
     // We can store them POS-by-POS or in a single array. 
     // Below, we just push them all into a single array in Redux:
+
     dispatch({ 
       type: 'TICKETS_LOADED', 
       payload: { posAddress, tickets: ticketsArray } 
@@ -620,7 +623,7 @@ export const loadMenuItemsForPOS = async (signer, posAddress, posAbi, dispatch) 
 
 
 export const addTicketOrders = async (
-  provider,
+  signer,
   posAddress,
   posAbi,
   ticketId,
@@ -628,7 +631,7 @@ export const addTicketOrders = async (
   dispatch
 ) => {
   try {
-    const signer = await provider.getSigner();
+    
     const posContract = new ethers.Contract(posAddress, POS_ABI, signer);
     const tx = await posContract.addTicketOrders(ticketId, items);
     await tx.wait();
@@ -644,14 +647,14 @@ export const addTicketOrders = async (
 };
 
 export const loadFullTicketDetails = async (
-  provider,
+  signer,
   posAddress,
   posAbi,
   ticketId,
   dispatch
 ) => {
   try {
-    const signer = await provider.getSigner();
+    
     const posContract = new ethers.Contract(posAddress, POS_ABI, signer);
 
     // Grab the entire ticket struct from the contract
@@ -698,7 +701,7 @@ export const bufferItemForTicket = (ticketId, item) => {
 //    by calling `addTicketOrders` in the POS contract.
 
 export const ringBufferedItems = async (
-  provider,
+  signer,
   posAddress,
   pendingOrderBuffer,
   posAbi,
@@ -724,14 +727,14 @@ export const ringBufferedItems = async (
       name: item.name
     }))
 
-    const signer = await provider.getSigner()
+    
     const posContract = new ethers.Contract(posAddress, posAbi, signer)
 
     // Send transaction
     console.log('fun')
     const tx = await posContract.addTicketOrders(ticketId, rungItems)
     await tx.wait()
-    console.log('fun')
+    
 
     // Now tell Redux we succeeded
     dispatch({
@@ -748,15 +751,15 @@ export const ringBufferedItems = async (
     console.error('Error in ringBufferedItems:', error)
   }
 }
-export const clockInEmployee = async (provider, contractAddress, abi, employeeId) => {
-  const signer = await provider.getSigner();
+export const clockInEmployee = async (signer, contractAddress, abi, employeeId) => {
+  
   const contract = new ethers.Contract(contractAddress, abi, signer);
   const tx = await contract.clockIn(employeeId);
   await tx.wait();
 };
 
-export const clockOutEmployee = async (provider, contractAddress, abi, employeeId) => {
-  const signer = await provider.getSigner();
+export const clockOutEmployee = async (signer, contractAddress, abi, employeeId) => {
+  
   const contract = new ethers.Contract(contractAddress, abi, signer);
   const tx = await contract.clockOut(employeeId);
   await tx.wait();

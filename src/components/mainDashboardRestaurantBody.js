@@ -66,7 +66,7 @@ function MainDashboardRestaurantBody() {
   const { isConnected } = useAppKitAccount();
   const ethersProvider = useEthersProvider({ chainId: 84532 });
   const ethersSigner = useEthersSigner({ chainId: 84532 });
-  const [myprovider, setProvider] = useState(null);
+  
   const [isLoading, setIsLoading] = useState(true);
 
   // Local state for the Restaurant contract's on-chain balance
@@ -140,7 +140,7 @@ function MainDashboardRestaurantBody() {
     e.preventDefault();
     if (!isConnected) return;
     try {
-      await createPOS(etherSigner, contractAddress, RESTAURANT_ABI, posName, dispatch);
+      await createPOS(ethersSigner, contractAddress, RESTAURANT_ABI, posName, dispatch);
       setPOSName('');
       setShowPOSForm(false);
     } catch (error) {
@@ -159,7 +159,7 @@ function MainDashboardRestaurantBody() {
     }
 
     await hireNewEmployee(
-      etherSigner,
+      ethersSigner,
       contractAddress,
       RESTAURANT_ABI,
       employeeJobId,
@@ -180,7 +180,7 @@ function MainDashboardRestaurantBody() {
     if (!isConnected) return;
     try {
       await addNewMenuItem(
-        etherSigner,
+        ethersSigner,
         contractAddress,
         RESTAURANT_ABI,
         menuItemCost,
@@ -202,10 +202,10 @@ function MainDashboardRestaurantBody() {
     try {
       if (serviceActive) {
         // Stop service
-        await endService(etherSigner, contractAddress, RESTAURANT_ABI, dispatch);
+        await endService(ethersSigner, contractAddress, RESTAURANT_ABI, dispatch);
       } else {
         // Start service
-        await startService(etherSigner, contractAddress, RESTAURANT_ABI, dispatch);
+        await startService(ethersSigner, contractAddress, RESTAURANT_ABI, dispatch);
       }
       await getServiceStatus(); // Reload local service state
     } catch (error) {
@@ -219,7 +219,7 @@ function MainDashboardRestaurantBody() {
     if (!isConnected) return;
     try {
       
-      const contract = new ethers.Contract(contractAddress, RESTAURANT_ABI, etherSigner);
+      const contract = new ethers.Contract(contractAddress, RESTAURANT_ABI, ethersSigner);
 
       const service = await contract.service();
       const serviceStartTime = await contract.serviceStart();
@@ -247,21 +247,21 @@ function MainDashboardRestaurantBody() {
         try {
           const { provider, address} = await ethersSigner;
           
-          setProvider(provider);
+          
 
           // Request accounts if not already connected
-          await ethersProvider.send('eth_requestAccounts', []);
+          
 
           // Fetch & store the contract’s current balance
-          const balance = await ethersProvider.getBalance(contractAddress);
+          const balance = await provider.getBalance(contractAddress);
           setContractBalance(balance);
 
           // Load needed data from the contract
-          await loadAllJobs(etherSigner, contractAddress, RESTAURANT_ABI, dispatch);
-          await loadAllEmployees(etherSigner, contractAddress, RESTAURANT_ABI, dispatch);
-          await loadAllServices(etherSigner, contractAddress, RESTAURANT_ABI, dispatch);
-          await loadAllPOS(etherSigner, contractAddress, RESTAURANT_ABI, dispatch);
-          await loadAllMenuItems(etherSigner, contractAddress, RESTAURANT_ABI, dispatch);
+          await loadAllJobs(ethersSigner, contractAddress, RESTAURANT_ABI, dispatch);
+          await loadAllEmployees(ethersSigner, contractAddress, RESTAURANT_ABI, dispatch);
+          await loadAllServices(ethersSigner, contractAddress, RESTAURANT_ABI, dispatch);
+          await loadAllPOS(ethersSigner, contractAddress, RESTAURANT_ABI, dispatch);
+          await loadAllMenuItems(ethersSigner, contractAddress, RESTAURANT_ABI, dispatch);
 
           // Check if service is active
           await getServiceStatus();
@@ -276,7 +276,7 @@ function MainDashboardRestaurantBody() {
       }
     };
     loadBlockchainData();
-  }, [contractAddress, dispatch]);
+  }, [contractAddress, dispatch, ethersSigner]);
 
   // Auto-refresh data every 10 seconds
   useEffect(() => {
