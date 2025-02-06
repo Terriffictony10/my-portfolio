@@ -117,7 +117,7 @@ export default function POSterminal() {
     // For example, we create the ticket on the first POS in the array. 
     // Or you could let the user select which POS to create it on.
     const posToUse = posArray[0]; 
-    const ethersProvider = new ethers.BrowserProvider(window.ethereum);
+    
     try {
       await createTicketForPOS(
         ethersSigner, 

@@ -506,14 +506,14 @@ export const createTicketForPOS = async (
 ) => {
   try {
     
-    const posContract = new ethers.Contract(posAddress, posAbi, signer);
+    const posContract = new ethers.Contract(posAddress, POS_ABI, signer);
 
     // The POS contract extends MenuTicketBase, which has createTicket(_server, _name)
     const tx = await posContract.createTicket(serverAddress, ticketName);
     await tx.wait();
 
     // After creation, reload tickets so the UI remains up-to-date
-    await loadAllTicketsForPOS(signer, posAddress, posAbi, dispatch);
+    await loadAllTicketsForPOS(signer, posAddress, POS_ABI, dispatch);
 
     dispatch({ type: 'CREATE_TICKET_SUCCESS' });
   } catch (error) {
