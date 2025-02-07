@@ -78,7 +78,7 @@ const AdminSchedule = ({ provider }) => {
         }
       });
     }
-  }, [startDate, endDate]);
+  }, [isConnected, ethersSigner, startDate, endDate]);
 
   const handleSchedule = async (e) => {
     e.preventDefault();

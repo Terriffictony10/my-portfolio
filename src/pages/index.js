@@ -208,31 +208,27 @@ export default function Home() {
 
   useEffect(() => {
     async function checkIfAdmin() {
-      if (isConnected) {
+      if (isConnected && ethersSigner) {
         // Determine which provider to use:
         // If an injected provider exists, use it; otherwise, use the ethersProvider from our hook.
-        let providerInstance;
-        if (window.ethereum) {
-          providerInstance = new ethers.BrowserProvider(window.ethereum);
-        } else if (ethersProvider) {
-          providerInstance = ethersProvider;
-        }
-        if (providerInstance) {
-          setProvider(providerInstance);
-          try {
-            const signer = await providerInstance.getSigner();
-            const addr = await signer.getAddress();
-            const response = await fetch(`/api/checkAdmin?address=${addr}`);
+        
+        
+        
+        const { provider, address} = await ethersSigner;
+          
+          
+            
+            const response = await fetch(`/api/checkAdmin?address=${address}`);
             const data = await response.json();
             setIsAdmin(data.isAdmin);
-          } catch (error) {
-            console.error('Error getting signer or checking admin:', error);
-          }
-        }
+           
+        
       }
     }
+    if(isConnected && ethersSigner){
     checkIfAdmin();
-  }, [isConnected, ethersProvider]);
+  }
+  }, [isConnected, ethersSigner]);
 
   const navigateToDemo = () => {
     window.location.href = '/Dashboard';
@@ -261,7 +257,7 @@ export default function Home() {
         <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
           <h2 style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>Admin Menu</h2>
           <p style={{ fontSize: '1.125rem' }}>This menu is only visible to the admin.</p>
-          {provider && <AdminSchedule provider={provider} />}
+          {ethersSigner && <AdminSchedule provider={provider} />}
         </div>
       )}
       <div

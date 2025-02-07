@@ -1,14 +1,7 @@
 {
   "/_app": "pages/_app.js",
-  "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/pay": "pages/pay.js",
-  "/Dashboard": "pages/Dashboard.js",
-  "/EmployeeDashboard": "pages/EmployeeDashboard.js",
-  "/api/employeeStatus": "pages/api/employeeStatus.js",
-  "/micros": "pages/micros.js",
-  "/mainJobDashboard": "pages/mainJobDashboard.js",
-  "/mainRestaurantDashboard": "pages/mainRestaurantDashboard.js",
-  "/POSterminal": "pages/POSterminal.js",
-  "/api/kitchenTickets": "pages/api/kitchenTickets.js"
+  "/_error": "pages/_error.js",
+  "/": "pages/index.js",
+  "/api/checkAdmin": "pages/api/checkAdmin.js"
 }
