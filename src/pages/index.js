@@ -238,6 +238,7 @@ export default function Home() {
     <div
       className="home-container"
       style={{
+        minWidth: '100vw',
         background: 'url("hospitality-bg.jpg") no-repeat center center/cover',
         minHeight: '100vh',
         padding: '20px'
@@ -245,7 +246,7 @@ export default function Home() {
     >
       <WalletConnector />
       <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-      <div style={{backgroundColor: "white", position: "absolute", top: "0%", left: "0%", width: "100vw", height: "130px", zIndex: "0"}}>
+      <div className={"landing-pane"}  >
         <Image
           src="/logo.png"
           alt="Decentratality"

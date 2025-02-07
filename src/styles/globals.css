@@ -81,37 +81,49 @@ nav li:first-child {
   }
 }
 @media (max-width: 400px) {
-  .dashboard-image{
-    height: 150px;
-    width: 180px;
-    padding-top: -10px;
+  .landing-pane{
+    width: 250vw !important;
+    height: 80px !important;
   }
+  .dashboard-image {
+  height: 200%;
+  width: 20%;
+  transform: translateY(-40px); /* Moves the element up by 20 pixels */
+}
   .walletconnector{
-    width: 5px;
+    width: 40px !important;
+    position: absolute;
+    left: 102%;
+    z-index: 200;
   }
   .dashboard-account{
     display: none;
+
   }
   .dashboard-tokens{
     padding-top: 50px;
+    position: absolute;
+    width: 150px;
+    top: -10vw !important;
+    left: 130vw !important;
   }
   .mini-description{
-    width: 220px;
+    width: 480px;
 
   }
   .home-container {
-  width: 100vw;
-  height: 100vh;
-  background: url("hospitality-bg.jpg") no-repeat center center;
-  background-size: cover;
+  width: 250vw !important;
+  height: 100vh !important;
+  background: none !important;
+  background-image: none !important;
   min-height: 100vh;
   padding: 20px;
 }
   .crowdsaleUi{
     position: absolute;
-    top: 300% !important;
-    left: 5% !important;
-    width: 360px !important;
+    top: 180% !important;
+    left: 12% !important;
+    width: 905px !important;
     height: 300px !important;
     font-size: 1rem !important;
   }
@@ -123,18 +135,25 @@ nav li:first-child {
   .buy-text-input{
     width: 170px;
     font-size: 0.8rem !important;
+    position: absolute !important;
+    left: 15% !important;
   }
   .crowdsale-progress-bar{
     width: 300px !important;
+    position: absolute !important;
+    left: 15% !important;
+    top: 45%;
   }
   .crowdsale-buy-text{
     font-size: 1rem !important;
     position: absolute !important;
+    left: 15% !important;
+    top: 49%;
   }
   .content{
     position: absolute ! important;
-    top: -43% !important;
-    left: -35% !important;
+    top: -30% !important;
+    left: 0% !important;
     
   }
   .sidebar {
@@ -189,6 +208,15 @@ nav li:first-child {
   justify-content: center;
   align-items: center;
   padding: 90px 0 0 0;
+}
+.landing-pane{
+  background-color: white;
+  width: 100vw;
+  position: absolute;
+  top: 0%;
+  left: 0%;
+  height: 130px;
+  z-index: 0;
 }
 .Crowdsale-glass {
   height: 500px;
