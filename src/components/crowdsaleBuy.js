@@ -86,6 +86,7 @@ const Buy = ({ provider, price, crowdsale, setIsLoading }) => {
             placeholder="Enter token amount"
             onChange={(e) => setAmount(e.target.value)}
             style={{ fontSize: '1.4rem', padding: '0.2rem' }}
+            className={"buy-text-input"}
           />
         </Col>
         <Col>
@@ -100,6 +101,7 @@ const Buy = ({ provider, price, crowdsale, setIsLoading }) => {
                 cursor: 'pointer',
                 backgroundColor: "green"
               }}
+              className={"crowdsale-buy-button"}
             >
               Purchase Tokens
             </button>

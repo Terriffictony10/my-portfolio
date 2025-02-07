@@ -191,10 +191,10 @@ function CrowdsaleBody() {
         marginBottom: '0.9rem',
         fontSize: '1.0rem'
       }}>
-        <p style={{ margin: '0.1rem 0' }}>
+        <p style={{ margin: '0.1rem 0' }} className={"dashboard-account"}>
           <strong>Account:</strong> {account}
         </p>
-        <p style={{ margin: '0.2rem 0' }}>
+        <p style={{ margin: '0.2rem 0' }} className={"dashboard-tokens"}>
           <strong>Tokens Owned:</strong> {accountBalance}
         </p>
       </div>
@@ -204,12 +204,11 @@ function CrowdsaleBody() {
         style={{
           margin: '0.2rem 0',
           padding: '0.2rem',
-          backgroundColor: '#dfe6e9',
           borderRadius: '4px'
         }}
       >
       
-        <p style={{ margin: '0.9rem 0', color: "black" }}>
+        <p style={{ margin: '0.9rem 0', color: "black" }} className={"mini-description"}>
           <strong>About Your Contribution:</strong> The crowdsale is not yet live, but will be deployed on Base chain before the end of February 2025. By purchasing tokens in our crowdsale, you are directly contributing to the development of <em>Decentratality</em>.
         </p>
       </div>

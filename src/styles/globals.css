@@ -81,6 +81,62 @@ nav li:first-child {
   }
 }
 @media (max-width: 400px) {
+  .dashboard-image{
+    height: 150px;
+    width: 180px;
+    padding-top: -10px;
+  }
+  .walletconnector{
+    width: 5px;
+  }
+  .dashboard-account{
+    display: none;
+  }
+  .dashboard-tokens{
+    padding-top: 50px;
+  }
+  .mini-description{
+    width: 220px;
+
+  }
+  .home-container {
+  width: 100vw;
+  height: 100vh;
+  background: url("hospitality-bg.jpg") no-repeat center center;
+  background-size: cover;
+  min-height: 100vh;
+  padding: 20px;
+}
+  .crowdsaleUi{
+    position: absolute;
+    top: 300% !important;
+    left: 5% !important;
+    width: 360px !important;
+    height: 300px !important;
+    font-size: 1rem !important;
+  }
+  .crowdsale-buy-button{
+    font-size: 1rem !important;
+    position: absolute !important;
+    left: 35% !important;
+  }
+  .buy-text-input{
+    width: 170px;
+    font-size: 0.8rem !important;
+  }
+  .crowdsale-progress-bar{
+    width: 300px !important;
+  }
+  .crowdsale-buy-text{
+    font-size: 1rem !important;
+    position: absolute !important;
+  }
+  .content{
+    position: absolute ! important;
+    top: -43% !important;
+    left: -35% !important;
+    
+  }
   .sidebar {
     width: 100%;
     backdrop-filter: blur(5px);

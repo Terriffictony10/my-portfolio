@@ -6,7 +6,7 @@ import React from 'react';
 // When the user clicks the button, the AppKit logic opens a modal with wallet options (including MetaMask).
 const WalletConnector = () => {
   return (
-    <div style={{ textAlign: 'center', marginBottom: '1rem', zIndex: "100" }}>
+    <div style={{ textAlign: 'center', marginBottom: '1rem', zIndex: "100", width: "50px"}}>
       {/* The custom element below is provided by Reown AppKit */}
       <appkit-button
         style={{
@@ -15,9 +15,11 @@ const WalletConnector = () => {
           color: '#fff',
           border: 'none',
           borderRadius: '6px',
+          width: "50px",
           cursor: 'pointer',
           fontSize: '1rem',
-          transition: 'background-color 0.3s ease'
+          transition: 'background-color 0.3s ease',
+          className: "walletconnector"
           
         }}
       >

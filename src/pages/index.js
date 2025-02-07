@@ -252,6 +252,7 @@ export default function Home() {
           width={300}
           height={100}
           style={{ margin: '0 auto', position: "absolute", top: " -6%", left: "-1%" }}
+          className="dashboard-image"
         />
       </div>
       </div>
