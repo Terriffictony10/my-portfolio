@@ -121,7 +121,7 @@ nav li:first-child {
 }
   .crowdsaleUi{
     position: absolute;
-    top: 180% !important;
+    top: 100% !important;
     left: 12% !important;
     width: 905px !important;
     height: 300px !important;
