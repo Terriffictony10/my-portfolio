@@ -129,7 +129,7 @@ const InfoAccordion = () => {
             cursor: 'pointer',
             transition: 'background-color 0.3s ease'
           }}
-          onClick={() => (window.location.href = '/Donate')}
+          onClick={() => window.scrollTo({ top: 600, left: 0, behavior: 'smooth' })}
           onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#e64a19')}
           onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#FF5722')}
         >
@@ -245,13 +245,15 @@ export default function Home() {
     >
       <WalletConnector />
       <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+      <div style={{backgroundColor: "white", position: "absolute", top: "0%", left: "0%", width: "100vw", height: "130px", zIndex: "0"}}>
         <Image
           src="/logo.png"
           alt="Decentratality"
           width={300}
           height={100}
-          style={{ margin: '0 auto' }}
+          style={{ margin: '0 auto', position: "absolute", top: " -6%", left: "-1%" }}
         />
+      </div>
       </div>
       {isAdmin && (
         <div style={{ marginBottom: '2rem', textAlign: 'center' }}>

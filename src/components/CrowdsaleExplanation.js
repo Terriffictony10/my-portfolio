@@ -3,10 +3,22 @@ import ProgressBar from 'react-bootstrap/ProgressBar';
 
 const CrowdsaleExplanation = () => {
   return (
-    <div style={{ fontSize: '1rem', lineHeight: '1.5rem', marginBottom: '2rem' }}>
+
+    <div style={{ fontSize: '1rem', lineHeight: '1.5rem', marginBottom: '2rem', color: "black" }}>
+    <div style={{backgroundColor: "yellow"}}>
+      <p style={{
+  color: "black",
+  textAlign: "center",
+  fontSize: "24px"
+}}>
+  Make sure you have MetaMask installed on whatever device you are trying to access Decentratality on, currently Decentratality is only deployed on BaseSepolia: chainId: 8453 RPCUrl: https://sepolia.base.org
+</p>
+</div>
+      
       <p>
         Welcome to the Decentratality Crowdsale! Your investment drives a revolutionary project with a smart safety net:
       </p>
+      
       <ul>
         <li>
           <strong>Refund Guarantee:</strong> If the funding goal is not reached by the end of the sale, every investor is automatically refunded.

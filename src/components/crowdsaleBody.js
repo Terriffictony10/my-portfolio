@@ -176,17 +176,20 @@ function CrowdsaleBody() {
       style={{
         fontSize: '0.9rem',
         width: '700px',
+        height: '700px',
         margin: '0 auto',
         padding: '0.2rem',
-        borderRadius: '4px'
+        borderRadius: '4px',
+        color: "black"
       }}
     >
+
       <div style={{ 
         position: 'absolute',
-        top: '10%',
-        left: '60%',
+        top: '4%',
+        left: '70%',
         marginBottom: '0.9rem',
-        fontSize: '1.5rem'
+        fontSize: '1.0rem'
       }}>
         <p style={{ margin: '0.1rem 0' }}>
           <strong>Account:</strong> {account}
@@ -195,6 +198,7 @@ function CrowdsaleBody() {
           <strong>Tokens Owned:</strong> {accountBalance}
         </p>
       </div>
+
       <div
         className="crowdsale-description"
         style={{
@@ -204,17 +208,18 @@ function CrowdsaleBody() {
           borderRadius: '4px'
         }}
       >
-        <p style={{ margin: '0.9rem 0' }}>
-          <strong>About Your Contribution:</strong> By purchasing tokens in our crowdsale, you are directly contributing to the development of <em>Decentratality</em>.
+      
+        <p style={{ margin: '0.9rem 0', color: "black" }}>
+          <strong>About Your Contribution:</strong> The crowdsale is not yet live, but will be deployed on Base chain before the end of February 2025. By purchasing tokens in our crowdsale, you are directly contributing to the development of <em>Decentratality</em>.
         </p>
       </div>
       <div className="crowdsaleUi">
-        <div className="content">
+        <div className="content" style={{  }}>
           {isLoading ? (
             <Loading style={{ fontSize: '0.6rem' }} />
           ) : (
             <>
-              <p style={{ margin: '0.2rem 0' }}>
+              <p style={{ margin: '0.2rem 0'}}>
                 <strong>Current Price:</strong> {price} ETH
               </p>
               <p style={{ margin: '0.2rem 0' }}>

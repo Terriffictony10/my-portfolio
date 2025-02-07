@@ -85,8 +85,8 @@ const Buy = ({ provider, price, crowdsale, setIsLoading }) => {
             type="number"
             placeholder="Enter token amount"
             onChange={(e) => setAmount(e.target.value)}
-            style={{ fontSize: '0.6rem', padding: '0.2rem' }}
-          />3
+            style={{ fontSize: '1.4rem', padding: '0.2rem' }}
+          />
         </Col>
         <Col>
           {isWaiting ? (
@@ -95,9 +95,10 @@ const Buy = ({ provider, price, crowdsale, setIsLoading }) => {
             <button
               type="submit"
               style={{
-                fontSize: '0.6rem',
+                fontSize: '1.6rem',
                 padding: '0.2rem 0.4rem',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                backgroundColor: "green"
               }}
             >
               Purchase Tokens
