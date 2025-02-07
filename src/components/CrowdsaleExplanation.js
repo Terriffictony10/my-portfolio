@@ -11,7 +11,7 @@ const CrowdsaleExplanation = () => {
   textAlign: "center",
   fontSize: "24px"
 }}>
-  Make sure you have MetaMask installed on whatever device you are trying to access Decentratality on, currently Decentratality is only deployed on BaseSepolia: chainId: 8453 RPCUrl: https://sepolia.base.org
+  Make sure you have MetaMask installed on whatever device you are trying to access Decentratality on, currently Decentratality is only deployed on BaseSepolia: chainId: 84532 RPCUrl: https://sepolia.base.org
 </p>
 </div>
       
