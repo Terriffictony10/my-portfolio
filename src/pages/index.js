@@ -1,7 +1,8 @@
-// src/pages/index.js
 import React, { useState, useEffect, useMemo } from 'react';
 import { ethers, BrowserProvider, JsonRpcSigner } from 'ethers';
 import Image from 'next/image';
+import AnimatedCircularProgressBar from '../components/magicui/animated-circular-progress-bar';
+import WarpBackground from '../components/magicui/warp-background'; // Ensure the path is correct
 import WalletConnector from '../components/WalletConnector';
 import AdminSchedule from '../components/AdminSchedule';
 import CrowdsaleBody from '../components/crowdsaleBody';
@@ -11,7 +12,6 @@ import wagmi from "../context/appkit/index.tsx";
 import { useAppKitAccount } from '@reown/appkit/react';
 import { Configure, useClient, useConnectorClient } from 'wagmi';
 
-/** Convert a viem Client to an ethers.js Provider. */
 export function clientToProvider(client) {
   const { chain, transport } = client;
   const network = {
@@ -21,7 +21,6 @@ export function clientToProvider(client) {
   };
 
   // Use the RPC URL provided by the transport.
-  // (Make sure your configuration passes a valid URL instead of defaulting to localhost)
   return new ethers.JsonRpcProvider(transport.url, network);
 }
 
@@ -30,6 +29,7 @@ export function useEthersProvider({ chainId } = {}) {
   const client = useClient({ chainId });
   return useMemo(() => (client ? clientToProvider(client) : undefined), [client]);
 }
+
 export function clientToSigner(client) {
   const { account, chain, transport } = client;
   const network = {
@@ -51,38 +51,15 @@ export function useEthersSigner({ chainId } = {}) {
 const AccordionItem = ({ title, children }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
-    <div
-      style={{
-        marginBottom: '1rem',
-        border: '1px solid #ddd',
-        borderRadius: '8px',
-        overflow: 'hidden',
-        transition: 'all 0.3s ease'
-      }}
-    >
+    <div className="accordion-item">
       <div
+        className="accordion-header"
         onClick={() => setIsOpen(!isOpen)}
-        style={{
-          backgroundColor: '#f9f9f9',
-          padding: '1rem',
-          cursor: 'pointer',
-          fontWeight: 'bold',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}
       >
         <span>{title}</span>
         <span>{isOpen ? '▲' : '▼'}</span>
       </div>
-      <div
-        style={{
-          maxHeight: isOpen ? '500px' : '0px',
-          overflow: 'hidden',
-          transition: 'max-height 0.3s ease',
-          padding: isOpen ? '1rem' : '0 1rem'
-        }}
-      >
+      <div className={`accordion-content ${isOpen ? 'open' : ''}`}>
         {children}
       </div>
     </div>
@@ -91,14 +68,7 @@ const AccordionItem = ({ title, children }) => {
 
 const InfoAccordion = () => {
   return (
-    <div
-      style={{
-        width: '90%',
-        maxWidth: '800px',
-        margin: '2rem auto',
-        textAlign: 'left'
-      }}
-    >
+    <div style={{ textAlign: 'left' }}>
       <AccordionItem title="Our Vision">
         <p>
           We aim to revolutionize the hospitality industry by integrating multiple management systems into one secure, blockchain-powered platform.
@@ -119,19 +89,8 @@ const InfoAccordion = () => {
           This project is still in development. Contribute to our crowdsale and join us in building the future of hospitality.
         </p>
         <button
-          style={{
-            padding: '0.5rem 1rem',
-            marginTop: '1rem',
-            backgroundColor: '#FF5722',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            transition: 'background-color 0.3s ease'
-          }}
+          className="action-button learnmore-button"
           onClick={() => window.scrollTo({ top: 600, left: 0, behavior: 'smooth' })}
-          onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#e64a19')}
-          onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#FF5722')}
         >
           Donate Now
         </button>
@@ -143,32 +102,8 @@ const InfoAccordion = () => {
 const LearnMoreModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.7)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
-        animation: 'fadeIn 0.5s'
-      }}
-    >
-      <div
-        style={{
-          backgroundColor: '#fff',
-          padding: '2rem',
-          borderRadius: '8px',
-          maxWidth: '600px',
-          width: '90%',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.26)',
-          textAlign: 'center'
-        }}
-      >
+    <div className="modal-overlay">
+      <div className="modal-content">
         <h2>About Decentratality</h2>
         <p>
           Tired of malicious developers scamming you with meme-coins? Look no further &mdash; Decentratality is the stable crypto project you&apos;ve been waiting for. Don&apos;t miss your chance to be an early investor in essentially the &quot;Facebook of Food.&quot;
@@ -177,19 +112,8 @@ const LearnMoreModal = ({ isOpen, onClose }) => {
           Our vision is to create a secure environment where employees can store all employment-related information safely &mdash; shielded from seizure &mdash; while linking that data to a public, customizable profile that highlights their strengths in the hospitality industry. Within the Decentratality Hub, users can take professional classes with tracked progress, engage in community conversations, and enjoy an all-in-one web app that handles POS transactions, employee payments, and document management.
         </p>
         <button
+          className="action-button demo-button"
           onClick={onClose}
-          style={{
-            marginTop: '1rem',
-            padding: '0.75rem 1.5rem',
-            borderRadius: '6px',
-            backgroundColor: '#4CAF50',
-            color: '#fff',
-            border: 'none',
-            cursor: 'pointer',
-            transition: 'background-color 0.3s ease'
-          }}
-          onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#43A047')}
-          onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#4CAF50')}
         >
           Close
         </button>
@@ -209,25 +133,15 @@ export default function Home() {
   useEffect(() => {
     async function checkIfAdmin() {
       if (isConnected && ethersSigner) {
-        // Determine which provider to use:
-        // If an injected provider exists, use it; otherwise, use the ethersProvider from our hook.
-        
-        
-        
-        const { provider, address} = await ethersSigner;
-          
-          
-            
-            const response = await fetch(`/api/checkAdmin?address=${address}`);
-            const data = await response.json();
-            setIsAdmin(data.isAdmin);
-           
-        
+        const { provider, address } = await ethersSigner;
+        const response = await fetch(`/api/checkAdmin?address=${address}`);
+        const data = await response.json();
+        setIsAdmin(data.isAdmin);
       }
     }
-    if(isConnected && ethersSigner){
-    checkIfAdmin();
-  }
+    if (isConnected && ethersSigner) {
+      checkIfAdmin();
+    }
   }, [isConnected, ethersSigner]);
 
   const navigateToDemo = () => {
@@ -235,88 +149,58 @@ export default function Home() {
   };
 
   return (
-    <div
-      className="home-container"
-      style={{
-        minWidth: '100vw',
-        background: 'url("hospitality-bg.jpg") no-repeat center center/cover',
-        minHeight: '100vh',
-        padding: '20px'
-      }}
+    <WarpBackground
+      perspective={200}
+      beamsPerSide={4}
+      beamSize={5}
+      beamDelayMax={3}
+      beamDelayMin={0}
+      beamDuration={4}
+      gridColor="hsl(0, 0%, 80%)"
+      className="min-h-screen"
     >
-      <WalletConnector />
-      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-      <div className={"landing-pane"}  >
-        <Image
-          src="/logo.png"
-          alt="Decentratality"
-          width={300}
-          height={100}
-          style={{ margin: '0 auto', position: "absolute", top: " -6%", left: "-1%" }}
-          className="dashboard-image"
-        />
-      </div>
-      </div>
-      {isAdmin && (
-        <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
-          <h2 style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>Admin Menu</h2>
-          <p style={{ fontSize: '1.125rem' }}>This menu is only visible to the admin.</p>
-          {ethersSigner && <AdminSchedule provider={provider} />}
+      <div className="home-container">
+        <WalletConnector />
+        <div>
+          <div className="landing-pane">
+            <Image
+              src="/logo.png"
+              alt="Decentratality"
+              width={300}
+              height={100}
+              className="dashboard-image"
+            />
+          </div>
         </div>
-      )}
-      <div
-        className="crowdsale-section"
-        style={{
-          margin: '20px auto',
-          maxWidth: '900px',
-          backgroundColor: '#dfe6e9',
-          padding: '2rem',
-          borderRadius: '12px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-        }}
-      >
-        <CrowdsaleExplanation />
-        <CrowdsaleBody />
+        {isAdmin && (
+          <div className="admin-section" style={{ textAlign: 'center', marginBottom: '2rem' }}>
+            <h2 style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>Admin Menu</h2>
+            <p style={{ fontSize: '1.125rem' }}>This menu is only visible to the admin.</p>
+            {ethersSigner && <AdminSchedule provider={provider} />}
+          </div>
+        )}
+        <div className="crowdsale-section">
+          <CrowdsaleExplanation />
+          <CrowdsaleBody />
+        </div>
+        <div className="action-buttons">
+          <button
+            className="action-button demo-button"
+            onClick={navigateToDemo}
+          >
+            Go to Demo
+          </button>
+          <button
+            className="action-button learnmore-button"
+            onClick={() => setModalOpen(true)}
+          >
+            Learn More
+          </button>
+        </div>
+        <InfoAccordion />
+        <LearnMoreModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
+        
       </div>
-      <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-        <button
-          onClick={navigateToDemo}
-          style={{
-            padding: '0.75rem 1.5rem',
-            marginRight: '1rem',
-            backgroundColor: '#0984e3',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '1rem',
-            transition: 'background-color 0.3s ease'
-          }}
-          onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#0d79d0')}
-          onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#0984e3')}
-        >
-          Go to Demo
-        </button>
-        <button
-          onClick={() => setModalOpen(true)}
-          style={{
-            padding: '0.75rem 1.5rem',
-            backgroundColor: '#6c5ce7',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '1rem',
-            transition: 'background-color 0.3s ease'
-          }}
-          onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#5847b0')}
-          onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#6c5ce7')}
-        >
-          Learn More
-        </button>
-      </div>
-      <InfoAccordion />
-      <LearnMoreModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
-    </div>
+    </WarpBackground>
   );
 }

@@ -1,4 +1,3 @@
-// src/components/crowdsaleBody.js
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { ethers, BrowserProvider, JsonRpcSigner } from 'ethers';
 import Loading from './Loading';
@@ -9,7 +8,6 @@ import CROWDSALE_ABI from '../abis/Crowdsale.json';
 import TOKEN_ABI from '../abis/Token.json';
 import config from '../config.json';
 import { useWalletInfo } from '@reown/appkit/react';
-import wagmi from "../context/appkit/index.tsx";
 import { useAppKitAccount } from '@reown/appkit/react';
 import { useClient, useConnectorClient } from 'wagmi';
 
@@ -21,8 +19,6 @@ export function clientToProvider(client) {
     name: chain.name,
     ensAddress: chain.contracts?.ensRegistry?.address,
   };
-
-  // Use the RPC URL provided by the transport.
   return new ethers.JsonRpcProvider(transport.url, network);
 }
 
@@ -43,15 +39,12 @@ export function clientToSigner(client) {
         ? chain.contracts.ensRegistry.address
         : undefined,
   };
-  const provider = new ethers.BrowserProvider(transport, network);
+  const provider = new BrowserProvider(transport, network);
   const signer = new ethers.JsonRpcSigner(provider, account.address);
   return signer;
 }
 
-/**
- * Hook to convert a viem Wallet Client to an ethers.js Signer.
- * This hook uses internal state and an effect to compute the signer.
- */
+/** Hook to convert a viem Wallet Client to an ethers.js Signer. */
 export function useEthersSigner({ chainId } = {}) {
   const { data: client } = useConnectorClient({ chainId });
   const [signer, setSigner] = useState(undefined);
@@ -96,37 +89,28 @@ function CrowdsaleBody() {
     async function loadBlockchainData() {
       if (isConnected && ethersSigner && ethersProvider) {
         try {
-          // Get the signer's address
-          const { provider, address} = await ethersSigner;
-          
-         
-          
-         
-          setAccount(address)
-          // Note: some implementations of JsonRpcSigner might expose the address via _address; otherwise use getAddress().
-          // Set the provider (from our hook) into state
+          // Get the signer's address and provider
+          const { provider, address } = await ethersSigner;
+          setAccount(address);
           setProvider(provider);
           
-          console.log()
-          // Retrieve the network and chainId
           const mynetwork = await provider.getNetwork();
           const chainId = mynetwork.chainId;
-          console.log(chainId)
-          // Instantiate the Token and Crowdsale contracts using the signer
-          const token = new ethers.Contract(config[chainId].token.address, TOKEN_ABI, ethersSigner);
           
+          // Instantiate the Token and Crowdsale contracts using the signer
+          const token = new ethers.Contract(
+            config[chainId].token.address,
+            TOKEN_ABI,
+            ethersSigner
+          );
           const crowdsaleContract = new ethers.Contract(
             config[chainId].crowdsale.address,
             CROWDSALE_ABI,
             ethersSigner
           );
-          
-          
           setCrowdsale(crowdsaleContract);
           
-
           const balance = await token.balanceOf(address);
-          console.log(balance)
           setAccountBalance(ethers.formatUnits(balance, 18));
           const priceVal = ethers.formatUnits(await crowdsaleContract.price(), 18);
           setPrice(priceVal);
@@ -156,7 +140,7 @@ function CrowdsaleBody() {
   const handleFinalize = useCallback(async () => {
     try {
       setFinalizeLoading(true);
-      const signer = provider.getSigner();
+      const signer = myprovider.getSigner();
       const tx = await crowdsale.connect(signer).finalize();
       await tx.wait();
       alert('Crowdsale finalized successfully!');
@@ -166,62 +150,37 @@ function CrowdsaleBody() {
       alert('Error finalizing crowdsale. See console for details.');
     }
     setFinalizeLoading(false);
-  }, [ crowdsale]);
+  }, [crowdsale, myprovider]);
 
   const isLive = Date.now() / 1000 >= saleStart;
 
   return (
-    <div
-      id="crowdsale-section"
-      style={{
-        fontSize: '0.9rem',
-        width: '700px',
-        height: '700px',
-        margin: '0 auto',
-        padding: '0.2rem',
-        borderRadius: '4px',
-        color: "black"
-      }}
-    >
-
-      <div style={{ 
-        position: 'absolute',
-        top: '4%',
-        left: '70%',
-        marginBottom: '0.9rem',
-        fontSize: '1.0rem'
-      }}>
-        <p style={{ margin: '0.1rem 0' }} className={"dashboard-account"}>
+    <div id="crowdsale-section" className="crowdsale-section">
+      <div className="account-info">
+        <p className="account-text dashboard-account">
           <strong>Account:</strong> {account}
         </p>
-        <p style={{ margin: '0.2rem 0' }} className={"dashboard-tokens"}>
+        <p className="account-text dashboard-tokens">
           <strong>Tokens Owned:</strong> {accountBalance}
         </p>
       </div>
 
-      <div
-        className="crowdsale-description"
-        style={{
-          margin: '0.2rem 0',
-          padding: '0.2rem',
-          borderRadius: '4px'
-        }}
-      >
-      
-        <p style={{ margin: '0.9rem 0', color: "black" }} className={"mini-description"}>
+      <div className="crowdsale-description">
+        <p className="mini-description">
           <strong>About Your Contribution:</strong> The crowdsale is not yet live, but will be deployed on Base chain before the end of February 2025. By purchasing tokens in our crowdsale, you are directly contributing to the development of <em>Decentratality</em>.
         </p>
       </div>
+
       <div className="crowdsaleUi">
-        <div className="content" style={{  }}>
+        <div className="content">
           {isLoading ? (
-            <Loading style={{ fontSize: '0.6rem' }} />
+            <Loading className="loading-text" />
           ) : (
             <>
-              <p style={{ margin: '0.2rem 0'}}>
+              <p className="info-text">
                 <strong>Current Price:</strong> {price} ETH
               </p>
-              <p style={{ margin: '0.2rem 0' }}>
+              <p className="info-text">
                 <strong>Status:</strong>{' '}
                 {finalized
                   ? 'Finalized'
@@ -229,34 +188,27 @@ function CrowdsaleBody() {
                   ? 'Ends at: ' + new Date(saleEnd * 1000).toLocaleString()
                   : 'Starts at: ' + new Date(saleStart * 1000).toLocaleString()}
               </p>
-              <p style={{ margin: '0.2rem 0' }}>
+              <p className="info-text">
                 <strong>Funding Goal:</strong> {fundingGoal} ETH
               </p>
               <Buy provider={myprovider} price={price} crowdsale={crowdsale} setIsLoading={setIsLoading} />
               <CrowdsaleProgress maxTokens={maxTokens} tokensSold={tokensSold} fundingGoal={fundingGoal} />
               {myprovider && crowdsale && <AutoFinalize provider={myprovider} crowdsale={crowdsale} />}
-              {myprovider && crowdsale && account && owner && account.toLowerCase() === owner.toLowerCase() && (
-                <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-                  <button
-                    onClick={handleFinalize}
-                    disabled={finalizeLoading}
-                    style={{
-                      padding: '0.75rem 1.5rem',
-                      backgroundColor: '#d32f2f',
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontSize: '1rem',
-                      transition: 'background-color 0.3s ease'
-                    }}
-                    onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#b71c1c')}
-                    onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#d32f2f')}
-                  >
-                    {finalizeLoading ? 'Finalizing...' : 'Finalize Crowdsale'}
-                  </button>
-                </div>
-              )}
+              {myprovider &&
+                crowdsale &&
+                account &&
+                owner &&
+                account.toLowerCase() === owner.toLowerCase() && (
+                  <div className="finalize-container">
+                    <button
+                      onClick={handleFinalize}
+                      disabled={finalizeLoading}
+                      className="finalize-button"
+                    >
+                      {finalizeLoading ? 'Finalizing...' : 'Finalize Crowdsale'}
+                    </button>
+                  </div>
+                )}
             </>
           )}
         </div>

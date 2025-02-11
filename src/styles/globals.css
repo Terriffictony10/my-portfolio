@@ -21,19 +21,267 @@
 * {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 body {
   min-height: 100vh;
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
-  font-family: 'MyCustomFont';
+  background-color: #404040; /* A simple dark-ish grey background */
+  font-family: 'MyCustomFont', sans-serif;
   color: #FD5E53;
 }
-.body {
+
+/* ============================ */
+/*   New Styles for Index Page  */
+/* ============================ */
+.home-container {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 2rem;
+  gap: 2rem;
 }
+.landing-pane {
+  background-color: #fff;
+  width: 100%;
+  max-width: 800px;
+  padding: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+}
+/* Used on the index page to wrap the crowdsale UI */
+.crowdsale-section {
+  background-color: rgba(248, 248, 248, 0.9);
+  padding: 2rem;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 800px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.action-button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+.demo-button {
+  background-color: #0984e3;
+  color: #fff;
+}
+.demo-button:hover {
+  background-color: #0d79d0;
+}
+.learnmore-button {
+  background-color: #6c5ce7;
+  color: #fff;
+}
+.learnmore-button:hover {
+  background-color: #5847b0;
+}
+
+/* ================================ */
+/*      Accordion Component         */
+/* ================================ */
+.accordion-item {
+  width: 90%;
+  max-width: 800px;
+  margin: 0 auto 1rem auto;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+.accordion-header {
+  background-color: #f9f9f9;
+  padding: 1rem;
+  cursor: pointer;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+  padding: 0 1rem;
+}
+.accordion-content.open {
+  max-height: 500px;
+  padding: 1rem;
+}
+
+/* ================================ */
+/*           Modal Styles           */
+/* ================================ */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.5s;
+}
+.modal-content {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  max-width: 600px;
+  width: 90%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
+  text-align: center;
+}
+
+/* =========================================== */
+/*  Animated Circular Progress (if needed)     */
+/* =========================================== */
+.animated-circular-progress {
+  margin-top: 2rem;
+}
+
+/* =================================================== */
+/*  CrowdsaleBody & Buy Component (Custom Styles)      */
+/*  (Renamed container to avoid conflict with index)   */
+/* =================================================== */
+.crowdsale-body-container {
+  font-size: 0.9rem;
+  width: 700px;
+  height: 700px;
+  margin: 0 auto;
+  padding: 0.2rem;
+  border-radius: 4px;
+  color: black;
+  position: relative;
+}
+.account-info {
+  position: absolute;
+  top: 4%;
+  left: 70%;
+  margin-bottom: 0.9rem;
+  font-size: 1rem;
+}
+.account-text {
+  margin: 0.2rem 0;
+}
+.crowdsale-description {
+  margin: 0.2rem 0;
+  padding: 0.2rem;
+  border-radius: 4px;
+}
+.mini-description {
+  margin: 0.9rem 0;
+  color: black;
+}
+.info-text {
+  margin: 0.2rem 0;
+}
+.finalize-container {
+  text-align: center;
+  margin-top: 1rem;
+}
+.finalize-button {
+  padding: 0.75rem 1.5rem;
+  background-color: #d32f2f;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+.finalize-button:hover {
+  background-color: #b71c1c;
+}
+
+/* Buy Component Styles */
+.buy-form {
+  font-size: 0.6rem;
+}
+.buy-form-group {
+  margin-bottom: 0.2rem;
+}
+.buy-text-input {
+  font-size: 1.4rem;
+  padding: 0.2rem;
+}
+.crowdsale-buy-button {
+  font-size: 1.6rem;
+  padding: 0.2rem 0.4rem;
+  cursor: pointer;
+  background-color: green;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+.crowdsale-buy-button:hover {
+  background-color: darkgreen;
+}
+.buy-spinner {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+/* -------------------------------------------------- */
+/* Adjusted Crowdsale UI Box (Blue Box) Positioning     */
+/* -------------------------------------------------- */
+.crowdsaleUi {
+  font-family: 'CrowdsaleBuyBox';
+  color: yellow;
+  font-size: 2rem;
+  background-color: blue;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 900px;
+  height: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 2rem auto;
+  padding: 0;
+  border-radius: 30px;
+  position: relative;
+  /* Shift slightly to the left so it aligns with the white pane */
+  transform: translateX(-115px);
+}
+.content {
+  z-index: 20;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* =================================================== */
+/*               Original Styles Below               */
+/* (Navigation, Sidebar, Dashboard, etc.)            */
+/* =================================================== */
 
 /* Navigation Styles */
 nav {
@@ -81,80 +329,66 @@ nav li:first-child {
   }
 }
 @media (max-width: 400px) {
-  .landing-pane{
+  .landing-pane {
     width: 250vw !important;
     height: 80px !important;
   }
   .dashboard-image {
-  height: 200%;
-  width: 20%;
-  transform: translateY(-40px); /* Moves the element up by 20 pixels */
-}
-  .walletconnector{
+    height: 200%;
+    width: 20%;
+    transform: translateY(-40px);
+  }
+  .walletconnector {
     width: 40px !important;
     position: absolute;
     left: 102%;
     z-index: 200;
   }
-  .dashboard-account{
+  .dashboard-account {
     display: none;
-
   }
-  .dashboard-tokens{
+  .dashboard-tokens {
     padding-top: 50px;
     position: absolute;
     width: 150px;
     top: -10vw !important;
     left: 130vw !important;
   }
-  .mini-description{
+  .mini-description {
     width: 480px;
-
   }
   .home-container {
-  width: 250vw !important;
-  height: 100vh !important;
-  background: none !important;
-  background-image: none !important;
-  min-height: 100vh;
-  padding: 20px;
-}
-  .crowdsaleUi{
-    position: absolute;
-    top: 120% !important;
-    left: 12% !important;
+    width: 250vw !important;
+    height: 100vh !important;
+    background: none !important;
+    background-image: none !important;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  .crowdsaleUi {
     width: 905px !important;
     height: 300px !important;
     font-size: 1rem !important;
+    margin: 2rem auto;
   }
-  .crowdsale-buy-button{
+  .crowdsale-buy-button {
     font-size: 1rem !important;
-    position: absolute !important;
-    left: 35% !important;
+    position: static !important;
   }
-  .buy-text-input{
+  .buy-text-input {
     width: 170px;
     font-size: 0.8rem !important;
-    position: absolute !important;
-    left: 15% !important;
   }
-  .crowdsale-progress-bar{
+  .crowdsale-progress-bar {
     width: 300px !important;
-    position: absolute !important;
-    left: 15% !important;
-    top: 45%;
+    position: static !important;
   }
-  .crowdsale-buy-text{
+  .crowdsale-buy-text {
     font-size: 1rem !important;
-    position: absolute !important;
-    left: 15% !important;
-    top: 49%;
   }
-  .content{
-    position: absolute ! important;
-    top: -30% !important;
-    left: 0% !important;
-    
+  .content {
+    position: relative !important;
+    padding: 2rem !important;
   }
   .sidebar {
     width: 100%;
@@ -209,15 +443,6 @@ nav li:first-child {
   align-items: center;
   padding: 90px 0 0 0;
 }
-.landing-pane{
-  background-color: white;
-  width: 100vw;
-  position: absolute;
-  top: 0%;
-  left: 0%;
-  height: 130px;
-  z-index: 0;
-}
 .Crowdsale-glass {
   height: 500px;
   width: 1200px;
@@ -234,26 +459,6 @@ nav li:first-child {
   font-size: 1rem;
   position: absolute;
 }
-.crowdsaleUi {
-  font-family: 'CrowdsaleBuyBox';
-  color: yellow;
-  font-size: 2rem;
-  background-color: blue;
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center;
-  width: 900px;
-  height: 600px;
-  display: flex-center;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: absolute;
-  top: 80%;
-  left: 25.8%;
-  padding: 0;
-  border-radius: 30px;
-}
 .crowdsaleUi::before {
   content: '';
   position: absolute;
@@ -263,18 +468,6 @@ nav li:first-child {
   height: 100%;
   z-index: 1;
 }
-.content {
-  z-index: 20;
-  position: absolute;
-  top: 00%;
-  left: 0%;
-  height: 600px;
-  width: 900px;
-  padding: 150px;
-
-}
-
-/* Text and Video Sections */
 .text-body {
   height: 100%;
   width: 100%;
@@ -343,7 +536,7 @@ nav li:first-child {
   background-image: url('DashboardBackground.jpg');
 }
 
-/* Old "Account" section (kept for reference if needed) */
+/* Old "Account" section */
 .DashboardAccount {
   display: flex;
   justify-content: flex-end;
@@ -352,19 +545,13 @@ nav li:first-child {
   font-family: 'CrowdsaleBuyBox';
 }
 
-/* ========================================================= */
-/*              NEW GRID LAYOUT FOR DASHBOARD               */
-/* ========================================================= */
-
-/* The main container for the dashboard in a 2-column grid */
+/* New Grid Layout for Dashboard */
 .main-dashboard-container {
-  display: grid;                  /* Enable CSS Grid */
-  grid-template-columns: 1fr 1fr; /* Two columns of equal width */
-  grid-gap: 20px;                 /* Spacing between grid items */
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 20px;
   padding: 20px;
 }
-
-/* Each box/section in the grid */
 .dashboard-section {
   background-color: rgba(255, 255, 255, 0.1);
   border: 1px solid white;
@@ -376,8 +563,6 @@ nav li:first-child {
   flex-direction: column;
   justify-content: flex-start;
 }
-
-/* Section Navbar: Title + Buttons at the top of each .dashboard-section */
 .section-navbar {
   display: flex;
   justify-content: space-between;
@@ -388,8 +573,6 @@ nav li:first-child {
   margin: 0;
   font-size: 1.25rem;
 }
-
-/* Data table for Jobs, Employees, etc. */
 .data-table {
   width: 100%;
   border-collapse: collapse;
@@ -398,9 +581,9 @@ nav li:first-child {
 }
 .data-table th,
 .data-table td {
-  border: 1px solid #444;
-  padding: 8px;
-  text-align: center;
+  padding: 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid #444;
 }
 .data-table th {
   background-color: #333;
@@ -412,8 +595,6 @@ nav li:first-child {
 .data-table tr:nth-child(odd) {
   background-color: #1e1e1e;
 }
-
-/* Service Start/Stop Buttons */
 .service-button.start {
   background-color: #28a745;
 }
@@ -429,23 +610,7 @@ nav li:first-child {
   font-size: 16px;
 }
 
-/* ========================================================= */
-/*      REPLACED/REMOVED OLD ABSOLUTE-POSITIONED BOXES       */
-/* ========================================================= */
-/* The following were replaced by the new grid-based sections.
-   They are commented out here for reference. Remove or leave
-   commented if you no longer need them. */
-
-/*
-.MainDashboardRestaurantBox,
-.MainDashboardRestaurantJobsBox,
-.MainDashboardRestaurantEmployeesBox {
-  position: absolute;
-  /* ... old absolute positioning styles ...
-}
-*/
-
-/* Employee Modals, etc. */
+/* Employee Modals */
 .employeeFormOverlay {
   position: fixed;
   top: 0;
@@ -503,13 +668,11 @@ nav li:first-child {
   background-color: #218838;
 }
 
-/* Service control container (optional) */
+/* Service Control Container */
 .service-control {
   text-align: center;
   margin-bottom: 20px;
 }
-
-/* Additional Service Table styling (if used) */
 .services-list {
   margin-top: 20px;
   width: 100%;
@@ -539,7 +702,6 @@ nav li:first-child {
 .services-table tr:nth-child(odd) {
   background-color: #1e1e1e;
 }
-/* Financials cells inside services table */
 .financials-cell {
   display: flex;
   flex-direction: column;
@@ -567,8 +729,6 @@ nav li:first-child {
     align-items: center;
   }
 }
-
-/* Additional Styles */
 .big {
   font-size: 1.8rem;
   color: white;
@@ -624,8 +784,6 @@ nav li:first-child {
   background-color: white;
   color: black;
 }
-
-/* Flexbox Utilities */
 .fullFlexCenter {
   position: absolute;
   top: 0;
@@ -636,7 +794,7 @@ nav li:first-child {
   height: 100vh;
   width: 100vw;
 }
-.button-POS{
+.button-POS {
   transform: translate(1000%, 0%);
 }
 .flex {
@@ -644,8 +802,6 @@ nav li:first-child {
   flex-direction: row;
   padding: 0;
 }
-
-/* Dashboard Frames */
 .DashboardButtonContainer {
   height: 100vh;
   width: 100vw;
@@ -700,8 +856,6 @@ nav li:first-child {
   height: 10vh;
   width: 100vw;
 }
-
-/* Buttons and Forms */
 .newRestaurantButton,
 .addNewRestaurantButtonAlreadyOwnOne,
 .restaurantButton {
@@ -764,8 +918,6 @@ nav li:first-child {
   transform: translate(-50%, -50%);
   z-index: -1;
 }
-
-/* Miscellaneous */
 .big {
   font-size: 1.8rem;
   color: white;
@@ -773,8 +925,6 @@ nav li:first-child {
 .hideOnMobile {
   display: block;
 }
-
-/* Menu Items (if needed) */
 .MainDashboardRestaurantMenuBox {
   display: flex;
   justify-content: space-between;
@@ -799,8 +949,6 @@ nav li:first-child {
   padding: 10px;
   margin-bottom: 10px;
 }
-
-/* Menu Item Form Modal */
 .menuItemFormOverlay {
   position: fixed;
   top: 0;
@@ -830,56 +978,47 @@ nav li:first-child {
   margin-right: 10px;
 }
 .table-scroll {
-  height: 200px;          /* fixed height so each section has the same box size */
-  overflow-y: auto;       /* vertical scroll if content exceeds 200px */
+  height: 200px;
+  overflow-y: auto;
   margin-top: 0.5rem;
-  border: 1px solid #333; /* optional border or background color */
+  border: 1px solid #333;
   border-radius: 4px;
   padding: 0.5rem;
 }
-
-/* For the table itself */
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.8rem;  /* smaller font size */
-  color: #fff;        /* assume you're using white text on dark background */
+  font-size: 0.8rem;
+  color: #fff;
 }
-
 .data-table th,
 .data-table td {
   padding: 0.5rem;
   text-align: left;
   border-bottom: 1px solid #444;
 }
-
-/* Make section backgrounds a bit darker if desired */
 .dashboard-section {
-  background-color: #222; 
+  background-color: #222;
   padding: 1rem;
   border-radius: 4px;
   margin-bottom: 1rem;
 }
-
-/* Example: Make the headings stand out */
 .section-navbar h2 {
   color: #fff;
   margin: 0;
 }
-
 .posFormOverlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* dark overlay */
-  display: flex;                       /* center the modal */
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999;                       /* on top of everything */
+  z-index: 9999;
 }
-
 .posFormContainer {
   position: fixed;
   background-color: #fff;
@@ -889,64 +1028,72 @@ nav li:first-child {
   left: 50%;
   transform: translate(-50%, -50%);
   padding: 20px;
-  z-index: 10000; /* or 1001, just ensure it's above the overlay */
+  z-index: 10000;
   border-radius: 8px;
-  color: #000;    /* black text so it's readable on white bg */
+  color: #000;
 }
 
-/* If using a separate CSS file, import it in Home.js:
-   import './Home.css'; 
-*/
-
-body {
-  margin: 0;
-  padding: 0;
-  background-color: #404040; /* A simple dark-ish grey background */
-  font-family: sans-serif;
+/* Tailwind/Theme Overrides */
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+  }
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
 }
-
-/* Container for all homepage content */
-.home-container {
-  min-height: 100vh;
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center; 
-  justify-content: flex-start;
-}
-
-/* Title styling for “Decentratality” */
-.site-title {
-  font-size: 2.5rem;
-  color: #fff;            /* White text on dark background */
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  margin-bottom: 2rem;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-}
-
-/* Pane for the Crowdsale UI */
-.crowdsale-section {
-  background-color: #f8f8f8; /* A light color that complements the darker page background */
-  padding: 2rem;
-  border-radius: 8px;
-  margin-bottom: 2rem;
-  max-width: 800px;
-  width: 100%;
-  box-shadow: 0 0 10px rgba(0,0,0,0.2);
-}
-
-/* Button styling */
-.demo-button {
-  background-color: #808080; 
-  color: #fff;
-  border: none;
-  padding: 1rem 2rem;
-  font-size: 1.1rem;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.demo-button:hover {
-  background-color: #666666;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
