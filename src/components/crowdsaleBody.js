@@ -7,11 +7,11 @@ import AutoFinalize from './AutoFinalize';
 import CROWDSALE_ABI from '../abis/Crowdsale.json';
 import TOKEN_ABI from '../abis/Token.json';
 import config from '../config.json';
-import { useWalletInfo } from '@reown/appkit/react';
 import { useAppKitAccount } from '@reown/appkit/react';
 import { useClient, useConnectorClient } from 'wagmi';
+import { BentoCard } from './magicui/bento-grid';
+import AnimatedCircularProgressBar from './magicui/animated-circular-progress-bar';
 
-/** Convert a viem Client to an ethers.js Provider. */
 export function clientToProvider(client) {
   const { chain, transport } = client;
   const network = {
@@ -21,34 +21,23 @@ export function clientToProvider(client) {
   };
   return new ethers.JsonRpcProvider(transport.url, network);
 }
-
-/** Hook to convert a viem Client to an ethers.js Provider. */
 export function useEthersProvider({ chainId } = {}) {
   const client = useClient({ chainId });
   return useMemo(() => (client ? clientToProvider(client) : undefined), [client]);
 }
-
-/** Convert a viem Wallet Client to an ethers.js Signer. */
 export function clientToSigner(client) {
   const { account, chain, transport } = client;
   const network = {
     chainId: chain.id,
     name: chain.name,
-    ensAddress:
-      chain.contracts && chain.contracts.ensRegistry
-        ? chain.contracts.ensRegistry.address
-        : undefined,
+    ensAddress: chain.contracts && chain.contracts.ensRegistry ? chain.contracts.ensRegistry.address : undefined,
   };
   const provider = new BrowserProvider(transport, network);
-  const signer = new ethers.JsonRpcSigner(provider, account.address);
-  return signer;
+  return new ethers.JsonRpcSigner(provider, account.address);
 }
-
-/** Hook to convert a viem Wallet Client to an ethers.js Signer. */
 export function useEthersSigner({ chainId } = {}) {
   const { data: client } = useConnectorClient({ chainId });
   const [signer, setSigner] = useState(undefined);
-
   useEffect(() => {
     if (client) {
       try {
@@ -59,12 +48,10 @@ export function useEthersSigner({ chainId } = {}) {
       }
     }
   }, [client]);
-
   return signer;
 }
 
 function CrowdsaleBody() {
-  // Local component state
   const [crowdsale, setCrowdsale] = useState(null);
   const [account, setAccount] = useState(null);
   const [owner, setOwner] = useState(null);
@@ -80,7 +67,6 @@ function CrowdsaleBody() {
   const [finalizeLoading, setFinalizeLoading] = useState(false);
   const [myprovider, setProvider] = useState(null);
 
-  // Get the ethers provider and signer via our custom hooks
   const ethersProvider = useEthersProvider({ chainId: 84532 });
   const ethersSigner = useEthersSigner({ chainId: 84532 });
   const { isConnected } = useAppKitAccount();
@@ -89,27 +75,14 @@ function CrowdsaleBody() {
     async function loadBlockchainData() {
       if (isConnected && ethersSigner && ethersProvider) {
         try {
-          // Get the signer's address and provider
           const { provider, address } = await ethersSigner;
           setAccount(address);
           setProvider(provider);
-          
           const mynetwork = await provider.getNetwork();
           const chainId = mynetwork.chainId;
-          
-          // Instantiate the Token and Crowdsale contracts using the signer
-          const token = new ethers.Contract(
-            config[chainId].token.address,
-            TOKEN_ABI,
-            ethersSigner
-          );
-          const crowdsaleContract = new ethers.Contract(
-            config[chainId].crowdsale.address,
-            CROWDSALE_ABI,
-            ethersSigner
-          );
+          const token = new ethers.Contract(config[chainId].token.address, TOKEN_ABI, ethersSigner);
+          const crowdsaleContract = new ethers.Contract(config[chainId].crowdsale.address, CROWDSALE_ABI, ethersSigner);
           setCrowdsale(crowdsaleContract);
-          
           const balance = await token.balanceOf(address);
           setAccountBalance(ethers.formatUnits(balance, 18));
           const priceVal = ethers.formatUnits(await crowdsaleContract.price(), 18);
@@ -155,61 +128,53 @@ function CrowdsaleBody() {
   const isLive = Date.now() / 1000 >= saleStart;
 
   return (
-    <div id="crowdsale-section" className="crowdsale-section">
-      <div className="account-info">
-        <p className="account-text dashboard-account">
-          <strong>Account:</strong> {account}
-        </p>
-        <p className="account-text dashboard-tokens">
-          <strong>Tokens Owned:</strong> {accountBalance}
+    <div className="crowdsale-menu p-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded-3xl shadow-xl">
+      <div className="mb-6 text-center">
+        <h2 className="text-3xl font-bold text-white">Join the Crowdsale</h2>
+        <p className="text-white mt-2">
+          Price: {price} ETH | Goal: {fundingGoal} ETH
         </p>
       </div>
-
-      <div className="crowdsale-description">
-        <p className="mini-description">
-          <strong>About Your Contribution:</strong> The crowdsale is not yet live, but will be deployed on Base chain before the end of February 2025. By purchasing tokens in our crowdsale, you are directly contributing to the development of <em>Decentratality</em>.
-        </p>
-      </div>
-
-      <div className="crowdsaleUi">
-        <div className="content">
-          {isLoading ? (
-            <Loading className="loading-text" />
-          ) : (
-            <>
-              <p className="info-text">
-                <strong>Current Price:</strong> {price} ETH
-              </p>
-              <p className="info-text">
-                <strong>Status:</strong>{' '}
-                {finalized
-                  ? 'Finalized'
-                  : isLive
-                  ? 'Ends at: ' + new Date(saleEnd * 1000).toLocaleString()
-                  : 'Starts at: ' + new Date(saleStart * 1000).toLocaleString()}
-              </p>
-              <p className="info-text">
-                <strong>Funding Goal:</strong> {fundingGoal} ETH
-              </p>
-              <Buy provider={myprovider} price={price} crowdsale={crowdsale} setIsLoading={setIsLoading} />
-              <CrowdsaleProgress maxTokens={maxTokens} tokensSold={tokensSold} fundingGoal={fundingGoal} />
-              {myprovider && crowdsale && <AutoFinalize provider={myprovider} crowdsale={crowdsale} />}
-              {myprovider &&
-                crowdsale &&
-                account &&
-                owner &&
-                account.toLowerCase() === owner.toLowerCase() && (
-                  <div className="finalize-container">
-                    <button
-                      onClick={handleFinalize}
-                      disabled={finalizeLoading}
-                      className="finalize-button"
-                    >
-                      {finalizeLoading ? 'Finalizing...' : 'Finalize Crowdsale'}
-                    </button>
-                  </div>
-                )}
-            </>
+      <div className="crowdsale-grid">
+        {/* Left Column: Circular Progress Counter */}
+        <div className="flex flex-col items-center justify-center">
+          <AnimatedCircularProgressBar
+            value={parseFloat(tokensSold)}
+            min={0}
+            max={parseFloat(maxTokens)}
+            gaugePrimaryColor="limegreen"
+            gaugeSecondaryColor="darkgreen"
+          />
+          <p className="text-white mt-4 text-sm">
+            {tokensSold} / {maxTokens} tokens sold
+          </p>
+        </div>
+        {/* Right Column: Crowdsale Details & Buy Form */}
+        <div className="flex flex-col gap-4">
+          <p className="text-white text-sm">
+            <strong>Current Price:</strong> {price} ETH
+          </p>
+          <p className="text-white text-sm">
+            <strong>Status:</strong>{' '}
+            {finalized
+              ? 'Finalized'
+              : isLive
+              ? 'Ends at: ' + new Date(saleEnd * 1000).toLocaleString()
+              : 'Starts at: ' + new Date(saleStart * 1000).toLocaleString()}
+          </p>
+          <p className="text-white text-sm">
+            <strong>Funding Goal:</strong> {fundingGoal} ETH
+          </p>
+          <Buy provider={myprovider} price={price} crowdsale={crowdsale} setIsLoading={() => {}} />
+          {/* Optionally include the progress indicator below the buy form */}
+          
+          {myprovider && crowdsale && <AutoFinalize provider={myprovider} crowdsale={crowdsale} />}
+          {myprovider && crowdsale && account && owner && account.toLowerCase() === owner.toLowerCase() && (
+            <div className="mt-4">
+              <button onClick={handleFinalize} disabled={finalizeLoading} className="finalize-button bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700">
+                {finalizeLoading ? 'Finalizing...' : 'Finalize Crowdsale'}
+              </button>
+            </div>
           )}
         </div>
       </div>

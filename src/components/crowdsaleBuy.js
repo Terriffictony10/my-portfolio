@@ -1,13 +1,8 @@
 import React, { useState } from 'react';
-import Form from 'react-bootstrap/Form';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import Spinner from 'react-bootstrap/Spinner';
-import { ethers, BrowserProvider, JsonRpcSigner } from 'ethers';
-import { useWalletInfo } from '@reown/appkit/react';
+import { ethers } from 'ethers';
 import { useAppKitAccount } from '@reown/appkit/react';
-import { useClient, useConnectorClient } from 'wagmi';
-import { useEthersProvider, useEthersSigner, clientToProvider, clientToSigner } from './crowdsaleBody';
+import { useEthersProvider, useEthersSigner } from './crowdsaleBody';
+import { ShinyButton } from './magicui/shiny-button';
 
 const Buy = ({ provider, price, crowdsale, setIsLoading }) => {
   const { isConnected } = useAppKitAccount();
@@ -20,7 +15,6 @@ const Buy = ({ provider, price, crowdsale, setIsLoading }) => {
     e.preventDefault();
     setIsWaiting(true);
     try {
-      // Retrieve the signer details
       const { address } = await ethersSigner;
       const response = await fetch(`/api/merkleProof?address=${address}`);
       if (!response.ok) {
@@ -29,9 +23,7 @@ const Buy = ({ provider, price, crowdsale, setIsLoading }) => {
       const { proof } = await response.json();
       const value = ethers.parseUnits((amount * price).toString(), 'ether');
       const formattedAmount = ethers.parseUnits(amount.toString(), 'ether');
-      const transaction = await crowdsale
-        .connect(ethersSigner)
-        .buyTokens(formattedAmount, proof, { value });
+      const transaction = await crowdsale.connect(ethersSigner).buyTokens(formattedAmount, proof, { value });
       await transaction.wait();
     } catch (error) {
       console.error(error);
@@ -42,27 +34,21 @@ const Buy = ({ provider, price, crowdsale, setIsLoading }) => {
   };
 
   return (
-    <Form onSubmit={buyHandler} className="buy-form">
-      <Form.Group as={Row} className="buy-form-group">
-        <Col>
-          <Form.Control
-            type="number"
-            placeholder="Enter token amount"
-            onChange={(e) => setAmount(e.target.value)}
-            className="buy-text-input"
-          />
-        </Col>
-        <Col>
-          {isWaiting ? (
-            <Spinner animation="border" className="buy-spinner" />
-          ) : (
-            <button type="submit" className="crowdsale-buy-button">
-              Purchase Tokens
-            </button>
-          )}
-        </Col>
-      </Form.Group>
-    </Form>
+    <form onSubmit={buyHandler} style={{transform: 'translate(-0%, 20%)'}}>
+      <input
+        type="number"
+        placeholder="Enter token amount"
+        onChange={(e) => setAmount(e.target.value)}
+        className="buy-text-input p-2 rounded-md border"
+      />
+      {isWaiting ? (
+        <span className="buy-spinner text-white">Processing...</span>
+      ) : (
+        <ShinyButton type="submit" className="crowdsale-buy-button">
+          Purchase Tokens
+        </ShinyButton>
+      )}
+    </form>
   );
 };
 

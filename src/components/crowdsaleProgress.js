@@ -1,16 +1,26 @@
-import ProgressBar from 'react-bootstrap/ProgressBar';
+import React from 'react';
+import AnimatedCircularProgressBar from './magicui/animated-circular-progress-bar';
 
 const CrowdsaleProgress = ({ maxTokens, tokensSold, fundingGoal }) => {
   const maxTokensNum = parseFloat(maxTokens);
   const tokensSoldNum = parseFloat(tokensSold);
   const fundingGoalNum = parseFloat(fundingGoal);
-  const tokenSalePercentage = maxTokensNum > 0 ? (tokensSoldNum / maxTokensNum) * 100 : 0;
-  const fundsRaised = (tokenSalePercentage / 100) * fundingGoalNum;
+  const currentPercent = maxTokensNum > 0 ? ((tokensSoldNum / maxTokensNum) * 100).toFixed(0) : 0;
+
   return (
-    <div className="text-center" style={{ fontSize: '0.6rem' }}>
-      <ProgressBar now={tokenSalePercentage} label={`${tokenSalePercentage.toFixed(2)}%`} style={{ height: '1.5rem' }} className={"crowdsale-progress-bar"}/>
-      <p style={{ marginTop: '0.2rem', fontSize: "1.5rem" }} className={"crowdsale-buy-text"}>
-        {fundsRaised.toFixed(2)} ETH raised out of {fundingGoalNum} ETH
+    <div  style={{transform: 'translate(-190%'}}>
+      <AnimatedCircularProgressBar
+        value={tokensSoldNum}
+        min={0}
+        max={maxTokensNum}
+        gaugePrimaryColor="limegreen"
+        gaugeSecondaryColor="darkgreen"
+      />
+      <p className="crowdsale-buy-text mt-2 text-xl text-white">
+        {tokensSoldNum} / {maxTokensNum} tokens sold ( {currentPercent}% )
+      </p>
+      <p className="info-text mt-2 text-white">
+        {((tokensSoldNum / maxTokensNum) * fundingGoalNum).toFixed(2)} ETH raised out of {fundingGoalNum} ETH
       </p>
     </div>
   );

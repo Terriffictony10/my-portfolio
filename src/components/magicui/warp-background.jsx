@@ -2,7 +2,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { motion } from "@motionone/react";
+import { motion } from "motion/react"
 import React, { useCallback, useMemo } from "react";
 
 const Beam = ({ width, x, delay, duration }) => {

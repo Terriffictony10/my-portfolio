@@ -1,17 +1,23 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { ethers, BrowserProvider, JsonRpcSigner } from 'ethers';
 import Image from 'next/image';
-import AnimatedCircularProgressBar from '../components/magicui/animated-circular-progress-bar';
-import WarpBackground from '../components/magicui/warp-background'; // Ensure the path is correct
+import WarpBackground from '../components/magicui/warp-background';
 import WalletConnector from '../components/WalletConnector';
 import AdminSchedule from '../components/AdminSchedule';
-import CrowdsaleBody from '../components/crowdsaleBody';
-import CrowdsaleExplanation from '../components/CrowdsaleExplanation';
-import { useWalletInfo } from '@reown/appkit/react';
-import wagmi from "../context/appkit/index.tsx";
 import { useAppKitAccount } from '@reown/appkit/react';
-import { Configure, useClient, useConnectorClient } from 'wagmi';
+import { useClient, useConnectorClient } from 'wagmi';
 
+// Magic UI Components
+import { BentoGrid, BentoCard } from '../components/magicui/bento-grid';
+import { Terminal, TypingAnimation } from '../components/magicui/terminal';
+import { Marquee } from '../components/magicui/marquee';
+import { OrbitingCircles } from '../components/magicui/orbiting-circles';
+
+// Our updated Crowdsale UI
+import CrowdsaleBody from '../components/crowdsaleBody';
+
+// -------------------------
+// Blockchain Helpers
 export function clientToProvider(client) {
   const { chain, transport } = client;
   const network = {
@@ -19,17 +25,12 @@ export function clientToProvider(client) {
     name: chain.name,
     ensAddress: chain.contracts?.ensRegistry?.address,
   };
-
-  // Use the RPC URL provided by the transport.
   return new ethers.JsonRpcProvider(transport.url, network);
 }
-
-/** Hook to convert a viem Client to an ethers.js Provider. */
 export function useEthersProvider({ chainId } = {}) {
   const client = useClient({ chainId });
   return useMemo(() => (client ? clientToProvider(client) : undefined), [client]);
 }
-
 export function clientToSigner(client) {
   const { account, chain, transport } = client;
   const network = {
@@ -38,67 +39,112 @@ export function clientToSigner(client) {
     ensAddress: chain.contracts && chain.contracts.ensRegistry ? chain.contracts.ensRegistry.address : undefined,
   };
   const provider = new BrowserProvider(transport, network);
-  const signer = new JsonRpcSigner(provider, account.address);
-  return signer;
+  return new JsonRpcSigner(provider, account.address);
 }
-
-/** Hook to convert a viem Wallet Client to an ethers.js Signer. */
 export function useEthersSigner({ chainId } = {}) {
   const { data: client } = useConnectorClient({ chainId });
   return useMemo(() => (client ? clientToSigner(client) : undefined), [client]);
 }
 
+// -------------------------
+// Navbar Component (Fixed at the top)
+const Navbar = ({ account, tokenBalance }) => {
+  return (
+    <nav className="navbar">
+      <div className="navbar-left">
+        <WalletConnector />
+      </div>
+      <div className="navbar-right">
+        <div className="account-info-navbar">
+          {account ? (
+            <>
+              <span className="account-text">Account: {account}</span>
+              <span className="token-balance">Tokens: {tokenBalance}</span>
+            </>
+          ) : (
+            <span>Not Connected</span>
+          )}
+        </div>
+        <div className="logo">
+          <Image src="/logo.png" alt="Decentratality" width={150} height={50} className="dashboard-image" />
+        </div>
+      </div>
+    </nav>
+  );
+};
+
+// -------------------------
+// Extra Dynamic Components
+const CodeTerminal = () => (
+  <Terminal className="mx-auto my-8">
+    <TypingAnimation delay={0}>{"$ npm install decentratality"}</TypingAnimation>
+    <TypingAnimation delay={500}>{"$ npm run start"}</TypingAnimation>
+    <TypingAnimation delay={1000}>{"Connecting to blockchain..."}</TypingAnimation>
+    <TypingAnimation delay={1500}>{"Initializing secure protocols..."}</TypingAnimation>
+    <TypingAnimation delay={2000}>{"Success! Welcome to Decentratality."}</TypingAnimation>
+  </Terminal>
+);
+const ExtraMarquee = () => (
+  <Marquee pauseOnHover reverse className="mb-8">
+    <span className="mx-4 text-xl text-white">Decentralized • Secure • Innovative</span>
+  </Marquee>
+);
+const ExtraOrbitingCircles = () => (
+  <OrbitingCircles radius={120} iconSize={40}>
+    <span role="img" aria-label="star">⭐</span>
+    <span role="img" aria-label="rocket">🚀</span>
+    <span role="img" aria-label="shield">🛡️</span>
+    <span role="img" aria-label="sparkles">✨</span>
+  </OrbitingCircles>
+);
+
+// -------------------------
+// Standard InfoAccordion
 const AccordionItem = ({ title, children }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <div className="accordion-item">
-      <div
-        className="accordion-header"
-        onClick={() => setIsOpen(!isOpen)}
-      >
+      <div className="accordion-header" onClick={() => setIsOpen(!isOpen)}>
         <span>{title}</span>
         <span>{isOpen ? '▲' : '▼'}</span>
       </div>
-      <div className={`accordion-content ${isOpen ? 'open' : ''}`}>
-        {children}
-      </div>
+      <div className={`accordion-content ${isOpen ? 'open' : ''}`}>{children}</div>
     </div>
   );
 };
+const InfoAccordion = () => (
+  <div className="info-accordion">
+    <AccordionItem title="Our Vision">
+      <p>
+        We aim to revolutionize hospitality by integrating multiple management systems into one secure, blockchain-powered platform.
+      </p>
+    </AccordionItem>
+    <AccordionItem title="Blockchain Integration">
+      <p>
+        Leveraging EVM-compatible blockchains, every transaction is securely recorded.
+      </p>
+    </AccordionItem>
+    <AccordionItem title="Employee Onboarding">
+      <p>
+        Our system links blockchain accounts to real-life identities for secure, compliant profiles.
+      </p>
+    </AccordionItem>
+    <AccordionItem title="Support the Future">
+      <p>
+        Contribute to our crowdsale and join us in building the future of hospitality.
+      </p>
+      <button
+        className="action-button learnmore-button"
+        onClick={() => window.scrollTo({ top: 600, left: 0, behavior: 'smooth' })}
+      >
+        Donate Now
+      </button>
+    </AccordionItem>
+  </div>
+);
 
-const InfoAccordion = () => {
-  return (
-    <div style={{ textAlign: 'left' }}>
-      <AccordionItem title="Our Vision">
-        <p>
-          We aim to revolutionize the hospitality industry by integrating multiple management systems into one secure, blockchain-powered platform.
-        </p>
-      </AccordionItem>
-      <AccordionItem title="Blockchain Integration">
-        <p>
-          Leveraging EVM-compatible blockchains, our service ensures every transaction and piece of financial data is recorded securely and is easily verifiable.
-        </p>
-      </AccordionItem>
-      <AccordionItem title="Employee Onboarding">
-        <p>
-          Our innovative onboarding system links blockchain accounts to real-life identities, ensuring that payroll processes remain secure and compliant while giving employees a customizable public profile.
-        </p>
-      </AccordionItem>
-      <AccordionItem title="Support the Future">
-        <p>
-          This project is still in development. Contribute to our crowdsale and join us in building the future of hospitality.
-        </p>
-        <button
-          className="action-button learnmore-button"
-          onClick={() => window.scrollTo({ top: 600, left: 0, behavior: 'smooth' })}
-        >
-          Donate Now
-        </button>
-      </AccordionItem>
-    </div>
-  );
-};
-
+// -------------------------
+// Learn More Modal
 const LearnMoreModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
   return (
@@ -106,15 +152,12 @@ const LearnMoreModal = ({ isOpen, onClose }) => {
       <div className="modal-content">
         <h2>About Decentratality</h2>
         <p>
-          Tired of malicious developers scamming you with meme-coins? Look no further &mdash; Decentratality is the stable crypto project you&apos;ve been waiting for. Don&apos;t miss your chance to be an early investor in essentially the &quot;Facebook of Food.&quot;
+          Decentratality is the secure crypto platform you’ve been waiting for. Our revolutionary approach combines blockchain integrity with modern financial management—empowering businesses and employees.
         </p>
         <p>
-          Our vision is to create a secure environment where employees can store all employment-related information safely &mdash; shielded from seizure &mdash; while linking that data to a public, customizable profile that highlights their strengths in the hospitality industry. Within the Decentratality Hub, users can take professional classes with tracked progress, engage in community conversations, and enjoy an all-in-one web app that handles POS transactions, employee payments, and document management.
+          With professional classes, community engagement, and an all-in-one web app for transactions and data management, we are redefining digital hospitality.
         </p>
-        <button
-          className="action-button demo-button"
-          onClick={onClose}
-        >
+        <button className="action-button demo-button" onClick={onClose}>
           Close
         </button>
       </div>
@@ -122,6 +165,8 @@ const LearnMoreModal = ({ isOpen, onClose }) => {
   );
 };
 
+// -------------------------
+// Main Home Component
 export default function Home() {
   const { isConnected } = useAppKitAccount();
   const ethersProvider = useEthersProvider({ chainId: 84532 });
@@ -129,6 +174,8 @@ export default function Home() {
   const [modalOpen, setModalOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [provider, setProvider] = useState(null);
+  const [account, setAccount] = useState("");
+  const [tokenBalance, setTokenBalance] = useState("");
 
   useEffect(() => {
     async function checkIfAdmin() {
@@ -142,6 +189,18 @@ export default function Home() {
     if (isConnected && ethersSigner) {
       checkIfAdmin();
     }
+  }, [isConnected, ethersSigner]);
+
+  useEffect(() => {
+    async function getAccountInfo() {
+      if (isConnected && ethersSigner) {
+        const { address } = await ethersSigner;
+        setAccount(address);
+        // Simulated token balance for demonstration purposes
+        setTokenBalance("1000");
+      }
+    }
+    getAccountInfo();
   }, [isConnected, ethersSigner]);
 
   const navigateToDemo = () => {
@@ -159,47 +218,51 @@ export default function Home() {
       gridColor="hsl(0, 0%, 80%)"
       className="min-h-screen"
     >
-      <div className="home-container">
-        <WalletConnector />
-        <div>
-          <div className="landing-pane">
-            <Image
-              src="/logo.png"
-              alt="Decentratality"
-              width={300}
-              height={100}
-              className="dashboard-image"
-            />
-          </div>
+      {/* Fixed Top Navbar */}
+      <Navbar account={account} tokenBalance={tokenBalance} />
+
+      {/* Main Content */}
+      <div className="main-content">
+        <div className="intro-section">
+          <h1>Welcome to Decentratality</h1>
+          <p>
+            Discover a new era in digital hospitality where blockchain meets secure financial management.
+          </p>
         </div>
-        {isAdmin && (
-          <div className="admin-section" style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <h2 style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>Admin Menu</h2>
-            <p style={{ fontSize: '1.125rem' }}>This menu is only visible to the admin.</p>
-            {ethersSigner && <AdminSchedule provider={provider} />}
-          </div>
-        )}
-        <div className="crowdsale-section">
-          <CrowdsaleExplanation />
+
+        {/* Crowdsale Menu – Reworked with Magic UI components */}
+        <div className="crowdsale-menu">
+          <h2 className="crowdsale-title">Join the Crowdsale</h2>
+          <p className="crowdsale-description-text">
+            Invest in Decentratality and shape the future of hospitality by choosing your token purchase option.
+          </p>
           <CrowdsaleBody />
         </div>
+
+        {/* Terminal Demo */}
+        <CodeTerminal />
+
+        {/* Extras */}
+        <div className="extras">
+          <ExtraMarquee />
+          <ExtraOrbitingCircles />
+        </div>
+
+        {/* Info Accordion */}
+        <InfoAccordion />
+
+        {/* Action Buttons */}
         <div className="action-buttons">
-          <button
-            className="action-button demo-button"
-            onClick={navigateToDemo}
-          >
+          <button className="action-button demo-button" onClick={navigateToDemo}>
             Go to Demo
           </button>
-          <button
-            className="action-button learnmore-button"
-            onClick={() => setModalOpen(true)}
-          >
+          <button className="action-button learnmore-button" onClick={() => setModalOpen(true)}>
             Learn More
           </button>
         </div>
-        <InfoAccordion />
+
+        {/* Learn More Modal */}
         <LearnMoreModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
-        
       </div>
     </WarpBackground>
   );

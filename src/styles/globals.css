@@ -28,43 +28,95 @@ body {
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
-  background-color: #404040; /* A simple dark-ish grey background */
+  background-color: #404040;
   font-family: 'MyCustomFont', sans-serif;
   color: #FD5E53;
 }
 
-/* ============================ */
-/*   New Styles for Index Page  */
-/* ============================ */
-.home-container {
-  min-height: 100vh;
+/* Navbar */
+.navbar {
+  width: 100%;
+  padding: 1rem 2rem;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+}
+.navbar-left,
+.navbar-right {
+  display: flex;
+  align-items: center;
+}
+.navbar-right {
+  gap: 1rem;
+}
+.account-info-navbar {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 2rem;
-  gap: 2rem;
+  font-size: 0.9rem;
+  text-align: right;
 }
-.landing-pane {
-  background-color: #fff;
-  width: 100%;
-  max-width: 800px;
-  padding: 1rem;
+.logo {
   display: flex;
-  justify-content: center;
   align-items: center;
-  border-radius: 8px;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
 }
-/* Used on the index page to wrap the crowdsale UI */
-.crowdsale-section {
-  background-color: rgba(248, 248, 248, 0.9);
+
+/* Main Content */
+.main-content {
+  margin-top: 80px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.intro-section {
+  text-align: center;
+  color: #fff;
+  font-family: 'CrowdsaleBuyBox', sans-serif;
+}
+.intro-section h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+.intro-section p {
+  font-size: 1.25rem;
+  line-height: 1.6;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Crowdsale Menu */
+.crowdsale-menu {
+  background-color: #1a1a1a;
   padding: 2rem;
   border-radius: 8px;
-  width: 100%;
-  max-width: 800px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  color: #fff;
 }
+.crowdsale-title {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+.crowdsale-description-text {
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Action Buttons */
 .action-buttons {
   display: flex;
   gap: 1rem;
@@ -94,13 +146,11 @@ body {
   background-color: #5847b0;
 }
 
-/* ================================ */
-/*      Accordion Component         */
-/* ================================ */
+/* Accordion */
 .accordion-item {
   width: 90%;
   max-width: 800px;
-  margin: 0 auto 1rem auto;
+  margin: 0 auto 1rem;
   border: 1px solid #ddd;
   border-radius: 8px;
   overflow: hidden;
@@ -126,9 +176,7 @@ body {
   padding: 1rem;
 }
 
-/* ================================ */
-/*           Modal Styles           */
-/* ================================ */
+/* Modal */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -152,17 +200,7 @@ body {
   text-align: center;
 }
 
-/* =========================================== */
-/*  Animated Circular Progress (if needed)     */
-/* =========================================== */
-.animated-circular-progress {
-  margin-top: 2rem;
-}
-
-/* =================================================== */
-/*  CrowdsaleBody & Buy Component (Custom Styles)      */
-/*  (Renamed container to avoid conflict with index)   */
-/* =================================================== */
+/* CrowdsaleBody & Buy */
 .crowdsale-body-container {
   font-size: 0.9rem;
   width: 700px;
@@ -174,30 +212,46 @@ body {
   position: relative;
 }
 .account-info {
-  position: absolute;
-  top: 4%;
-  left: 70%;
-  margin-bottom: 0.9rem;
-  font-size: 1rem;
+  margin-bottom: 1rem;
 }
 .account-text {
   margin: 0.2rem 0;
 }
-.crowdsale-description {
-  margin: 0.2rem 0;
-  padding: 0.2rem;
-  border-radius: 4px;
+
+/* Crowdsale UI (the standalone menu) */
+.crowdsale-menu {
+  background-color: #1a1a1a;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
-.mini-description {
-  margin: 0.9rem 0;
-  color: black;
-}
-.info-text {
-  margin: 0.2rem 0;
-}
-.finalize-container {
+.crowdsale-menu h2 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
   text-align: center;
-  margin-top: 1rem;
+}
+.crowdsale-menu p {
+  font-size: 1rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+/* Circular Counter and Form Section */
+.crowdsale-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+@media (min-width: 768px) {
+  .crowdsale-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Extra spacing for inner elements */
+.info-text {
+  font-size: 1rem;
 }
 .finalize-button {
   padding: 0.75rem 1.5rem;
@@ -213,81 +267,32 @@ body {
   background-color: #b71c1c;
 }
 
-/* Buy Component Styles */
+/* Buy Form */
 .buy-form {
-  font-size: 0.6rem;
-}
-.buy-form-group {
-  margin-bottom: 0.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 .buy-text-input {
-  font-size: 1.4rem;
-  padding: 0.2rem;
-}
-.crowdsale-buy-button {
-  font-size: 1.6rem;
-  padding: 0.2rem 0.4rem;
-  cursor: pointer;
-  background-color: green;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  transition: background-color 0.3s ease;
-}
-.crowdsale-buy-button:hover {
-  background-color: darkgreen;
-}
-.buy-spinner {
-  width: 0.8rem;
-  height: 0.8rem;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
 }
 
-/* -------------------------------------------------- */
-/* Adjusted Crowdsale UI Box (Blue Box) Positioning     */
-/* -------------------------------------------------- */
-.crowdsaleUi {
-  font-family: 'CrowdsaleBuyBox';
-  color: yellow;
-  font-size: 2rem;
-  background-color: blue;
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center;
-  width: 900px;
-  height: 600px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin: 2rem auto;
-  padding: 0;
-  border-radius: 30px;
-  position: relative;
-  /* Shift slightly to the left so it aligns with the white pane */
-  transform: translateX(-115px);
-}
-.content {
-  z-index: 20;
-  position: relative;
-  width: 100%;
-  height: 100%;
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+/* Extras Section */
+.extras {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  padding: 2rem 0;
 }
 
-/* =================================================== */
-/*               Original Styles Below               */
-/* (Navigation, Sidebar, Dashboard, etc.)            */
-/* =================================================== */
-
-/* Navigation Styles */
+/* Original Navigation */
 nav {
-  background-color: rgba(55, 56, 61, 0.2);
+  background-color: rgba(55,56,61,0.2);
   backdrop-filter: blur(5px);
-  box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 3px 3px 5px rgba(0,0,0,0.1);
 }
 nav ul {
   width: 100%;
@@ -300,7 +305,6 @@ nav li {
   height: 120px;
 }
 nav a {
-  height: 100%;
   padding: 0 30px;
   display: flex;
   align-items: center;
@@ -308,14 +312,14 @@ nav a {
   font-size: 1.5rem;
 }
 nav a:hover {
-  background-color: rgba(55, 56, 61, 0.35);
+  background-color: rgba(55,56,61,0.35);
   backdrop-filter: blur(5px);
 }
 nav li:first-child {
   margin-right: auto;
 }
 
-/* Menu Styles */
+/* Menu */
 .menu {
   display: none;
   z-index: 10;
@@ -329,74 +333,14 @@ nav li:first-child {
   }
 }
 @media (max-width: 400px) {
-  .landing-pane {
-    width: 250vw !important;
-    height: 80px !important;
-  }
-  .dashboard-image {
-    height: 200%;
-    width: 20%;
-    transform: translateY(-40px);
-  }
-  .walletconnector {
-    width: 40px !important;
-    position: absolute;
-    left: 102%;
-    z-index: 200;
-  }
-  .dashboard-account {
-    display: none;
-  }
-  .dashboard-tokens {
-    padding-top: 50px;
-    position: absolute;
-    width: 150px;
-    top: -10vw !important;
-    left: 130vw !important;
-  }
-  .mini-description {
-    width: 480px;
-  }
-  .home-container {
-    width: 250vw !important;
-    height: 100vh !important;
-    background: none !important;
-    background-image: none !important;
-    min-height: 100vh;
-    padding: 20px;
-  }
-  .crowdsaleUi {
-    width: 905px !important;
-    height: 300px !important;
-    font-size: 1rem !important;
-    margin: 2rem auto;
-  }
-  .crowdsale-buy-button {
-    font-size: 1rem !important;
-    position: static !important;
+  .landing-pane,
+  .crowdsale-menu {
+    width: 100%;
+    padding: 1rem;
   }
   .buy-text-input {
-    width: 170px;
-    font-size: 0.8rem !important;
-  }
-  .crowdsale-progress-bar {
-    width: 300px !important;
-    position: static !important;
-  }
-  .crowdsale-buy-text {
-    font-size: 1rem !important;
-  }
-  .content {
-    position: relative !important;
-    padding: 2rem !important;
-  }
-  .sidebar {
     width: 100%;
-    backdrop-filter: blur(5px);
-  }
-  .big {
-    font-size: 2.0rem;
-    color: white;
+    font-size: 0.9rem;
   }
 }
 
@@ -406,10 +350,10 @@ nav li:first-child {
   justify-content: center;
   align-items: center;
   background-color: black;
-  backdrop-filter: blur(0px) !important;
+  backdrop-filter: blur(0px);
 }
 
-/* Sidebar Styles */
+/* Sidebar */
 .sidebar {
   position: fixed;
   top: 0;
@@ -417,9 +361,9 @@ nav li:first-child {
   height: 100vh;
   width: 250px;
   z-index: 999;
-  background-color: rgba(55, 56, 61, 0.5);
+  background-color: rgba(55,56,61,0.5);
   backdrop-filter: blur(5px);
-  box-shadow: -10px 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: -10px 0 10px rgba(0,0,0,0.1);
   display: none;
   flex-direction: column;
   align-items: flex-start;
@@ -431,71 +375,6 @@ nav li:first-child {
 }
 .sidebar a {
   width: 100%;
-}
-
-/* Body Content */
-.crowdsaleBody {
-  height: 100%;
-  width: 100%;
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 90px 0 0 0;
-}
-.Crowdsale-glass {
-  height: 500px;
-  width: 1200px;
-  background-color: rgba(55, 56, 61, 0.5);
-  backdrop-filter: blur(5px);
-  box-shadow: -10px 0 10px rgba(0, 0, 0, 0.1);
-  border-radius: 30px;
-  position: relative;
-}
-.Crowdsale {
-  height: 500px;
-  width: 1200px;
-  color: white;
-  font-size: 1rem;
-  position: absolute;
-}
-.crowdsaleUi::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-}
-.text-body {
-  height: 100%;
-  width: 100%;
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px 900px 0 0;
-}
-.video {
-  width: 65vh;
-  transform: rotate(180deg);
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-end;
-}
-.video-specs {
-  border-radius: 3.1rem;
-  filter: blur(2px);
-  opacity: 0.7;
-}
-.page-text {
-  padding: 30px;
-  font-size: 1rem;
-  position: absolute;
-  transform: rotate(180deg);
-  color: white;
-  text-shadow: 5px 5px 4px rgba(0, 0, 0, 0.9);
 }
 
 /* Demo Pane */
@@ -510,9 +389,9 @@ nav li:first-child {
 .demoglass {
   height: 40vh;
   width: 50vw;
-  background-color: rgba(55, 56, 61, 0.5);
+  background-color: rgba(55,56,61,0.5);
   backdrop-filter: blur(5px);
-  box-shadow: -10px 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: -10px 0 10px rgba(0,0,0,0.1);
   border-radius: 30px;
   display: flex;
   justify-content: center;
@@ -549,11 +428,11 @@ nav li:first-child {
 .main-dashboard-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-gap: 20px;
+  gap: 20px;
   padding: 20px;
 }
 .dashboard-section {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255,255,255,0.1);
   border: 1px solid white;
   border-radius: 5px;
   padding: 20px;
@@ -617,7 +496,7 @@ nav li:first-child {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(55, 56, 61, 0.5);
+  background-color: rgba(55,56,61,0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -898,7 +777,7 @@ nav li:first-child {
   align-items: center;
   justify-content: center;
   position: absolute;
-  background-color: rgba(55, 56, 61, 0.5);
+  background-color: rgba(55,56,61,0.5);
   backdrop-filter: blur(5px);
   top: 0;
   left: 0;
@@ -924,113 +803,6 @@ nav li:first-child {
 }
 .hideOnMobile {
   display: block;
-}
-.MainDashboardRestaurantMenuBox {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 20px;
-}
-.addMenuItemButton {
-  background-color: #28a745;
-  color: #fff;
-  border: none;
-  padding: 8px 16px;
-  cursor: pointer;
-}
-.addMenuItemButton:hover {
-  background-color: #218838;
-}
-.MainDashboardRestaurantMenuContainer {
-  margin-top: 10px;
-}
-.menuItem {
-  border: 1px solid #ccc;
-  padding: 10px;
-  margin-bottom: 10px;
-}
-.menuItemFormOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 9999;
-}
-.menuItemFormContainer {
-  color: black;
-  position: fixed;
-  background-color: #fff;
-  width: 400px;
-  max-width: 80%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  padding: 20px;
-  z-index: 1001;
-  border-radius: 8px;
-}
-.menuItemFormContainer form p {
-  margin-bottom: 15px;
-}
-.menuItemFormContainer .button {
-  margin-right: 10px;
-}
-.table-scroll {
-  height: 200px;
-  overflow-y: auto;
-  margin-top: 0.5rem;
-  border: 1px solid #333;
-  border-radius: 4px;
-  padding: 0.5rem;
-}
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.8rem;
-  color: #fff;
-}
-.data-table th,
-.data-table td {
-  padding: 0.5rem;
-  text-align: left;
-  border-bottom: 1px solid #444;
-}
-.dashboard-section {
-  background-color: #222;
-  padding: 1rem;
-  border-radius: 4px;
-  margin-bottom: 1rem;
-}
-.section-navbar h2 {
-  color: #fff;
-  margin: 0;
-}
-.posFormOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-}
-.posFormContainer {
-  position: fixed;
-  background-color: #fff;
-  width: 400px;
-  max-width: 80%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  padding: 20px;
-  z-index: 10000;
-  border-radius: 8px;
-  color: #000;
 }
 
 /* Tailwind/Theme Overrides */
@@ -1098,16 +870,14 @@ nav li:first-child {
   }
 }
 
-/* =================================================== */
-/*        iPhone & Mobile Media Query Adjustments     */
-/* =================================================== */
+/* iPhone & Mobile Media Query */
 @media (max-width: 480px) {
   .home-container {
     padding: 1rem;
     gap: 1rem;
   }
   .landing-pane,
-  .crowdsale-section {
+  .crowdsale-menu {
     width: 100%;
     max-width: 100%;
     padding: 1rem;
