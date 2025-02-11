@@ -1097,3 +1097,29 @@ nav li:first-child {
     @apply bg-background text-foreground;
   }
 }
+
+/* =================================================== */
+/*        iPhone & Mobile Media Query Adjustments     */
+/* =================================================== */
+@media (max-width: 480px) {
+  .home-container {
+    padding: 1rem;
+    gap: 1rem;
+  }
+  .landing-pane,
+  .crowdsale-section {
+    width: 100%;
+    max-width: 100%;
+    padding: 1rem;
+  }
+  .crowdsaleUi {
+    width: 95%;
+    height: auto;
+    transform: translateX(0);
+    margin: 1rem auto;
+    font-size: 1.5rem;
+  }
+  .content {
+    padding: 1rem;
+  }
+}
