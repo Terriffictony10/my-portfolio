@@ -130,7 +130,6 @@ function CrowdsaleBody() {
   return (
     <div className="crowdsale-menu p-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded-3xl shadow-xl">
       <div className="mb-6 text-center">
-        <h2 className="text-3xl font-bold text-white">Join the Crowdsale</h2>
         <p className="text-white mt-2">
           Price: {price} ETH | Goal: {fundingGoal} ETH
         </p>
