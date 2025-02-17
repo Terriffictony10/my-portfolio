@@ -9,10 +9,15 @@ module.exports = {
     version: "0.8.27"
   },
   networks: {
-    localhost: {},
-    sepolia: {
-      url: `https://base-sepolia.g.alchemy.com/v2/bql2av9VfQgvrsog9dCYuLXajvw3bKje`,
-      accounts: [privateKeys]
-    }
+    localhost: {
+      // Fork from Base Sepolia to simulate the Base chain locally.
+      forking: {
+        url: "https://base-mainnet.g.alchemy.com/v2/bql2av9VfQgvrsog9dCYuLXajvw3bKje"
+      }
+    },
+    // sepolia: {
+    //   url: `https://base-sepolia.g.alchemy.com/v2/bql2av9VfQgvrsog9dCYuLXajvw3bKje`,
+    //   accounts: [privateKeys]
+    // }
   },
 }
