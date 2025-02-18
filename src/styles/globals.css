@@ -893,3 +893,95 @@ nav li:first-child {
     padding: 1rem;
   }
 }
+
+
+@media (max-width: 480px) {
+  .home-container {
+    padding: 1rem;
+    gap: 1rem;
+  }
+  .landing-pane,
+  .crowdsale-menu {
+    width: 100%;
+    max-width: 100%;
+    padding: 1rem;
+  }
+  .crowdsaleUi {
+    width: 95%;
+    height: auto;
+    transform: translateX(0);
+    margin: 1rem auto;
+    font-size: 1.5rem;
+  }
+  .content {
+    padding: 1rem;
+  }
+}
+
+/* === New Media Query for Screens Under 400px === */
+@media (max-width: 400px) {
+  /* General Layout */
+  .main-content {
+    padding: 1rem;
+    max-width: 100%;
+  }
+  .intro-section h1 {
+    font-size: 1.8rem;
+  }
+  .intro-section p {
+    font-size: 1rem;
+    padding: 0 0.5rem;
+  }
+
+  /* Navbar Adjustments */
+  .navbar {
+    padding: 0.5rem 1rem;
+  }
+  .account-info-navbar {
+    font-size: 0.8rem;
+  }
+
+  /* Crowdsale Menu & Videos */
+  .crowdsale-menu {
+    padding: 1rem;
+    margin: 0.5rem;
+  }
+  .crowdsale-title {
+    font-size: 1.8rem;
+  }
+  .crowdsale-description-text {
+    font-size: 0.9rem;
+  }
+  .video-section {
+    flex-direction: column;
+    align-items: center;
+  }
+  .video-spot {
+    min-width: 100%;
+    margin-bottom: 1rem;
+  }
+  .video-spot iframe {
+    height: 200px; /* Reduce video height for smaller screens */
+  }
+
+  /* Action Buttons & Accordion */
+  .action-buttons .action-button {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+  .accordion-header,
+  .accordion-content {
+    font-size: 0.9rem;
+  }
+
+  /* Extras Section */
+  .extras {
+    grid-template-columns: 1fr;
+  }
+
+  /* Buy Form */
+  .buy-text-input {
+    width: 100%;
+    font-size: 0.9rem;
+  }
+}
