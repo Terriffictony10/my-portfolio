@@ -234,8 +234,46 @@ export default function Home() {
         <div className="crowdsale-menu">
           <h2 className="crowdsale-title">Join the Crowdsale</h2>
           <p className="crowdsale-description-text">
-            Invest in Decentratality and shape the future of hospitality by choosing your token purchase option.
+            Take a look at these videos if you want to know more about how Decentratality will reshape the world of hospitality
           </p>
+
+          {/* Video Spots */}
+          <div
+            className="video-section"
+            style={{
+              display: 'flex',
+              gap: '1rem',
+              margin: '1rem 0',
+              flexWrap: 'wrap'
+            }}
+          >
+            <div className="video-section" style={{ display: 'flex', width: '1200px', gap: '1rem', margin: '1rem 0'}}>
+  <div className="video-spot" style={{ flex: 1, minWidth: '300px' }}>
+    <iframe 
+      width="100%"
+      height="315"
+      src="https://www.youtube.com/embed/VIDEO_ID_1"
+      title="YouTube video player"
+      frameBorder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowFullScreen
+    ></iframe>
+  </div>
+  <div className="video-spot" style={{ flex: 1, minWidth: '300px' }}>
+    <iframe
+      width="100%"
+      height="315"
+      src="https://www.youtube.com/embed/VIDEO_ID_2"
+      title="YouTube video player"
+      frameBorder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowFullScreen
+    ></iframe>
+  </div>
+</div>
+
+          </div>
+
           <CrowdsaleBody />
         </div>
 
