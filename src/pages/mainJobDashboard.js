@@ -192,10 +192,7 @@ export default function EmployeePage() {
 
   // Clock in/out
   const handleClockButton = async () => {
-    if (!provider || !restaurantAddress || !restaurantAbi) {
-      console.log('Missing provider or contract details');
-      return;
-    }
+    
 
     try {
       if (!isClockedIn) {
