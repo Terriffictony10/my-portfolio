@@ -55,7 +55,7 @@ contract decentratalityServiceFactory is Ownable {
     ) public payable returns (uint256, address) {
         require(msg.value >= _startingCash + cost, "Insufficient starting cash");
 
-        // Deploy the new Restaurant contract via the deployer
+        
         address restaurant =
             restaurantDeployer.deployRestaurant(_name, msg.sender, posDeployer);
 
@@ -79,9 +79,7 @@ contract decentratalityServiceFactory is Ownable {
         require(sent, "failed to send");
     }
 
-    /**
-     * @dev Returns an array of all restaurant addresses.
-     */
+    
     function getAllRestaurants() public view returns (address[] memory) {
         address[] memory allRestaurants = new address[](nextRestaurantId);
         for (uint256 i = 1; i <= nextRestaurantId; i++) {

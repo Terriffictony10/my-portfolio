@@ -96,26 +96,26 @@ contract DAO {
     }
 
     function finalizeProposal(uint256 _id) external onlyInvestor{
-        // Fetch proposal from mapping by id
+        
         Proposal storage proposal = proposals[_id];
 
-        // Ensure proposal is not already finalized
+        
         require(proposal.finalized == false, "proposal already finalized");
 
-        // Mark proposal as finalized
+        
         proposal.finalized = true;
 
-        // Check that proposal has enough votes
+        
         require(proposal.votes >= quorum, "must reach quorum to finalize proposal");
 
-        // Check that the contract has enough ether
+        
         require(address(this).balance >= proposal.amount);
 
-        // Transfer the funds to recipient
+        
         (bool sent, ) = proposal.recipient.call{value: proposal.amount}("");
         require(sent);
 
-        // Emit event
+        
         emit Finalize(_id);
     }
 }

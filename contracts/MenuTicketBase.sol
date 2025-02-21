@@ -36,7 +36,7 @@ contract MenuTicketBase {
         uint256 timestamp
     );
 
-    // Add common functionalities for menuItems
+    
     function addMenuItem(uint256 _cost, string memory _name) public {
         nextMenuItemId++;
         menu[nextMenuItemId] = menuItem(_cost, _name);
@@ -50,7 +50,7 @@ contract MenuTicketBase {
         delete menuItemIds[_index];
     }
 
-    // Add common functionality for tickets
+  
     function createTicket(address _server, string memory _name) public {
         nextTicketId++;
         Ticket storage newTicket = tickets[nextTicketId];

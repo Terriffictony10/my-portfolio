@@ -24,16 +24,12 @@ contract POS is Ownable, MenuTicketBase {
         _;
     }
 
-    /**
-     * @notice Returns the entire array of Ticket IDs, mirroring the pattern in Restaurant.sol
-     */
+    
     function getTicketIds() external view returns (uint256[] memory) {
         return TicketIds;
     }
 
-    /**
-     * @notice Returns the name of this POS. Removed onlyOwner so that loadAllPOS won't revert.
-     */
+    
     function getName() public view returns (string memory) {
         return name;
     }

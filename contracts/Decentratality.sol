@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 contract Decentratality is ERC20, Ownable, AccessControl, ReentrancyGuard {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    // Mapping to store restaurant contracts with their IDs
+    
 
     modifier onlyInvestor () {
         require(
@@ -16,12 +16,12 @@ contract Decentratality is ERC20, Ownable, AccessControl, ReentrancyGuard {
         );
         _;
     }
-    // Constructor to initialize the token with a name, symbol, and total supply
+    
     constructor(
         
     )ERC20("Decentratality", "DHPT") Ownable(msg.sender){
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender); // Admin role
-        _grantRole(MINTER_ROLE, msg.sender);        // Initial minter role
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender); 
+        _grantRole(MINTER_ROLE, msg.sender);        
         _mint(msg.sender, 1000000 * 10 ** decimals());
     }
     receive() external payable {

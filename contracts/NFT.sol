@@ -31,29 +31,28 @@ contract NFT is ERC721Enumerable, Ownable {
     }
 
     function mint(uint256 _mintAmount) public payable {
-        // Only allow minting after specified time
+        
         require(block.timestamp >= allowMintingOn);
-        // Must mint at least 1 token
+        
         require(_mintAmount > 0);
-        // Require enough payment
+        
         require(msg.value >= cost * _mintAmount);
 
         uint256 supply = totalSupply();
 
-        // Do not let them mint more tokens than available
+        
         require(supply + _mintAmount <= maxSupply);
 
-        // Create tokens
+       
         for(uint256 i = 1; i <= _mintAmount; i++) {
             _safeMint(msg.sender, supply + i);
         }
 
-        // Emit event
+       
         emit Mint(_mintAmount, msg.sender);
     }
 
-    // Return metadata IPFS url
-    // EG: 'ipfs://QmQ2jnDYecFhrf3asEWjyjZRX1pZSsNWG3qHzmNDvXa9qg/1.json'
+    
     function tokenURI(uint256 _tokenId)
         public
         view
@@ -74,7 +73,7 @@ contract NFT is ERC721Enumerable, Ownable {
         return tokenIds;
     }
 
-    // Owner functions
+    
 
     function withdraw() public onlyOwner {
         uint256 balance = address(this).balance;

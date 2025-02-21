@@ -252,7 +252,7 @@ export default function Home() {
     <iframe 
       width="100%"
       height="315"
-      src="https://www.youtube.com/embed/VIDEO_ID_1"
+      src="https://www.youtube.com/watch?v=y4tL3pWq-Os"
       title="YouTube video player"
       frameBorder="0"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -263,7 +263,7 @@ export default function Home() {
     <iframe
       width="100%"
       height="315"
-      src="https://www.youtube.com/embed/VIDEO_ID_2"
+      src="https://www.youtube.com/watch?v=y4tL3pWq-Os"
       title="YouTube video player"
       frameBorder="0"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
