@@ -7,6 +7,24 @@ import  { injected }  from '@wagmi/connectors';
 
 export const projectId = '6df9df8b72567f05d2f0d1503b13538f';
 
+const localHardhatNetwork = defineChain({
+  id: 31337,
+  caipNetworkId: 'eip155:31337',
+  chainNamespace: 'eip155',
+  name: 'Hardhat Local',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'Ether',
+    symbol: 'ETH'
+  },
+  rpcUrls: {
+    default: {
+      http: ['http://127.0.0.1:8545'],
+      webSocket: ['ws://127.0.0.1:8545']
+    }
+  }
+});
+
 const customNetwork = defineChain({
   id: 84532,
   caipNetworkId: 'eip155:84532',
@@ -25,7 +43,7 @@ const customNetwork = defineChain({
   }
 });
 
-export const networks = [customNetwork];
+export const networks = [customNetwork, localHardhatNetwork];
 
 export const wagmiAdapter = new WagmiAdapter({
   storage: createStorage({

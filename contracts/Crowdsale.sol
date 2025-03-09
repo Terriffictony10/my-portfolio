@@ -3,17 +3,11 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import {IUniswapV3Factory} from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
+import {IWETH9} from "./IWETH9.sol";
 
 
 
-interface IWETH {
-    function deposit() external payable;
-    function approve(address spender, uint256 amount) external returns (bool);
-}
-
-interface IBaseSwapFactory {
-    function createPool(address tokenA, address tokenB, uint24 fee) external returns (address pool);
-}
 
 
 contract Crowdsale {
@@ -66,7 +60,7 @@ contract Crowdsale {
     }
     
     
-     */
+     
     function scheduleCrowdsale(uint256 _saleStart, uint256 _saleEnd, uint256 _fundingGoal) public onlyOwner {
         require(_saleStart >= block.timestamp, "Start time must be in the future");
         require(_saleEnd > _saleStart, "End time must be greater than start time");
@@ -107,28 +101,14 @@ contract Crowdsale {
     }
     
     
-    function finalizeAndCreatePool(address baseSwapFactory, address wethAddress) public onlyOwner {
+    function finalize() public onlyOwner {
         require(block.timestamp >= saleEnd, "Sale not ended");
         require(!finalized, "Already finalized");
         finalized = true;
         uint256 currentBalance = address(this).balance;
         if (currentBalance >= fundingGoal) {
             goalMet = true;
-            
-            uint256 poolContribution = currentBalance / 2;
-            uint256 ownerContribution = currentBalance - poolContribution;
-            
-            
-            IWETH(wethAddress).deposit{value: poolContribution}();
-            
-            require(IWETH(wethAddress).approve(baseSwapFactory, poolContribution), "WETH approve failed");
-            
-            
-            address pool = IBaseSwapFactory(baseSwapFactory).createPool(address(token), wethAddress, 3000);
-            emit PoolCreated(pool);
-            
-            
-            (bool sent, ) = owner.call{value: ownerContribution}("");
+            (bool sent, ) = owner.call{value: currentBalance}("");
             require(sent, "ETH transfer to owner failed");
             emit Finalize(tokensSold, currentBalance);
         } else {

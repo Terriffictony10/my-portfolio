@@ -67,8 +67,8 @@ function CrowdsaleBody() {
   const [finalizeLoading, setFinalizeLoading] = useState(false);
   const [myprovider, setProvider] = useState(null);
 
-  const ethersProvider = useEthersProvider({ chainId: 84532 });
-  const ethersSigner = useEthersSigner({ chainId: 84532 });
+  const ethersProvider = useEthersProvider({ chainId: 31337 });
+  const ethersSigner = useEthersSigner({ chainId:  31337});
   const { isConnected } = useAppKitAccount();
 
   useEffect(() => {
@@ -113,8 +113,7 @@ function CrowdsaleBody() {
   const handleFinalize = useCallback(async () => {
     try {
       setFinalizeLoading(true);
-      const signer = myprovider.getSigner();
-      const tx = await crowdsale.connect(signer).finalize();
+      const tx = await crowdsale.finalize();
       await tx.wait();
       alert('Crowdsale finalized successfully!');
       setFinalized(true);
@@ -123,7 +122,7 @@ function CrowdsaleBody() {
       alert('Error finalizing crowdsale. See console for details.');
     }
     setFinalizeLoading(false);
-  }, [crowdsale, myprovider]);
+  }, [crowdsale, ethersSigner]);
 
   const isLive = Date.now() / 1000 >= saleStart;
 

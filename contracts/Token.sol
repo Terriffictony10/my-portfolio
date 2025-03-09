@@ -10,7 +10,7 @@ contract Token {
     uint256 public totalSupply;
     address public deployer; 
 
-    mapping(address => uint256) public balanceOf; /
+    mapping(address => uint256) public balanceOf; 
     mapping(address => mapping(address => uint256)) public allowance; 
     
 

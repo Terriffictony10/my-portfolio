@@ -4,6 +4,9 @@ import Image from 'next/image';
 import WarpBackground from '../components/magicui/warp-background';
 import WalletConnector from '../components/WalletConnector';
 import AdminSchedule from '../components/AdminSchedule';
+import CROWDSALE_ABI from '../abis/Crowdsale.json';
+import TOKEN_ABI from '../abis/Token.json';
+import config from '../config.json';
 import { useAppKitAccount } from '@reown/appkit/react';
 import { useClient, useConnectorClient } from 'wagmi';
 
@@ -169,8 +172,8 @@ const LearnMoreModal = ({ isOpen, onClose }) => {
 // Main Home Component
 export default function Home() {
   const { isConnected } = useAppKitAccount();
-  const ethersProvider = useEthersProvider({ chainId: 84532 });
-  const ethersSigner = useEthersSigner({ chainId: 84532 });
+  const ethersProvider = useEthersProvider({ chainId: 31337 });
+  const ethersSigner = useEthersSigner({ chainId: 31337 });
   const [modalOpen, setModalOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [provider, setProvider] = useState(null);
@@ -194,10 +197,17 @@ export default function Home() {
   useEffect(() => {
     async function getAccountInfo() {
       if (isConnected && ethersSigner) {
-        const { address } = await ethersSigner;
+        const { provider, address } = await ethersSigner;
         setAccount(address);
         // Simulated token balance for demonstration purposes
-        setTokenBalance("1000");
+        
+          
+          const mynetwork = await provider.getNetwork();
+          const chainId = mynetwork.chainId;
+          const token = new ethers.Contract(config[chainId].token.address, TOKEN_ABI, ethersSigner);
+        const crowdsaleContract = new ethers.Contract(config[chainId].crowdsale.address, CROWDSALE_ABI, ethersSigner);
+        const balance = await token.balanceOf(address);
+          setTokenBalance(ethers.formatUnits(balance, 18));
       }
     }
     getAccountInfo();
@@ -263,7 +273,7 @@ export default function Home() {
   <iframe
     width="100%"
     height="315"
-    src="https://www.youtube.com/embed/y4tL3pWq-Os"
+    src="https://www.youtube.com/embed/?v=ICx8HkmynZc"
     title="YouTube video player"
     frameBorder="0"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

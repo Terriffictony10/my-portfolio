@@ -2,8 +2,7 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
+  "/POSterminal": "pages/POSterminal.js",
   "/": "pages/index.js",
-  "/EmployeeDashboard": "pages/EmployeeDashboard.js",
-  "/mainJobDashboard": "pages/mainJobDashboard.js",
-  "/api/employeeStatus": "pages/api/employeeStatus.js"
+  "/Dashboard": "pages/Dashboard.js"
 }
