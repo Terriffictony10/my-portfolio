@@ -60,7 +60,7 @@ const baseNetwork = defineChain({
   }
 });
 
-export const networks = [baseNetwork];
+export const networks = [baseNetwork, customNetwork];
 
 export const wagmiAdapter = new WagmiAdapter({
   storage: createStorage({
