@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { ethers, BrowserProvider, JsonRpcSigner } from 'ethers';
 import Loading from './Loading';
 import Buy from './crowdsaleBuy';
@@ -12,6 +12,7 @@ import { useClient, useConnectorClient } from 'wagmi';
 import { BentoCard } from './magicui/bento-grid';
 import AnimatedCircularProgressBar from './magicui/animated-circular-progress-bar';
 
+// Return a provider using the client’s transport data.
 export function clientToProvider(client) {
   const { chain, transport } = client;
   const network = {
@@ -23,14 +24,22 @@ export function clientToProvider(client) {
 }
 export function useEthersProvider({ chainId } = {}) {
   const client = useClient({ chainId });
-  return useMemo(() => (client ? clientToProvider(client) : undefined), [client]);
+  return client ? clientToProvider(client) : undefined;
 }
+
+// Updated: Validate that required properties exist before creating a signer.
 export function clientToSigner(client) {
+  if (!client || !client.account || !client.chain || !client.transport) {
+    throw new Error("Invalid client object: missing required properties.");
+  }
   const { account, chain, transport } = client;
+  if (!chain.id) {
+    throw new Error("Invalid client object: chain.id is undefined.");
+  }
   const network = {
     chainId: chain.id,
     name: chain.name,
-    ensAddress: chain.contracts && chain.contracts.ensRegistry ? chain.contracts.ensRegistry.address : undefined,
+    ensAddress: chain.contracts?.ensRegistry?.address,
   };
   const provider = new BrowserProvider(transport, network);
   return new ethers.JsonRpcSigner(provider, account.address);
@@ -66,22 +75,31 @@ function CrowdsaleBody() {
   const [isLoading, setIsLoading] = useState(true);
   const [finalizeLoading, setFinalizeLoading] = useState(false);
   const [myprovider, setProvider] = useState(null);
+  const [isLive, setIsLive] = useState(false); // State for live status
 
-  const ethersProvider = useEthersProvider({ chainId: 31337 });
-  const ethersSigner = useEthersSigner({ chainId:  31337});
+  const ethersProvider = useEthersProvider({ chainId: 8453 });
+  const ethersSigner = useEthersSigner({ chainId: 8453 });
   const { isConnected } = useAppKitAccount();
 
   useEffect(() => {
     async function loadBlockchainData() {
       if (isConnected && ethersSigner && ethersProvider) {
         try {
-          const { provider, address } = await ethersSigner;
+          const address = await ethersSigner.getAddress();
           setAccount(address);
-          setProvider(provider);
-          const mynetwork = await provider.getNetwork();
+          setProvider(ethersSigner.provider);
+          const mynetwork = await ethersSigner.provider.getNetwork();
           const chainId = mynetwork.chainId;
-          const token = new ethers.Contract(config[chainId].token.address, TOKEN_ABI, ethersSigner);
-          const crowdsaleContract = new ethers.Contract(config[chainId].crowdsale.address, CROWDSALE_ABI, ethersSigner);
+          const token = new ethers.Contract(
+            config[chainId].token.address,
+            TOKEN_ABI,
+            ethersSigner
+          );
+          const crowdsaleContract = new ethers.Contract(
+            config[chainId].crowdsale.address,
+            CROWDSALE_ABI,
+            ethersSigner
+          );
           setCrowdsale(crowdsaleContract);
           const balance = await token.balanceOf(address);
           setAccountBalance(ethers.formatUnits(balance, 18));
@@ -108,9 +126,22 @@ function CrowdsaleBody() {
       }
     }
     loadBlockchainData();
-  }, [isConnected, ethersSigner, ethersProvider]);
+  }, [isConnected, ethersSigner, ethersProvider, finalized]);
+
+  // Update isLive based on saleStart timestamp.
+  useEffect(() => {
+    const currentTime = Math.floor(Date.now() / 1000);
+    if (saleStart === 0) {
+      setIsLive(false);
+    } else if (currentTime >= saleStart) {
+      setIsLive(true);
+    } else {
+      setIsLive(false);
+    }
+  }, [saleStart]);
 
   const handleFinalize = useCallback(async () => {
+    if (!crowdsale) return;
     try {
       setFinalizeLoading(true);
       const tx = await crowdsale.finalize();
@@ -124,7 +155,23 @@ function CrowdsaleBody() {
     setFinalizeLoading(false);
   }, [crowdsale, ethersSigner]);
 
-  const isLive = Date.now() / 1000 >= saleStart;
+  // Calculate status text inline.
+  let statusText = '';
+  if (finalized) {
+    statusText = 'Finalized';
+  } else if (saleStart === 0) {
+    statusText = 'Crowdsale is not scheduled';
+  } else if (!isLive) {
+    statusText = 'Starts at: ' + new Date(saleStart * 1000).toLocaleString();
+  } else {
+    statusText = 'Live, ends at: ' + new Date(saleEnd * 1000).toLocaleString();
+  }
+
+  // Ensure numbers for the progress bar.
+  const tokensSoldNumber = Number(tokensSold) || 0;
+  const maxTokensNumber = Number(maxTokens) || 0;
+
+ 
 
   return (
     <div className="crowdsale-menu p-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded-3xl shadow-xl">
@@ -137,14 +184,14 @@ function CrowdsaleBody() {
         {/* Left Column: Circular Progress Counter */}
         <div className="flex flex-col items-center justify-center">
           <AnimatedCircularProgressBar
-            value={parseFloat(tokensSold)}
+            value={tokensSoldNumber}
             min={0}
-            max={parseFloat(maxTokens)}
+            max={maxTokensNumber}
             gaugePrimaryColor="limegreen"
             gaugeSecondaryColor="darkgreen"
           />
           <p className="text-white mt-4 text-sm">
-            {tokensSold} / {maxTokens} tokens sold
+            {tokensSoldNumber} / {maxTokensNumber} tokens sold
           </p>
         </div>
         {/* Right Column: Crowdsale Details & Buy Form */}
@@ -153,27 +200,28 @@ function CrowdsaleBody() {
             <strong>Current Price:</strong> {price} ETH
           </p>
           <p className="text-white text-sm">
-            <strong>Status:</strong>{' '}
-            {finalized
-              ? 'Finalized'
-              : isLive
-              ? 'Ends at: ' + new Date(saleEnd * 1000).toLocaleString()
-              : 'Starts at: ' + new Date(saleStart * 1000).toLocaleString()}
+            <strong>Status:</strong> {statusText}
           </p>
           <p className="text-white text-sm">
             <strong>Funding Goal:</strong> {fundingGoal} ETH
           </p>
           <Buy provider={myprovider} price={price} crowdsale={crowdsale} setIsLoading={() => {}} />
-          {/* Optionally include the progress indicator below the buy form */}
-          
           {myprovider && crowdsale && <AutoFinalize provider={myprovider} crowdsale={crowdsale} />}
-          {myprovider && crowdsale && account && owner && account.toLowerCase() === owner.toLowerCase() && (
-            <div className="mt-4">
-              <button onClick={handleFinalize} disabled={finalizeLoading} className="finalize-button bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700">
-                {finalizeLoading ? 'Finalizing...' : 'Finalize Crowdsale'}
-              </button>
-            </div>
-          )}
+          {myprovider &&
+            crowdsale &&
+            account &&
+            owner &&
+            account.toLowerCase() === owner.toLowerCase() && (
+              <div className="mt-4">
+                <button
+                  onClick={handleFinalize}
+                  disabled={finalizeLoading}
+                  className="finalize-button bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700"
+                >
+                  {finalizeLoading ? 'Finalizing...' : 'Finalize Crowdsale'}
+                </button>
+              </div>
+            )}
         </div>
       </div>
     </div>

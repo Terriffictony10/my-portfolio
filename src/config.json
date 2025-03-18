@@ -7,7 +7,7 @@
             "address": "0x0165878A594ca255338adfa4d48449f69242Eb8F"
         },
         "crowdsale": {
-            "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
+            "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
         },
         "decentratalityServiceFactory": {
             "address": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
@@ -34,6 +34,14 @@
         },
         "restaurantDeployer": {
             "address": "0xcC98e876A27E386Bc363B40B8eBD9F5D72219440"
+        }
+    },
+    "8453": {
+        "token": {
+            "address": "0x9872380cB5D3884CDd3E755369B9853cAaC8D93C"
+        },
+        "crowdsale": {
+            "address": "0xc81d69A5B02105038cb310bB24718360Ff36Ccf1"
         }
     }
 }

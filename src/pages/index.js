@@ -172,8 +172,8 @@ const LearnMoreModal = ({ isOpen, onClose }) => {
 // Main Home Component
 export default function Home() {
   const { isConnected } = useAppKitAccount();
-  const ethersProvider = useEthersProvider({ chainId: 31337 });
-  const ethersSigner = useEthersSigner({ chainId: 31337 });
+  const ethersProvider = useEthersProvider({ chainId: 8453 });
+  const ethersSigner = useEthersSigner({ chainId: 8453});
   const [modalOpen, setModalOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [provider, setProvider] = useState(null);

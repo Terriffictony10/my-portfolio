@@ -42,8 +42,25 @@ const customNetwork = defineChain({
     }
   }
 });
+const baseNetwork = defineChain({
+  id: 8453,
+  caipNetworkId: 'eip155:8453',
+  chainNamespace: 'eip155',
+  name: 'Base',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'Base Ether',
+    symbol: 'BASE'
+  },
+  rpcUrls: {
+    default: {
+      http: ['https://base-mainnet.infura.io/v3/f35a83b4eba0446989ef9be5172774a5'],
+      webSocket: ['wss://base-mainnet.infura.io/ws/v3/f35a83b4eba0446989ef9be5172774a5']
+    }
+  }
+});
 
-export const networks = [customNetwork, localHardhatNetwork];
+export const networks = [baseNetwork];
 
 export const wagmiAdapter = new WagmiAdapter({
   storage: createStorage({

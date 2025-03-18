@@ -1,5 +1,4 @@
 require("@nomicfoundation/hardhat-toolbox");
-
 require("dotenv").config();
 const privateKeys = process.env.PRIVATE_KEYS || '';
 
@@ -10,14 +9,18 @@ module.exports = {
   },
   networks: {
     localhost: {
-      // Fork from Base Mainnet at specified block number to simulate the Base chain locally.
       forking: {
         url: "https://eth-mainnet.g.alchemy.com/v2/0BF2YEv0FZrq3x1a8z0Xuj_0ELf_iVNb"
+        
       }
     },
-    // sepolia: {
-    //   url: `https://base-sepolia.g.alchemy.com/v2/bql2av9VfQgvrsog9dCYuLXajvw3bKje`,
-    //   accounts: [privateKeys]
-    // }
+    sepolia: {
+      url: `https://base-sepolia.g.alchemy.com/v2/bql2av9VfQgvrsog9dCYuLXajvw3bKje`,
+      accounts: [privateKeys]
+    },
+    base: {
+      url: `https://base-mainnet.g.alchemy.com/v2/0BF2YEv0FZrq3x1a8z0Xuj_0ELf_iVNb`,
+      accounts: [privateKeys]
+    }
   },
 };

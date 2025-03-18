@@ -20,6 +20,21 @@
         "internalType": "bytes32",
         "name": "_merkleRoot",
         "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "_uniswapFactory",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_weth",
+        "type": "address"
+      },
+      {
+        "internalType": "uint24",
+        "name": "_poolFee",
+        "type": "uint24"
       }
     ],
     "stateMutability": "nonpayable",
@@ -138,108 +153,6 @@
     ],
     "name": "PoolCreated",
     "type": "event"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_saleStart",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_saleEnd",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_fundingGoal",
-        "type": "uint256"
-      }
-    ],
-    "name": "scheduleCrowdsale",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_amount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes32[]",
-        "name": "_merkleProof",
-        "type": "bytes32[]"
-      }
-    ],
-    "name": "buyTokens",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_price",
-        "type": "uint256"
-      }
-    ],
-    "name": "setPrice",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "_merkleRoot",
-        "type": "bytes32"
-      }
-    ],
-    "name": "setMerkleRoot",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "finalize",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address[]",
-        "name": "buyers_",
-        "type": "address[]"
-      },
-      {
-        "internalType": "uint256[]",
-        "name": "contributions_",
-        "type": "uint256[]"
-      },
-      {
-        "internalType": "uint256[]",
-        "name": "tokensBought_",
-        "type": "uint256[]"
-      },
-      {
-        "internalType": "bytes32[][]",
-        "name": "proofs",
-        "type": "bytes32[][]"
-      }
-    ],
-    "name": "batchRefund",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
   },
   {
     "inputs": [],
@@ -401,6 +314,147 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "uniswapFactory",
+    "outputs": [
+      {
+        "internalType": "contract IUniswapV3Factory",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "weth",
+    "outputs": [
+      {
+        "internalType": "contract IWETH9",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "poolFee",
+    "outputs": [
+      {
+        "internalType": "uint24",
+        "name": "",
+        "type": "uint24"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_saleStart",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_saleEnd",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_fundingGoal",
+        "type": "uint256"
+      }
+    ],
+    "name": "scheduleCrowdsale",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32[]",
+        "name": "_merkleProof",
+        "type": "bytes32[]"
+      }
+    ],
+    "name": "buyTokens",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_price",
+        "type": "uint256"
+      }
+    ],
+    "name": "setPrice",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "_merkleRoot",
+        "type": "bytes32"
+      }
+    ],
+    "name": "setMerkleRoot",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "finalize",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "buyers_",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "contributions_",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "tokensBought_",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "bytes32[][]",
+        "name": "proofs",
+        "type": "bytes32[][]"
+      }
+    ],
+    "name": "batchRefund",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
