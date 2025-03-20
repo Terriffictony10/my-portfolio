@@ -244,7 +244,7 @@ export default function Home() {
         <div className="crowdsale-menu">
           <h2 className="crowdsale-title">Join the Crowdsale</h2>
           <p className="crowdsale-description-text">
-            Take a look at these videos if you want to know more about how Decentratality will reshape the world of hospitality
+            Take a look at these videos if you want to know more about how Decentratality will bring the blockchain to the front and back of house of your restaurant soon!
           </p>
 
           {/* Video Spots */}
