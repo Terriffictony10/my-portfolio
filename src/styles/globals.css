@@ -107,7 +107,7 @@ body {
 
 /* Crowdsale Menu */
 .crowdsale-menu {
-  background-color: #1a1a1a;
+  background-color: black;
   padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
@@ -157,6 +157,9 @@ body {
 .demo-button {
   background-color: #0984e3;
   color: #fff;
+}
+.crowdsale-data {
+  background-color: black;
 }
 .demo-button:hover {
   background-color: #0d79d0;
@@ -243,7 +246,7 @@ body {
 
 /* Crowdsale UI (the standalone menu) */
 .crowdsale-menu {
-  background-color: #1a1a1a;
+  background-color: black;
   padding: 2rem;
   border-radius: 16px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);

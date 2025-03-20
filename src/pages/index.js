@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import Head from 'next/head';
 import { ethers, BrowserProvider, JsonRpcSigner } from 'ethers';
 import Image from 'next/image';
 import WarpBackground from '../components/magicui/warp-background';
@@ -39,7 +40,10 @@ export function clientToSigner(client) {
   const network = {
     chainId: chain.id,
     name: chain.name,
-    ensAddress: chain.contracts && chain.contracts.ensRegistry ? chain.contracts.ensRegistry.address : undefined,
+    ensAddress:
+      chain.contracts && chain.contracts.ensRegistry
+        ? chain.contracts.ensRegistry.address
+        : undefined,
   };
   const provider = new BrowserProvider(transport, network);
   return new JsonRpcSigner(provider, account.address);
@@ -54,55 +58,52 @@ export function useEthersSigner({ chainId } = {}) {
 const Navbar = ({ account, tokenBalance }) => {
   return (
     <nav className="navbar">
-  <div className="navbar-left">
-    <WalletConnector />
-  </div>
-  <div className="navbar-right" style={{ position: 'relative' }}>
-    <div 
-      className="decentratalityfont"
-      style={{ 
-        fontSize: '5rem',
-        transform: 'translateX(-350px)'
-      }}
-    >
-      Decentratality
-    </div>
-    {/* This account info is now absolutely positioned, so it won't push the other elements */}
-    {account && (
-      <div 
-        className="account-info-navbar"
-        style={{
-          color: 'blue',
-          position: 'absolute',
-          top: '30',        // Adjust as needed
-          right: '0',      // Adjust as needed
-          zIndex: 10,
-          transform: 'translateX(-190px)',
-          backgroundColor: 'rgba(0,0,0,0)',
-                // Ensure it appears on top
-           // Optional: a background to improve readability
-          padding: '0.5rem'
-        }}
-      >
-        <span className="account-text">
-  Account: {account.slice(0, 4)}...{account.slice(-4)}
-</span>
-        <span className="token-balance" style={{ marginLeft: '1rem' }}>
-          Tokens: {tokenBalance}
-        </span>
+      <div className="navbar-left">
+        <WalletConnector />
       </div>
-    )}
-    <div className="logo">
-      <Image 
-        src="/logo.png" 
-        alt="Decentratality" 
-        width={150} 
-        height={50} 
-        className="dashboard-image" 
-      />
-    </div>
-  </div>
-</nav>
+      <div className="navbar-right" style={{ position: 'relative' }}>
+        <div
+          className="decentratalityfont"
+          style={{
+            fontSize: '5rem',
+            transform: 'translateX(-350px)',
+          }}
+        >
+          Decentratality
+        </div>
+        {account && (
+          <div
+            className="account-info-navbar"
+            style={{
+              color: 'blue',
+              position: 'absolute',
+              top: '30px', // Adjusted to include unit
+              right: '0',
+              zIndex: 10,
+              transform: 'translateX(-190px)',
+              backgroundColor: 'rgba(0,0,0,0)',
+              padding: '0.5rem',
+            }}
+          >
+            <span className="account-text">
+              Account: {account.slice(0, 4)}...{account.slice(-4)}
+            </span>
+            <span className="token-balance" style={{ marginLeft: '1rem' }}>
+              Tokens: {tokenBalance}
+            </span>
+          </div>
+        )}
+        <div className="logo">
+          <Image
+            src="/logo.png"
+            alt="Decentratality"
+            width={150}
+            height={50}
+            className="dashboard-image"
+          />
+        </div>
+      </div>
+    </nav>
   );
 };
 
@@ -124,10 +125,18 @@ const ExtraMarquee = () => (
 );
 const ExtraOrbitingCircles = () => (
   <OrbitingCircles radius={120} iconSize={40}>
-    <span role="img" aria-label="star">⭐</span>
-    <span role="img" aria-label="rocket">🚀</span>
-    <span role="img" aria-label="shield">🛡️</span>
-    <span role="img" aria-label="sparkles">✨</span>
+    <span role="img" aria-label="star">
+      ⭐
+    </span>
+    <span role="img" aria-label="rocket">
+      🚀
+    </span>
+    <span role="img" aria-label="shield">
+      🛡️
+    </span>
+    <span role="img" aria-label="sparkles">
+      ✨
+    </span>
   </OrbitingCircles>
 );
 
@@ -149,13 +158,12 @@ const InfoAccordion = () => (
   <div className="info-accordion">
     <AccordionItem title="Our Vision">
       <p>
-        We aim to revolutionize hospitality by integrating multiple management systems into one secure, blockchain-powered platform.
+        We aim to revolutionize hospitality by integrating multiple management systems into one
+        secure, blockchain-powered platform.
       </p>
     </AccordionItem>
     <AccordionItem title="Blockchain Integration">
-      <p>
-        Leveraging EVM-compatible blockchains, every transaction is securely recorded.
-      </p>
+      <p>Leveraging EVM-compatible blockchains, every transaction is securely recorded.</p>
     </AccordionItem>
     <AccordionItem title="Employee Onboarding">
       <p>
@@ -168,7 +176,9 @@ const InfoAccordion = () => (
       </p>
       <button
         className="action-button learnmore-button"
-        onClick={() => window.scrollTo({ top: 600, left: 0, behavior: 'smooth' })}
+        onClick={() =>
+          window.scrollTo({ top: 600, left: 0, behavior: 'smooth' })
+        }
       >
         Donate Now
       </button>
@@ -185,10 +195,13 @@ const LearnMoreModal = ({ isOpen, onClose }) => {
       <div className="modal-content">
         <h2>About Decentratality</h2>
         <p>
-          Decentratality is the secure crypto platform you’ve been waiting for. Our revolutionary approach combines blockchain integrity with modern financial management—empowering businesses and employees.
+          Decentratality is the secure crypto platform you’ve been waiting for. Our revolutionary
+          approach combines blockchain integrity with modern financial management—empowering
+          businesses and employees.
         </p>
         <p>
-          With professional classes, community engagement, and an all-in-one web app for transactions and data management, we are redefining digital hospitality.
+          With professional classes, community engagement, and an all-in-one web app for
+          transactions and data management, we are redefining digital hospitality.
         </p>
         <button className="action-button demo-button" onClick={onClose}>
           Close
@@ -203,7 +216,7 @@ const LearnMoreModal = ({ isOpen, onClose }) => {
 export default function Home() {
   const { isConnected } = useAppKitAccount();
   const ethersProvider = useEthersProvider({ chainId: 8453 });
-  const ethersSigner = useEthersSigner({ chainId: 8453});
+  const ethersSigner = useEthersSigner({ chainId: 8453 });
   const [modalOpen, setModalOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [provider, setProvider] = useState(null);
@@ -229,15 +242,15 @@ export default function Home() {
       if (isConnected && ethersSigner) {
         const { provider, address } = await ethersSigner;
         setAccount(address);
-        // Simulated token balance for demonstration purposes
-        
-          
-          const mynetwork = await provider.getNetwork();
-          const chainId = mynetwork.chainId;
-          const token = new ethers.Contract(config[chainId].token.address, TOKEN_ABI, ethersSigner);
-        const crowdsaleContract = new ethers.Contract(config[chainId].crowdsale.address, CROWDSALE_ABI, ethersSigner);
+        const mynetwork = await provider.getNetwork();
+        const chainId = mynetwork.chainId;
+        const token = new ethers.Contract(
+          config[chainId].token.address,
+          TOKEN_ABI,
+          ethersSigner
+        );
         const balance = await token.balanceOf(address);
-          setTokenBalance(ethers.formatUnits(balance, 18));
+        setTokenBalance(ethers.formatUnits(balance, 18));
       }
     }
     getAccountInfo();
@@ -248,101 +261,105 @@ export default function Home() {
   };
 
   return (
-    <WarpBackground
-      perspective={200}
-      beamsPerSide={4}
-      beamSize={5}
-      beamDelayMax={3}
-      beamDelayMin={0}
-      beamDuration={4}
-      gridColor="hsl(0, 0%, 80%)"
-      className="min-h-screen min-w-screen"
-    >
-      {/* Fixed Top Navbar */}
-      <Navbar account={account} tokenBalance={tokenBalance} />
+    <>
+      <Head>
+        {/* This meta tag forces mobile browsers to use the device width,
+            keeping your desktop layout intact on an iPhone */}
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </Head>
+      <WarpBackground
+        perspective={200}
+        beamsPerSide={4}
+        beamSize={5}
+        beamDelayMax={3}
+        beamDelayMin={0}
+        beamDuration={4}
+        gridColor="hsl(0, 0%, 80%)"
+        className="min-h-screen"
+      >
+        {/* Fixed Top Navbar */}
+        <Navbar account={account} tokenBalance={tokenBalance} />
 
-      {/* Main Content */}
-      <div className="main-content">
-        <div className="intro-section">
-          <h1>Welcome to Decentratality</h1>
-          <p>
-            Discover a new era in digital hospitality where blockchain meets secure financial management.
-          </p>
-        </div>
+        {/* Wrap main content in a fixed–max-width container */}
+        <div className="container mx-auto" style={{ maxWidth: '1200px' }}>
+          <div className="main-content">
+            <div className="intro-section">
+              <h1>Welcome to Decentratality</h1>
+              <p>
+                Discover a new era in digital hospitality where blockchain meets secure financial
+                management.
+              </p>
+            </div>
 
-        {/* Crowdsale Menu – Reworked with Magic UI components */}
-        <div className="crowdsale-menu">
-          <h2 className="crowdsale-title">Join the Crowdsale</h2>
-          <p className="crowdsale-description-text">
-            Take a look at these videos if you want to know more about how Decentratality will bring the blockchain to the front and back of house of your restaurant soon!
-          </p>
+            {/* Crowdsale Menu – Reworked with Magic UI components */}
+            <div className="crowdsale-menu p-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded-3xl shadow-xl">
+              <h2 className="crowdsale-title text-center">Join the Crowdsale</h2>
+              <p className="crowdsale-description-text text-center">
+                Take a look at these videos if you want to know more about how Decentratality will
+                bring the blockchain to the front and back of house of your restaurant soon!
+              </p>
 
-          {/* Video Spots */}
-          <div
-            className="video-section"
-            style={{
-              display: 'flex',
-              gap: '1rem',
-              margin: '1rem 0',
-              flexWrap: 'wrap'
-            }}
-          >
-            <div className="video-section" style={{ display: 'flex', width: '1200px', gap: '1rem', margin: '1rem 0'}}>
-  <div className="video-spot" style={{ flex: 1, minWidth: '300px' }}>
-    <iframe 
-  width="100%"
-  height="315"
-  src="https://www.youtube.com/embed/y4tL3pWq-Os"
-  title="YouTube video player"
-  frameBorder="0"
-  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-  allowFullScreen
-></iframe>
-</div>
-<div className="video-spot" style={{ flex: 1, minWidth: '300px' }}>
-  <iframe
-    width="100%"
-    height="315"
-    src="https://www.youtube.com/embed/ICx8HkmynZc?si=vU6BeJmhvtaw-GsX"
-    title="YouTube video player"
-    frameBorder="0"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-    allowFullScreen
-  ></iframe>
+              {/* Video Spots – updated to be responsive */}
+              <div className="video-section flex gap-4 flex-wrap my-4">
+                <div className="flex w-full max-w-5xl gap-4 my-4 mx-auto">
+                  <div className="video-spot flex-1 min-w-[300px]">
+                    <iframe
+                      className="w-full"
+                      height="315"
+                      src="https://www.youtube.com/embed/y4tL3pWq-Os"
+                      title="YouTube video player"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    ></iframe>
+                  </div>
+                  <div className="video-spot flex-1 min-w-[300px]">
+                    <iframe
+                      className="w-full"
+                      height="315"
+                      src="https://www.youtube.com/embed/ICx8HkmynZc?si=vU6BeJmhvtaw-GsX"
+                      title="YouTube video player"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    ></iframe>
+                  </div>
+                </div>
+              </div>
 
-  </div>
-</div>
+              <CrowdsaleBody />
+            </div>
 
+            {/* Terminal Demo */}
+            <CodeTerminal />
+
+            {/* Extras */}
+            <div className="extras">
+              <ExtraMarquee />
+              <ExtraOrbitingCircles />
+            </div>
+
+            {/* Info Accordion */}
+            <InfoAccordion />
+
+            {/* Action Buttons */}
+            <div className="action-buttons flex justify-center gap-4 my-8">
+              <button className="action-button demo-button" onClick={navigateToDemo}>
+                Go to Demo
+              </button>
+              <button
+                className="action-button learnmore-button"
+                onClick={() => setModalOpen(true)}
+              >
+                Learn More
+              </button>
+            </div>
+
+            {/* Learn More Modal */}
+            <LearnMoreModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
           </div>
-
-          <CrowdsaleBody />
         </div>
-
-        {/* Terminal Demo */}
-        <CodeTerminal />
-
-        {/* Extras */}
-        <div className="extras">
-          <ExtraMarquee />
-          <ExtraOrbitingCircles />
-        </div>
-
-        {/* Info Accordion */}
-        <InfoAccordion />
-
-        {/* Action Buttons */}
-        <div className="action-buttons">
-          <button className="action-button demo-button" onClick={navigateToDemo}>
-            Go to Demo
-          </button>
-          <button className="action-button learnmore-button" onClick={() => setModalOpen(true)}>
-            Learn More
-          </button>
-        </div>
-
-        {/* Learn More Modal */}
-        <LearnMoreModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
-      </div>
-    </WarpBackground>
+      </WarpBackground>
+    </>
   );
 }

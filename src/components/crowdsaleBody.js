@@ -174,9 +174,11 @@ function CrowdsaleBody() {
  
 
   return (
-    <div className="crowdsale-menu p-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded-3xl shadow-xl flex items-center gap-8">
+    <div className="crowdsale-menu p-8 bg-gradient-to-r rounded-3xl shadow-xl flex items-center gap-8" style={{
+                backgroundColor: 'black'
+              }}>
   {/* Left Frame: Progress Bar */}
-  <div className="progress-frame p-4 border border-white rounded-lg flex flex-col items-center" style={{ height: '400px', width: '400px'}}>
+  <div className="progress-frame p-4 border border-white rounded-lg flex flex-col items-center" style={{ height: '400px', width: '400px', backgroundColor: 'black'}}>
     <p className="text-white decentratalityfont mb-5 " style={{ 
       position: 'absolute',
       fontSize: "2.0rem", width: '500px',
@@ -205,7 +207,7 @@ function CrowdsaleBody() {
   </div>
   
   {/* Right Frame: Single Row Data & Actions */}
-  <div className="crowdsale-data flex items-center gap-6 flex-1" style={{ height: '400px'}}>
+  <div className="crowdsale-data" style={{ height: '400px', backgroundColor: 'black', position: 'absolute', top: '-10px', left: '40vw'}}>
     <div className="data-item text-white text-base" 
     style={{
       position: 'absolute',
