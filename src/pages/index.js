@@ -61,9 +61,10 @@ const Navbar = ({ account, tokenBalance }) => {
       <div className="navbar-left">
         <WalletConnector />
       </div>
-      <div className="navbar-right" style={{ position: 'relative' }}>
+      <div className="navbar-right relative">
         <div
           className="decentratalityfont"
+          // On mobile, adjust the font size and transform
           style={{
             fontSize: '5rem',
             transform: 'translateX(-350px)',
@@ -73,22 +74,19 @@ const Navbar = ({ account, tokenBalance }) => {
         </div>
         {account && (
           <div
-            className="account-info-navbar"
+            className="account-info-navbar text-blue-500 absolute p-2"
             style={{
-              color: 'blue',
-              position: 'absolute',
-              top: '30px', // Adjusted to include unit
+              top: '30px',
               right: '0',
               zIndex: 10,
               transform: 'translateX(-190px)',
-              backgroundColor: 'rgba(0,0,0,0)',
-              padding: '0.5rem',
+              backgroundColor: 'transparent',
             }}
           >
             <span className="account-text">
               Account: {account.slice(0, 4)}...{account.slice(-4)}
             </span>
-            <span className="token-balance" style={{ marginLeft: '1rem' }}>
+            <span className="token-balance ml-4">
               Tokens: {tokenBalance}
             </span>
           </div>
@@ -99,6 +97,8 @@ const Navbar = ({ account, tokenBalance }) => {
             alt="Decentratality"
             width={150}
             height={50}
+            // Include width: auto to help preserve aspect ratio if you modify dimensions in CSS
+            style={{ width: '150px', height: 'auto' }}
             className="dashboard-image"
           />
         </div>
@@ -120,7 +120,9 @@ const CodeTerminal = () => (
 );
 const ExtraMarquee = () => (
   <Marquee pauseOnHover reverse className="mb-8">
-    <span className="mx-4 text-xl text-white">Decentralized • Secure • Innovative</span>
+    <span className="mx-4 text-xl text-white">
+      Decentralized • Secure • Innovative
+    </span>
   </Marquee>
 );
 const ExtraOrbitingCircles = () => (
@@ -150,7 +152,9 @@ const AccordionItem = ({ title, children }) => {
         <span>{title}</span>
         <span>{isOpen ? '▲' : '▼'}</span>
       </div>
-      <div className={`accordion-content ${isOpen ? 'open' : ''}`}>{children}</div>
+      <div className={`accordion-content ${isOpen ? 'open' : ''}`}>
+        {children}
+      </div>
     </div>
   );
 };
@@ -158,21 +162,26 @@ const InfoAccordion = () => (
   <div className="info-accordion">
     <AccordionItem title="Our Vision">
       <p>
-        We aim to revolutionize hospitality by integrating multiple management systems into one
-        secure, blockchain-powered platform.
+        We aim to revolutionize hospitality by integrating multiple management
+        systems into one secure, blockchain-powered platform.
       </p>
     </AccordionItem>
     <AccordionItem title="Blockchain Integration">
-      <p>Leveraging EVM-compatible blockchains, every transaction is securely recorded.</p>
+      <p>
+        Leveraging EVM-compatible blockchains, every transaction is securely
+        recorded.
+      </p>
     </AccordionItem>
     <AccordionItem title="Employee Onboarding">
       <p>
-        Our system links blockchain accounts to real-life identities for secure, compliant profiles.
+        Our system links blockchain accounts to real-life identities for secure,
+        compliant profiles.
       </p>
     </AccordionItem>
     <AccordionItem title="Support the Future">
       <p>
-        Contribute to our crowdsale and join us in building the future of hospitality.
+        Contribute to our crowdsale and join us in building the future of
+        hospitality.
       </p>
       <button
         className="action-button learnmore-button"
@@ -195,13 +204,14 @@ const LearnMoreModal = ({ isOpen, onClose }) => {
       <div className="modal-content">
         <h2>About Decentratality</h2>
         <p>
-          Decentratality is the secure crypto platform you’ve been waiting for. Our revolutionary
-          approach combines blockchain integrity with modern financial management—empowering
-          businesses and employees.
+          Decentratality is the secure crypto platform you’ve been waiting for. Our
+          revolutionary approach combines blockchain integrity with modern
+          financial management—empowering businesses and employees.
         </p>
         <p>
-          With professional classes, community engagement, and an all-in-one web app for
-          transactions and data management, we are redefining digital hospitality.
+          With professional classes, community engagement, and an all-in-one web
+          app for transactions and data management, we are redefining digital
+          hospitality.
         </p>
         <button className="action-button demo-button" onClick={onClose}>
           Close
@@ -219,7 +229,6 @@ export default function Home() {
   const ethersSigner = useEthersSigner({ chainId: 8453 });
   const [modalOpen, setModalOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [provider, setProvider] = useState(null);
   const [account, setAccount] = useState("");
   const [tokenBalance, setTokenBalance] = useState("");
 
@@ -263,9 +272,11 @@ export default function Home() {
   return (
     <>
       <Head>
-        {/* This meta tag forces mobile browsers to use the device width,
-            keeping your desktop layout intact on an iPhone */}
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {/* Ensure mobile browsers use the device width */}
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+        />
       </Head>
       <WarpBackground
         perspective={200}
@@ -280,14 +291,14 @@ export default function Home() {
         {/* Fixed Top Navbar */}
         <Navbar account={account} tokenBalance={tokenBalance} />
 
-        {/* Wrap main content in a fixed–max-width container */}
-        <div className="container mx-auto" style={{ maxWidth: '1200px' }}>
+        {/* Fixed–max-width container for main content */}
+        <div className="container mx-auto px-4" style={{ maxWidth: '1200px' }}>
           <div className="main-content">
-            <div className="intro-section">
+            <div className="intro-section text-center">
               <h1>Welcome to Decentratality</h1>
               <p>
-                Discover a new era in digital hospitality where blockchain meets secure financial
-                management.
+                Discover a new era in digital hospitality where blockchain meets
+                secure financial management.
               </p>
             </div>
 
@@ -295,12 +306,13 @@ export default function Home() {
             <div className="crowdsale-menu p-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded-3xl shadow-xl">
               <h2 className="crowdsale-title text-center">Join the Crowdsale</h2>
               <p className="crowdsale-description-text text-center">
-                Take a look at these videos if you want to know more about how Decentratality will
-                bring the blockchain to the front and back of house of your restaurant soon!
+                Take a look at these videos if you want to know more about how
+                Decentratality will bring blockchain to the front and back of
+                your restaurant soon!
               </p>
 
-              {/* Video Spots – updated to be responsive */}
-              <div className="video-section flex gap-4 flex-wrap my-4">
+              {/* Responsive Video Spots */}
+              <div className="video-section flex flex-wrap gap-4 my-4">
                 <div className="flex w-full max-w-5xl gap-4 my-4 mx-auto">
                   <div className="video-spot flex-1 min-w-[300px]">
                     <iframe
