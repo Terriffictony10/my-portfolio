@@ -54,25 +54,55 @@ export function useEthersSigner({ chainId } = {}) {
 const Navbar = ({ account, tokenBalance }) => {
   return (
     <nav className="navbar">
-      <div className="navbar-left">
-        <WalletConnector />
+  <div className="navbar-left">
+    <WalletConnector />
+  </div>
+  <div className="navbar-right" style={{ position: 'relative' }}>
+    <div 
+      className="decentratalityfont"
+      style={{ 
+        fontSize: '5rem',
+        transform: 'translateX(-350px)'
+      }}
+    >
+      Decentratality
+    </div>
+    {/* This account info is now absolutely positioned, so it won't push the other elements */}
+    {account && (
+      <div 
+        className="account-info-navbar"
+        style={{
+          color: 'blue',
+          position: 'absolute',
+          top: '30',        // Adjust as needed
+          right: '0',      // Adjust as needed
+          zIndex: 10,
+          transform: 'translateX(-190px)',
+          backgroundColor: 'rgba(0,0,0,0)',
+                // Ensure it appears on top
+           // Optional: a background to improve readability
+          padding: '0.5rem'
+        }}
+      >
+        <span className="account-text">
+  Account: {account.slice(0, 4)}...{account.slice(-4)}
+</span>
+        <span className="token-balance" style={{ marginLeft: '1rem' }}>
+          Tokens: {tokenBalance}
+        </span>
       </div>
-      <div className="navbar-right">
-        <div className="account-info-navbar">
-          {account ? (
-            <>
-              <span className="account-text">Account: {account}</span>
-              <span className="token-balance">Tokens: {tokenBalance}</span>
-            </>
-          ) : (
-            <span>Not Connected</span>
-          )}
-        </div>
-        <div className="logo">
-          <Image src="/logo.png" alt="Decentratality" width={150} height={50} className="dashboard-image" />
-        </div>
-      </div>
-    </nav>
+    )}
+    <div className="logo">
+      <Image 
+        src="/logo.png" 
+        alt="Decentratality" 
+        width={150} 
+        height={50} 
+        className="dashboard-image" 
+      />
+    </div>
+  </div>
+</nav>
   );
 };
 
@@ -226,7 +256,7 @@ export default function Home() {
       beamDelayMin={0}
       beamDuration={4}
       gridColor="hsl(0, 0%, 80%)"
-      className="min-h-screen"
+      className="min-h-screen min-w-screen"
     >
       {/* Fixed Top Navbar */}
       <Navbar account={account} tokenBalance={tokenBalance} />

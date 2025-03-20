@@ -174,57 +174,97 @@ function CrowdsaleBody() {
  
 
   return (
-    <div className="crowdsale-menu p-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded-3xl shadow-xl">
-      <div className="mb-6 text-center">
-        <p className="text-white mt-2">
-          Price: {price} ETH | Goal: {fundingGoal} ETH
-        </p>
-      </div>
-      <div className="crowdsale-grid">
-        {/* Left Column: Circular Progress Counter */}
-        <div className="flex flex-col items-center justify-center">
-          <AnimatedCircularProgressBar
-            value={tokensSoldNumber}
-            min={0}
-            max={maxTokensNumber}
-            gaugePrimaryColor="limegreen"
-            gaugeSecondaryColor="darkgreen"
-          />
-          <p className="text-white mt-4 text-sm">
-            {tokensSoldNumber} / {maxTokensNumber} tokens sold
-          </p>
-        </div>
-        {/* Right Column: Crowdsale Details & Buy Form */}
-        <div className="flex flex-col gap-4">
-          <p className="text-white text-sm">
-            <strong>Current Price:</strong> {price} ETH
-          </p>
-          <p className="text-white text-sm">
-            <strong>Status:</strong> {statusText}
-          </p>
-          <p className="text-white text-sm">
-            <strong>Funding Goal:</strong> {fundingGoal} ETH
-          </p>
-          <Buy provider={myprovider} price={price} crowdsale={crowdsale} setIsLoading={() => {}} />
-          {myprovider && crowdsale && <AutoFinalize provider={myprovider} crowdsale={crowdsale} />}
-          {myprovider &&
-            crowdsale &&
-            account &&
-            owner &&
-            account.toLowerCase() === owner.toLowerCase() && (
-              <div className="mt-4">
-                <button
-                  onClick={handleFinalize}
-                  disabled={finalizeLoading}
-                  className="finalize-button bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700"
-                >
-                  {finalizeLoading ? 'Finalizing...' : 'Finalize Crowdsale'}
-                </button>
-              </div>
-            )}
-        </div>
-      </div>
+    <div className="crowdsale-menu p-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded-3xl shadow-xl flex items-center gap-8">
+  {/* Left Frame: Progress Bar */}
+  <div className="progress-frame p-4 border border-white rounded-lg flex flex-col items-center" style={{ height: '400px', width: '400px'}}>
+    <p className="text-white decentratalityfont mb-5 " style={{ 
+      position: 'absolute',
+      fontSize: "2.0rem", width: '500px',
+      top: '850px',
+      left: '250px',
+    } }>Tokens Sold</p>
+    <div className="w-48 h-4 bg-gray-200 rounded-full overflow-hidden" style={{ 
+      position: 'absolute', 
+      width: '300px',
+      top: '1050px',
+      height: '40px',
+      left: '360px'
+     }}>
+      <div
+        className="h-full bg-limegreen"
+        style={{ width: `${(tokensSoldNumber / maxTokensNumber) * 100}%` }}
+      ></div>
     </div>
+    <p className="text-white mt-2 text-xs" style={{
+      position: 'absolute',
+      top: '970px',
+      left: '450px',
+    }}>
+      {tokensSoldNumber} / {maxTokensNumber}
+    </p>
+  </div>
+  
+  {/* Right Frame: Single Row Data & Actions */}
+  <div className="crowdsale-data flex items-center gap-6 flex-1" style={{ height: '400px'}}>
+    <div className="data-item text-white text-base" 
+    style={{
+      position: 'absolute',
+      width: '500px',
+      top: '850px',
+    }}>
+      <strong>Price:</strong> {price} ETH
+    </div>
+    <div className="data-item text-white text-base"
+    style={{
+      position: 'absolute',
+      width: '500px',
+      top: '870px',
+    }}>
+      <strong>Status:</strong> {statusText}
+    </div>
+    <div className="data-item text-white text-base"
+    style={{
+      position: 'absolute',
+      width: '500px',
+      top: '920px',
+    }}>
+      <strong>Goal:</strong> {fundingGoal} ETH
+    </div>
+    <div className="data-item text-white text-base"
+    style={{
+      position: 'absolute',
+      width: '500px',
+      top: '960px',
+    }}>
+      Join the pre-sale for the token that will drive the hospitality industry for years to come!!
+    </div>
+    <div className="buy-button"
+    style={{
+      position: 'absolute',
+      top: '1090px',
+    }}
+    >
+      <Buy provider={myprovider} price={price} crowdsale={crowdsale} setIsLoading={() => {}} />
+    </div>
+    {myprovider && crowdsale && <AutoFinalize provider={myprovider} crowdsale={crowdsale} />}
+    {myprovider &&
+      crowdsale &&
+      account &&
+      owner &&
+      account.toLowerCase() === owner.toLowerCase() && (
+        <div className="ml-4">
+          <button
+            onClick={handleFinalize}
+            disabled={finalizeLoading}
+            className="finalize-button bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700"
+          >
+            {finalizeLoading ? 'Finalizing...' : 'Finalize Crowdsale'}
+          </button>
+        </div>
+      )}
+  </div>
+</div>
+
   );
 }
 

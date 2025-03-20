@@ -11,6 +11,12 @@
   font-style: normal;
 }
 @font-face {
+  font-family: 'DecentratalityFont';
+  src: url('./KnifePrincess-MMPY.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
   font-family: 'CrowdsaleBuyBox';
   src: url('./ArchivoBlack-Regular.otf') format('opentype');
   font-weight: normal;
@@ -34,6 +40,9 @@ body {
 }
 
 /* Navbar */
+.decentratalityfont{
+  font-family: 'DecentratalityFont';
+}
 .navbar {
   width: 100%;
   padding: 1rem 2rem;
@@ -47,7 +56,9 @@ body {
   left: 0;
   z-index: 100;
 }
-.navbar-left,
+.navbar-left {
+
+}
 .navbar-right {
   display: flex;
   align-items: center;
