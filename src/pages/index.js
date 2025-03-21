@@ -271,7 +271,7 @@ export default function Home() {
 
   return (
     <>
-      
+      <div style={{ backgroundColor: "black"}}>
       <WarpBackground
         perspective={200}
         beamsPerSide={4}
@@ -281,12 +281,13 @@ export default function Home() {
         beamDuration={4}
         gridColor="hsl(0, 0%, 80%)"
         className="hideOnMobile min-h-screen "
+
       >
         {/* Fixed Top Navbar */}
         <Navbar account={account} tokenBalance={tokenBalance} />
 
         {/* Fixed–max-width container for main content */}
-        <div className="hideOnMobile container mx-auto px-4 " style={{ maxWidth: '1200px' }}>
+        <div className="hideOnMobile container mx-auto px-4 " style={{ maxWidth: '1200px', backgroundColor: "black" }}>
           <div className="hideOnMobile main-content ">
             <div className="hideOnMobile intro-section text-center ">
               <h1>Welcome to Decentratality</h1>
@@ -366,6 +367,15 @@ export default function Home() {
           </div>
         </div>
       </WarpBackground>
+      <div style={{ display: "flex-center", backgroundColor: "black"}}>
+      <div style={{ position: "absolute", top: "0px", left: '0px', fontSize: "3.1rem", color: "white"}}>
+      <div className="mobileFont1" >
+      decentratality
+      </div>
+      </div>
+      <CrowdsaleBody />
+      </div>
+      </div>
     </>
   );
 }

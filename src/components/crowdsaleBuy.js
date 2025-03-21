@@ -41,12 +41,24 @@ const Buy = ({ provider, price, crowdsale, setIsLoading }) => {
         onChange={(e) => setAmount(e.target.value)}
         className="buy-text-input p-2 rounded-md border"
       />
+      <input
+        type="number"
+        placeholder="Enter token amount"
+        onChange={(e) => setAmount(e.target.value)}
+        className="p-2 rounded-md border"
+      />
+
       {isWaiting ? (
         <span className="buy-spinner text-white">Processing...</span>
       ) : (
+      <>
         <ShinyButton type="submit" className="crowdsale-buy-button">
           Purchase Tokens
         </ShinyButton>
+        <ShinyButton type="submit" style={{ backgroundColor: "white"}}>
+          Purchase Tokens
+        </ShinyButton>
+        </>
       )}
     </form>
   );

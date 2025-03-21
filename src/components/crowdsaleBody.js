@@ -174,6 +174,7 @@ function CrowdsaleBody() {
  
 
   return (
+    <>
     <div className="crowdsale-menu p-8 bg-gradient-to-r rounded-3xl shadow-xl flex items-center gap-8" style={{
                 backgroundColor: 'black'
               }}>
@@ -266,6 +267,19 @@ function CrowdsaleBody() {
       )}
   </div>
 </div>
+<div style={{ position: "absolute", top: "90px"}}>
+<div>
+<strong style={{ color: "white", fontSize: "1.5rem"}} className="mobileFont1">Status:</strong> {statusText}
+</div>
+<div>
+<strong style={{ color: "white", fontSize: "1.5rem"}} className="mobileFont1">Goal:</strong> {fundingGoal} ETH
+</div>
+<div>
+<strong style={{ color: "white", fontSize: "1.5rem"}} className="mobileFont1">Price:</strong> {price} ETH
+</div>
+<Buy provider={myprovider} price={price} crowdsale={crowdsale} setIsLoading={() => {}} />
+</div>
+</>
 
   );
 }
