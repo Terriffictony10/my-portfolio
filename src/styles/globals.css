@@ -367,6 +367,9 @@ nav li:first-child {
 /* New Media Query for Screens 400px Wide and Below */
 @media (max-width: 400px) {
   /* Adjust Main Content */
+  .hideOnMobile {
+    display: block !important;
+  }
   .main-content {
     padding: 1rem;
     max-width: 100%;
