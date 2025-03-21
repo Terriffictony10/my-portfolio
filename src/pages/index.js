@@ -271,13 +271,7 @@ export default function Home() {
 
   return (
     <>
-      <Head>
-        {/* Ensure mobile browsers use the device width */}
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
-        />
-      </Head>
+      // 
       <WarpBackground
         perspective={200}
         beamsPerSide={4}
