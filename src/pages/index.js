@@ -280,15 +280,15 @@ export default function Home() {
         beamDelayMin={0}
         beamDuration={4}
         gridColor="hsl(0, 0%, 80%)"
-        className="min-h-screen hideOnMobile"
+        className="hideOnMobile min-h-screen "
       >
         {/* Fixed Top Navbar */}
         <Navbar account={account} tokenBalance={tokenBalance} />
 
         {/* Fixed–max-width container for main content */}
-        <div className="container mx-auto px-4 hideOnMobile" style={{ maxWidth: '1200px' }}>
-          <div className="main-content hideOnMobile">
-            <div className="intro-section text-center hideOnMobile">
+        <div className="hideOnMobile container mx-auto px-4 " style={{ maxWidth: '1200px' }}>
+          <div className="hideOnMobile main-content ">
+            <div className="hideOnMobile intro-section text-center ">
               <h1>Welcome to Decentratality</h1>
               <p>
                 Discover a new era in digital hospitality where blockchain meets

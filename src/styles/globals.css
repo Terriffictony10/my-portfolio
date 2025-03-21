@@ -965,3 +965,74 @@ nav li:first-child {
     @apply bg-background text-foreground;
   }
 }
+
+
+/* Hide all content on mobile devices with width less than 600px */
+@media screen and (max-width: 600px) {
+  /* Navbar & Header */
+  .navbar,
+  .navbar-left,
+  .navbar-right,
+  .decentratalityfont,
+  .account-info-navbar,
+  .account-text,
+  .token-balance,
+  .logo,
+  .dashboard-image,
+
+  /* Main Layout & Containers */
+  .hideOnMobile,
+  .min-h-screen,
+  .container,
+  .mx-auto,
+  .px-4,
+  .main-content,
+  .intro-section,
+  .text-center,
+
+  /* Crowdsale & Videos */
+  .crowdsale-menu,
+  .p-8,
+  .bg-gradient-to-r,
+  .from-blue-600,
+  .to-blue-800,
+  .rounded-3xl,
+  .shadow-xl,
+  .crowdsale-title,
+  .crowdsale-description-text,
+  .video-section,
+  .flex,
+  .flex-wrap,
+  .gap-4,
+  .my-4,
+  .w-full,
+  .max-w-5xl,
+  .video-spot,
+  .flex-1,
+  .min-w-\[300px\],
+
+  /* Extras & Accordions */
+  .extras,
+  .info-accordion,
+  .action-buttons,
+  .action-button,
+  .demo-button,
+  .learnmore-button,
+
+  /* CrowdsaleBody Specific */
+  .progress-frame,
+  .data-item,
+  .buy-button,
+
+  /* CrowdsaleBuy Specific */
+  .buy-text-input,
+  .buy-spinner,
+  .crowdsale-buy-button,
+
+  /* CrowdsaleExplanation (if using Bootstrap progress bars) */
+  .progress-bar {
+    display: none !important;
+  }
+}
+
+
