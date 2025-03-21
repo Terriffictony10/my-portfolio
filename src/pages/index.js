@@ -271,7 +271,7 @@ export default function Home() {
 
   return (
     <>
-      // 
+      
       <WarpBackground
         perspective={200}
         beamsPerSide={4}
