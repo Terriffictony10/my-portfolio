@@ -57,6 +57,7 @@ export function useEthersSigner({ chainId } = {}) {
 // Navbar Component (Fixed at the top)
 const Navbar = ({ account, tokenBalance }) => {
   return (
+    
     <nav className="navbar">
       <div className="navbar-left">
         <WalletConnector />
@@ -368,7 +369,10 @@ export default function Home() {
         </div>
       </WarpBackground>
       <div style={{ display: "flex-center", backgroundColor: "black"}}>
-      <div style={{ position: "absolute", top: "0px", left: '0px', fontSize: "3.1rem", color: "white"}}>
+      <div >
+        <WalletConnector />
+      </div>
+      <div style={{ position: "absolute", top: "0px", left: '120px', fontSize: "2.3rem", color: "white"}}>
       <div className="mobileFont1" >
       decentratality
       </div>
