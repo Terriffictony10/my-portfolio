@@ -47,8 +47,8 @@ export function useEthersSigner({ chainId } = {}) {
 
 const AdminSchedule = ({ provider }) => {
   const { address, isConnected } = useAppKitAccount();
-  const ethersProvider = useEthersProvider({ chainId: 84532 });
-  const ethersSigner = useEthersSigner({ chainId: 84532 });
+  const ethersProvider = useEthersProvider({ chainId: 8453 });
+  const ethersSigner = useEthersSigner({ chainId: 8453 });
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date(Date.now() + 3600 * 1000));
   const [fundingGoalEth, setFundingGoalEth] = useState('');
