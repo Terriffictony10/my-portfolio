@@ -82,7 +82,14 @@ function CrowdsaleBody() {
   const { isConnected } = useAppKitAccount();
 
   useEffect(() => {
+    let timeoutId;
     async function loadBlockchainData() {
+
+      if (!isConnected || !ethersSigner || !ethersProvider) {
+      // Retry after a short delay
+      timeoutId = setTimeout(loadBlockchainData, 500);
+      return;
+    }
       if (isConnected && ethersSigner && ethersProvider) {
         try {
           const address = await ethersSigner.getAddress();
