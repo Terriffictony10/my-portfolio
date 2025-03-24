@@ -126,7 +126,7 @@ function CrowdsaleBody() {
       }
     }
     loadBlockchainData();
-  }, [isConnected, ethersSigner, ethersProvider, finalized]);
+  }, [isConnected, ethersSigner, ethersProvider, finalized, price, fundingGoal]);
 
   // Update isLive based on saleStart timestamp.
   useEffect(() => {
