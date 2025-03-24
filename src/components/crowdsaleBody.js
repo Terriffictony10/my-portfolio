@@ -13,26 +13,15 @@ import { BentoCard } from './magicui/bento-grid';
 import AnimatedCircularProgressBar from './magicui/animated-circular-progress-bar';
 
 // Return a provider using the client’s transport data.
-function clientToProvider(client) {
-  try {
-    if (client.transport?.url) {
-      const { chain, transport } = client;
-      return new ethers.JsonRpcProvider(transport.url, {
-        name: chain.name,
-        chainId: chain.id,
-      });
-    }
-  } catch (e) {
-    console.warn("Falling back to window.ethereum for provider");
-  }
-
-  if (typeof window !== "undefined" && window.ethereum) {
-    return new ethers.BrowserProvider(window.ethereum);
-  }
-
-  throw new Error("No valid provider found");
+export function clientToProvider(client) {
+  const { chain, transport } = client;
+  const network = {
+    chainId: chain.id,
+    name: chain.name,
+    ensAddress: chain.contracts?.ensRegistry?.address,
+  };
+  return new ethers.JsonRpcProvider(transport.url, network);
 }
-
 export function useEthersProvider({ chainId } = {}) {
   const client = useClient({ chainId });
   return client ? clientToProvider(client) : undefined;
