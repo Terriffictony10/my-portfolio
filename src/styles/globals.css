@@ -991,6 +991,7 @@ nav li:first-child {
   .text-center,
 
   /* Crowdsale & Videos */
+  .crowdsale-menu,
   .p-8,
   .bg-gradient-to-r,
   .from-blue-600,
@@ -1019,7 +1020,7 @@ nav li:first-child {
   .learnmore-button,
 
   /* CrowdsaleBody Specific */
-  
+  .progress-frame,
   .data-item,
   .buy-button,
 

@@ -368,6 +368,7 @@ export default function Home() {
           </div>
         </div>
       </WarpBackground>
+     
       <div style={{ display: "flex-center", backgroundColor: "black"}}>
       <div >
         <WalletConnector />
@@ -380,6 +381,7 @@ export default function Home() {
       <CrowdsaleBody />
       </div>
       </div>
+     
     </>
   );
 }

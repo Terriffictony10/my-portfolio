@@ -83,59 +83,88 @@ function CrowdsaleBody() {
   let errorCode;
 
   useEffect(() => {
-    let timeoutId;
-    async function loadBlockchainData() {
-
-      if (!isConnected || !ethersSigner || !ethersProvider) {
-      // Retry after a short delay
-      timeoutId = setTimeout(loadBlockchainData, 500);
+  async function loadBlockchainData() {
+    // If connections are missing, just exit.
+    if (!isConnected || !ethersSigner || !ethersProvider) {
       return;
     }
-      if (isConnected && ethersSigner && ethersProvider) {
-        try {
-          const address = await ethersSigner.getAddress();
-          setAccount(address);
-          setProvider(ethersSigner.provider);
-          const mynetwork = await ethersSigner.provider.getNetwork();
-          const chainId = mynetwork.chainId;
-          const token = new ethers.Contract(
-            config[chainId].token.address,
-            TOKEN_ABI,
-            ethersSigner
-          );
-          const crowdsaleContract = new ethers.Contract(
-            config[chainId].crowdsale.address,
-            CROWDSALE_ABI,
-            ethersSigner
-          );
-          setCrowdsale(crowdsaleContract);
-          const balance = await token.balanceOf(address);
-          setAccountBalance(ethers.formatUnits(balance, 18));
-          const priceVal = ethers.formatUnits(await crowdsaleContract.price(), 18);
-          setPrice(priceVal);
-          const maxTokensVal = ethers.formatUnits(await crowdsaleContract.maxTokens(), 18);
-          setMaxTokens(maxTokensVal);
-          const tokensSoldVal = ethers.formatUnits(await crowdsaleContract.tokensSold(), 18);
-          setTokensSold(tokensSoldVal);
-          const fundingGoalWei = await crowdsaleContract.fundingGoal();
-          setFundingGoal(ethers.formatUnits(fundingGoalWei, 18));
-          const saleStartTimestamp = await crowdsaleContract.saleStart();
-          setSaleStart(Number(saleStartTimestamp));
-          const saleEndTimestamp = await crowdsaleContract.saleEnd();
-          setSaleEnd(Number(saleEndTimestamp));
-          const finalizedStatus = await crowdsaleContract.finalized();
-          setFinalized(finalizedStatus);
-          const ownerAddress = await crowdsaleContract.owner();
-          setOwner(ownerAddress);
-        } catch (error) {
-          errorCode = error;
-          console.error('Error loading blockchain data:', error);
-        }
-        setIsLoading(false);
-      }
+
+    // Helper function to wait for a given time in ms
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    try {
+      const address = await ethersSigner.getAddress();
+      setAccount(address);
+      await sleep(800);
+
+      setProvider(ethersSigner.provider);
+      await sleep(800);
+
+      const mynetwork = await ethersSigner.provider.getNetwork();
+      const chainId = mynetwork.chainId;
+      await sleep(800);
+
+      const token = new ethers.Contract(
+        config[chainId].token.address,
+        TOKEN_ABI,
+        ethersSigner
+      );
+      await sleep(800);
+
+      const crowdsaleContract = new ethers.Contract(
+        config[chainId].crowdsale.address,
+        CROWDSALE_ABI,
+        ethersSigner
+      );
+      setCrowdsale(crowdsaleContract);
+      await sleep(800);
+
+      const balance = await token.balanceOf(address);
+      setAccountBalance(ethers.formatUnits(balance, 18));
+      await sleep(800);
+
+      const priceRaw = await crowdsaleContract.price();
+      const priceVal = ethers.formatUnits(priceRaw, 18);
+      setPrice(priceVal);
+      await sleep(800);
+
+      const maxTokensRaw = await crowdsaleContract.maxTokens();
+      const maxTokensVal = ethers.formatUnits(maxTokensRaw, 18);
+      setMaxTokens(maxTokensVal);
+      await sleep(800);
+
+      const tokensSoldRaw = await crowdsaleContract.tokensSold();
+      const tokensSoldVal = ethers.formatUnits(tokensSoldRaw, 18);
+      setTokensSold(tokensSoldVal);
+      await sleep(800);
+
+      const fundingGoalWei = await crowdsaleContract.fundingGoal();
+      setFundingGoal(ethers.formatUnits(fundingGoalWei, 18));
+      await sleep(800);
+
+      const saleStartTimestamp = await crowdsaleContract.saleStart();
+      setSaleStart(Number(saleStartTimestamp));
+      await sleep(800);
+
+      const saleEndTimestamp = await crowdsaleContract.saleEnd();
+      setSaleEnd(Number(saleEndTimestamp));
+      await sleep(800);
+
+      const finalizedStatus = await crowdsaleContract.finalized();
+      setFinalized(finalizedStatus);
+      await sleep(800);
+
+      const ownerAddress = await crowdsaleContract.owner();
+      setOwner(ownerAddress);
+    } catch (error) {
+      errorCode = error;
+      console.error('Error loading blockchain data:', error);
     }
-    loadBlockchainData();
-  }, [isConnected, ethersSigner, ethersProvider, finalized, price, fundingGoal]);
+    setIsLoading(false);
+  }
+  loadBlockchainData();
+}, [isConnected, ethersSigner, ethersProvider, finalized, price, fundingGoal]);
+
 
   // Update isLive based on saleStart timestamp.
   useEffect(() => {
@@ -276,21 +305,21 @@ function CrowdsaleBody() {
       )}
   </div>
 </div>
-// <div style={{ position: "absolute", top: "90px"}}>
-// <div>
-// <strong style={{ color: "white", fontSize: "1.5rem"}} className="mobileFont1">Status:</strong> {statusText}
-// </div>
-// <div>
-// <strong style={{ color: "white", fontSize: "1.5rem"}} className="mobileFont1">Goal:</strong> {fundingGoal} ETH
-// </div>
-// <div>
-// <strong style={{ color: "white", fontSize: "1.5rem"}} className="mobileFont1">Price:</strong> {price} ETH
-// </div>
-// <div>
-// {errorCode}
-// </div>
-// <Buy provider={myprovider} price={price} crowdsale={crowdsale} setIsLoading={() => {}} />
-// </div>
+<div style={{ position: "absolute", top: "90px"}}>
+<div>
+<strong style={{ color: "white", fontSize: "1.5rem"}} className="mobileFont1">Status:</strong> {statusText}
+</div>
+<div>
+<strong style={{ color: "white", fontSize: "1.5rem"}} className="mobileFont1">Goal:</strong> {fundingGoal} ETH
+</div>
+<div>
+<strong style={{ color: "white", fontSize: "1.5rem"}} className="mobileFont1">Price:</strong> {price} ETH
+</div>
+<div>
+{errorCode}
+</div>
+<Buy provider={myprovider} price={price} crowdsale={crowdsale} setIsLoading={() => {}} />
+</div>
 </>
 
   );
