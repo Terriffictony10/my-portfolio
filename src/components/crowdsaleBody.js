@@ -95,21 +95,110 @@ function CrowdsaleBody() {
     try {
       const address = await ethersSigner.getAddress();
       setAccount(address);
-      await sleep(2000);
+     
+
+      
+    } catch (error) {
+      errorCode = error;
+      console.error('Error loading blockchain data:', error);
+    }
+    setIsLoading(false);
+  }
+  loadBlockchainData();
+}, [isConnected, ethersSigner, ethersProvider, finalized, price, fundingGoal]);
+
+  useEffect(() => {
+  async function loadBlockchainData() {
+    // If connections are missing, just exit.
+    if (!isConnected || !ethersSigner || !ethersProvider) {
+      return;
+    }
+
+    // Helper function to wait for a given time in ms
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    try {
 
       setProvider(ethersSigner.provider);
-      await sleep(2000);
+      
+
+      
+    } catch (error) {
+      errorCode = error;
+      console.error('Error loading blockchain data:', error);
+    }
+    setIsLoading(false);
+  }
+  loadBlockchainData();
+}, [isConnected, ethersSigner, ethersProvider, finalized, price, fundingGoal]);
+
+  useEffect(() => {
+  async function loadBlockchainData() {
+    // If connections are missing, just exit.
+    if (!isConnected || !ethersSigner || !ethersProvider) {
+      return;
+    }
+
+    // Helper function to wait for a given time in ms
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    try {
 
       const mynetwork = await ethersSigner.provider.getNetwork();
       const chainId = mynetwork.chainId;
-      await sleep(2000);
+      
+
+      
+    } catch (error) {
+      errorCode = error;
+      console.error('Error loading blockchain data:', error);
+    }
+    setIsLoading(false);
+  }
+  loadBlockchainData();
+}, [isConnected, ethersSigner, ethersProvider, finalized, price, fundingGoal]);
+
+  useEffect(() => {
+  async function loadBlockchainData() {
+    // If connections are missing, just exit.
+    if (!isConnected || !ethersSigner || !ethersProvider) {
+      return;
+    }
+
+    // Helper function to wait for a given time in ms
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    try {
 
       const token = new ethers.Contract(
         config[chainId].token.address,
         TOKEN_ABI,
         ethersSigner
       );
-      await sleep(2000);
+      
+
+      
+    } catch (error) {
+      errorCode = error;
+      console.error('Error loading blockchain data:', error);
+    }
+    setIsLoading(false);
+  }
+  loadBlockchainData();
+}, [isConnected, ethersSigner, ethersProvider, finalized, price, fundingGoal]);
+
+  useEffect(() => {
+  async function loadBlockchainData() {
+    // If connections are missing, just exit.
+    if (!isConnected || !ethersSigner || !ethersProvider) {
+      return;
+    }
+
+    // Helper function to wait for a given time in ms
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    try {
+      
 
       const crowdsaleContract = new ethers.Contract(
         config[chainId].crowdsale.address,
@@ -117,42 +206,239 @@ function CrowdsaleBody() {
         ethersSigner
       );
       setCrowdsale(crowdsaleContract);
-      await sleep(2000);
+      
+
+      
+    } catch (error) {
+      errorCode = error;
+      console.error('Error loading blockchain data:', error);
+    }
+    setIsLoading(false);
+  }
+  loadBlockchainData();
+}, [isConnected, ethersSigner, ethersProvider, finalized, price, fundingGoal]);
+
+  useEffect(() => {
+  async function loadBlockchainData() {
+    // If connections are missing, just exit.
+    if (!isConnected || !ethersSigner || !ethersProvider) {
+      return;
+    }
+
+    // Helper function to wait for a given time in ms
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    try {
 
       const balance = await token.balanceOf(address);
       setAccountBalance(ethers.formatUnits(balance, 18));
-      await sleep(800);
+      
+
+    } catch (error) {
+      errorCode = error;
+      console.error('Error loading blockchain data:', error);
+    }
+    setIsLoading(false);
+  }
+  loadBlockchainData();
+}, [isConnected, ethersSigner, ethersProvider, finalized, price, fundingGoal]);
+
+  useEffect(() => {
+  async function loadBlockchainData() {
+    // If connections are missing, just exit.
+    if (!isConnected || !ethersSigner || !ethersProvider) {
+      return;
+    }
+
+    // Helper function to wait for a given time in ms
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    try {
 
       const priceRaw = await crowdsaleContract.price();
       const priceVal = ethers.formatUnits(priceRaw, 18);
       setPrice(priceVal);
-      await sleep(800);
+      
+
+      
+    } catch (error) {
+      errorCode = error;
+      console.error('Error loading blockchain data:', error);
+    }
+    setIsLoading(false);
+  }
+  loadBlockchainData();
+}, [isConnected, ethersSigner, ethersProvider, finalized, price, fundingGoal]);
+
+  useEffect(() => {
+  async function loadBlockchainData() {
+    // If connections are missing, just exit.
+    if (!isConnected || !ethersSigner || !ethersProvider) {
+      return;
+    }
+
+    // Helper function to wait for a given time in ms
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    try {
 
       const maxTokensRaw = await crowdsaleContract.maxTokens();
       const maxTokensVal = ethers.formatUnits(maxTokensRaw, 18);
       setMaxTokens(maxTokensVal);
-      await sleep(800);
+     
+
+    } catch (error) {
+      errorCode = error;
+      console.error('Error loading blockchain data:', error);
+    }
+    setIsLoading(false);
+  }
+  loadBlockchainData();
+}, [isConnected, ethersSigner, ethersProvider, finalized, price, fundingGoal]);
+
+  useEffect(() => {
+  async function loadBlockchainData() {
+    // If connections are missing, just exit.
+    if (!isConnected || !ethersSigner || !ethersProvider) {
+      return;
+    }
+
+    // Helper function to wait for a given time in ms
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    try {
+      
 
       const tokensSoldRaw = await crowdsaleContract.tokensSold();
       const tokensSoldVal = ethers.formatUnits(tokensSoldRaw, 18);
       setTokensSold(tokensSoldVal);
-      await sleep(800);
+      
+
+      
+    } catch (error) {
+      errorCode = error;
+      console.error('Error loading blockchain data:', error);
+    }
+    setIsLoading(false);
+  }
+  loadBlockchainData();
+}, [isConnected, ethersSigner, ethersProvider, finalized, price, fundingGoal]);
+
+  useEffect(() => {
+  async function loadBlockchainData() {
+    // If connections are missing, just exit.
+    if (!isConnected || !ethersSigner || !ethersProvider) {
+      return;
+    }
+
+    // Helper function to wait for a given time in ms
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    try {
 
       const fundingGoalWei = await crowdsaleContract.fundingGoal();
       setFundingGoal(ethers.formatUnits(fundingGoalWei, 18));
-      await sleep(800);
+      
+
+    } catch (error) {
+      errorCode = error;
+      console.error('Error loading blockchain data:', error);
+    }
+    setIsLoading(false);
+  }
+  loadBlockchainData();
+}, [isConnected, ethersSigner, ethersProvider, finalized, price, fundingGoal]);
+
+  useEffect(() => {
+  async function loadBlockchainData() {
+    // If connections are missing, just exit.
+    if (!isConnected || !ethersSigner || !ethersProvider) {
+      return;
+    }
+
+    // Helper function to wait for a given time in ms
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    try {
 
       const saleStartTimestamp = await crowdsaleContract.saleStart();
       setSaleStart(Number(saleStartTimestamp));
-      await sleep(800);
+      
+
+      
+    } catch (error) {
+      errorCode = error;
+      console.error('Error loading blockchain data:', error);
+    }
+    setIsLoading(false);
+  }
+  loadBlockchainData();
+}, [isConnected, ethersSigner, ethersProvider, finalized, price, fundingGoal]);
+
+  useEffect(() => {
+  async function loadBlockchainData() {
+    // If connections are missing, just exit.
+    if (!isConnected || !ethersSigner || !ethersProvider) {
+      return;
+    }
+
+    // Helper function to wait for a given time in ms
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    try {
 
       const saleEndTimestamp = await crowdsaleContract.saleEnd();
       setSaleEnd(Number(saleEndTimestamp));
+      
+
+    } catch (error) {
+      errorCode = error;
+      console.error('Error loading blockchain data:', error);
+    }
+    setIsLoading(false);
+  }
+  loadBlockchainData();
+}, [isConnected, ethersSigner, ethersProvider, finalized, price, fundingGoal]);
+
+  useEffect(() => {
+  async function loadBlockchainData() {
+    // If connections are missing, just exit.
+    if (!isConnected || !ethersSigner || !ethersProvider) {
+      return;
+    }
+
+    // Helper function to wait for a given time in ms
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    try {
+      
       await sleep(800);
 
       const finalizedStatus = await crowdsaleContract.finalized();
       setFinalized(finalizedStatus);
-      await sleep(800);
+      
+
+      
+    } catch (error) {
+      errorCode = error;
+      console.error('Error loading blockchain data:', error);
+    }
+    setIsLoading(false);
+  }
+  loadBlockchainData();
+}, [isConnected, ethersSigner, ethersProvider, finalized, price, fundingGoal]);
+
+  useEffect(() => {
+  async function loadBlockchainData() {
+    // If connections are missing, just exit.
+    if (!isConnected || !ethersSigner || !ethersProvider) {
+      return;
+    }
+
+    // Helper function to wait for a given time in ms
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    try {
 
       const ownerAddress = await crowdsaleContract.owner();
       setOwner(ownerAddress);
@@ -164,7 +450,6 @@ function CrowdsaleBody() {
   }
   loadBlockchainData();
 }, [isConnected, ethersSigner, ethersProvider, finalized, price, fundingGoal]);
-
 
   // Update isLive based on saleStart timestamp.
   useEffect(() => {
