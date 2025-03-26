@@ -6,8 +6,8 @@ import { ShinyButton } from './magicui/shiny-button';
 
 const Buy = ({ provider, price, crowdsale, setIsLoading }) => {
   const { isConnected } = useAppKitAccount();
-  const ethersProvider = useEthersProvider({ chainId: 84532 });
-  const ethersSigner = useEthersSigner({ chainId: 84532 });
+  const ethersProvider = useEthersProvider({ chainId: 8453 });
+  const ethersSigner = useEthersSigner({ chainId: 8453 });
   const [amount, setAmount] = useState('0');
   const [isWaiting, setIsWaiting] = useState(false);
 

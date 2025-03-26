@@ -83,7 +83,14 @@ function CrowdsaleBody() {
   let errorCode;
 
   useEffect(() => {
+    let timeoutId;
     async function loadBlockchainData() {
+
+      if (!isConnected || !ethersSigner || !ethersProvider) {
+      // Retry after a short delay
+      timeoutId = setTimeout(loadBlockchainData, 500);
+      return;
+    }
       if (isConnected && ethersSigner && ethersProvider) {
         try {
           const address = await ethersSigner.getAddress();
@@ -128,7 +135,7 @@ function CrowdsaleBody() {
       }
     }
     loadBlockchainData();
-  }, [isConnected, ethersSigner, ethersProvider, finalized]);
+  }, [isConnected, ethersSigner, ethersProvider, finalized, price, fundingGoal]);
 
   // Update isLive based on saleStart timestamp.
   useEffect(() => {
