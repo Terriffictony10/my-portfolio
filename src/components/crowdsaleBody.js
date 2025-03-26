@@ -592,7 +592,7 @@ function CrowdsaleBody() {
 </div>
 <div style={{ position: "absolute", top: "90px"}}>
 <div>
-<strong style={{ color: "white", fontSize: "1.5rem"}} className="mobileFont1">Status:</strong> {account}{myprovider}
+<strong style={{ color: "white", fontSize: "1.5rem"}} className="mobileFont1">Status:</strong> {statusText}
 </div>
 <div>
 <strong style={{ color: "white", fontSize: "1.5rem"}} className="mobileFont1">Goal:</strong> {fundingGoal} ETH
