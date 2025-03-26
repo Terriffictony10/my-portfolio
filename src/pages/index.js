@@ -369,18 +369,7 @@ export default function Home() {
         </div>
       </WarpBackground>
      
-      <div style={{ display: "flex-center", backgroundColor: "black"}}>
-      <div >
-        <WalletConnector />
-      </div>
-      <div style={{ position: "absolute", top: "0px", left: '120px', fontSize: "2.3rem", color: "white"}}>
-      <div className="mobileFont1" >
-      decentratality
-      </div>
-      </div>
-      <CrowdsaleBody />
-      </div>
-      </div>
+      
      
     </>
   );

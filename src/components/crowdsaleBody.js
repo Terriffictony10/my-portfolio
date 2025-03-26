@@ -570,6 +570,7 @@ function CrowdsaleBody() {
       top: '1090px',
     }}
     >
+
       <Buy provider={myprovider} price={price} crowdsale={crowdsale} setIsLoading={() => {}} />
     </div>
     {myprovider && crowdsale && <AutoFinalize provider={myprovider} crowdsale={crowdsale} />}
@@ -590,21 +591,7 @@ function CrowdsaleBody() {
       )}
   </div>
 </div>
-<div style={{ position: "absolute", top: "90px"}}>
-<div>
-<strong style={{ color: "white", fontSize: "1.5rem"}} className="mobileFont1">Status:</strong> {statusText}
-</div>
-<div>
-<strong style={{ color: "white", fontSize: "1.5rem"}} className="mobileFont1">Goal:</strong> {fundingGoal} ETH
-</div>
-<div>
-<strong style={{ color: "white", fontSize: "1.5rem"}} className="mobileFont1">Price:</strong> {price} ETH
-</div>
-<div>
-{errorCode}
-</div>
-<Buy provider={myprovider} price={price} crowdsale={crowdsale} setIsLoading={() => {}} />
-</div>
+
 </>
 
   );
