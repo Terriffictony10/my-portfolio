@@ -80,6 +80,7 @@ function CrowdsaleBody() {
   const ethersProvider = useEthersProvider({ chainId: 8453 });
   const ethersSigner = useEthersSigner({ chainId: 8453 });
   const { isConnected } = useAppKitAccount();
+  let errorCode;
 
   useEffect(() => {
     async function loadBlockchainData() {
@@ -120,6 +121,7 @@ function CrowdsaleBody() {
           const ownerAddress = await crowdsaleContract.owner();
           setOwner(ownerAddress);
         } catch (error) {
+          errorCode = error;
           console.error('Error loading blockchain data:', error);
         }
         setIsLoading(false);
@@ -276,6 +278,9 @@ function CrowdsaleBody() {
 </div>
 <div>
 <strong style={{ color: "white", fontSize: "1.5rem"}} className="mobileFont1">Price:</strong> {price} ETH
+</div>
+<div>
+{errorCode}
 </div>
 <Buy provider={myprovider} price={price} crowdsale={crowdsale} setIsLoading={() => {}} />
 </div>
