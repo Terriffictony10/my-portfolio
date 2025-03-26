@@ -95,21 +95,21 @@ function CrowdsaleBody() {
     try {
       const address = await ethersSigner.getAddress();
       setAccount(address);
-      await sleep(800);
+      await sleep(2000);
 
       setProvider(ethersSigner.provider);
-      await sleep(800);
+      await sleep(2000);
 
       const mynetwork = await ethersSigner.provider.getNetwork();
       const chainId = mynetwork.chainId;
-      await sleep(800);
+      await sleep(2000);
 
       const token = new ethers.Contract(
         config[chainId].token.address,
         TOKEN_ABI,
         ethersSigner
       );
-      await sleep(800);
+      await sleep(2000);
 
       const crowdsaleContract = new ethers.Contract(
         config[chainId].crowdsale.address,
@@ -117,7 +117,7 @@ function CrowdsaleBody() {
         ethersSigner
       );
       setCrowdsale(crowdsaleContract);
-      await sleep(800);
+      await sleep(2000);
 
       const balance = await token.balanceOf(address);
       setAccountBalance(ethers.formatUnits(balance, 18));
@@ -307,7 +307,7 @@ function CrowdsaleBody() {
 </div>
 <div style={{ position: "absolute", top: "90px"}}>
 <div>
-<strong style={{ color: "white", fontSize: "1.5rem"}} className="mobileFont1">Status:</strong> {account}
+<strong style={{ color: "white", fontSize: "1.5rem"}} className="mobileFont1">Status:</strong> {account}{myprovider}
 </div>
 <div>
 <strong style={{ color: "white", fontSize: "1.5rem"}} className="mobileFont1">Goal:</strong> {fundingGoal} ETH
