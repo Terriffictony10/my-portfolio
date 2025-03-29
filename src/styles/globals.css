@@ -978,9 +978,6 @@ nav li:first-child {
 
 /* Hide all content on mobile devices with width less than 600px */
 @media screen and (max-width: 600px) {
-  .navbar {
-    width: 50%;
-  }
   .index-title {
   transform: translateX(-50vw);
   font-size: 3.0rem !important;
@@ -992,7 +989,7 @@ nav li:first-child {
     maxWidth: 400px !important;
     }
   .warp-background {
-    width: 295vw !important;
+    width: 290vw !important;
   }  
   .video {
     width: 100vw;
