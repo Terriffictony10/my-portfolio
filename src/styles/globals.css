@@ -1006,8 +1006,11 @@ nav li:first-child {
     font-size: 1.0rem;
   }
   .mobile-buy {
-    width: 100vw;
+    width: 80vw;
     background-color: bisque;
+  }
+  .crowdsale-data {
+    width: 30vw;
   }
 }
 
