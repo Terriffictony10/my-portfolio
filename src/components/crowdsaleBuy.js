@@ -34,7 +34,7 @@ const Buy = ({ provider, price, crowdsale, setIsLoading }) => {
   };
 
   return (
-    <form onSubmit={buyHandler} style={{transform: 'translate(-0%, 20%)'}}>
+    <form onSubmit={buyHandler} style={{transform: 'translate(-0%, 20%)'}} className="mobile-buy">
       <input
         type="number"
         placeholder="Enter token amount"

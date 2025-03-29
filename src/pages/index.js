@@ -64,11 +64,10 @@ const Navbar = ({ account, tokenBalance }) => {
       </div>
       <div className="navbar-right relative">
         <div
-          className="decentratalityfont"
+          className="decentratalityfont index-title"
           // On mobile, adjust the font size and transform
           style={{
             fontSize: '5rem',
-            transform: 'translateX(-350px)',
           }}
         >
           Decentratality
@@ -281,14 +280,14 @@ export default function Home() {
         beamDelayMin={0}
         beamDuration={4}
         gridColor="hsl(0, 0%, 80%)"
-        className="hideOnMobile min-h-screen "
+        className="hideOnMobile warp-background min-h-screen "
 
       >
         {/* Fixed Top Navbar */}
         <Navbar account={account} tokenBalance={tokenBalance} />
 
         {/* Fixed–max-width container for main content */}
-        <div className="hideOnMobile container mx-auto px-4 " style={{ maxWidth: '1200px', backgroundColor: "black" }}>
+        <div className="hideOnMobile home-container mx-auto px-4 " style={{ backgroundColor: "black" }}>
           <div className="hideOnMobile main-content ">
             <div className="hideOnMobile intro-section text-center ">
               <h1>Welcome to Decentratality</h1>
@@ -312,7 +311,7 @@ export default function Home() {
                 <div className="flex w-full max-w-5xl gap-4 my-4 mx-auto">
                   <div className="video-spot flex-1 min-w-[300px]">
                     <iframe
-                      className="w-full"
+                      className="w-full video"
                       height="315"
                       src="https://www.youtube.com/embed/y4tL3pWq-Os"
                       title="YouTube video player"
@@ -323,7 +322,7 @@ export default function Home() {
                   </div>
                   <div className="video-spot flex-1 min-w-[300px]">
                     <iframe
-                      className="w-full"
+                      className="w-full video2"
                       height="315"
                       src="https://www.youtube.com/embed/ICx8HkmynZc?si=vU6BeJmhvtaw-GsX"
                       title="YouTube video player"

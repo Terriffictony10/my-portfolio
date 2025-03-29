@@ -189,13 +189,13 @@ function CrowdsaleBody() {
               }}>
   {/* Left Frame: Progress Bar */}
   <div className="progress-frame p-4 border border-white rounded-lg flex flex-col items-center" style={{ height: '400px', width: '400px', backgroundColor: 'black'}}>
-    <p className="text-white decentratalityfont mb-5 " style={{ 
+    <p className="text-white mobile-text-white decentratalityfont mb-5 " style={{ 
       position: 'absolute',
       fontSize: "2.0rem", width: '500px',
       top: '850px',
       left: '250px',
     } }>Tokens Sold</p>
-    <div className="w-48 h-4 bg-gray-200 rounded-full overflow-hidden" style={{ 
+    <div className="w-48 mobile-text-white h-4 bg-gray-200 rounded-full overflow-hidden" style={{ 
       position: 'absolute', 
       width: '300px',
       top: '1050px',
@@ -207,7 +207,7 @@ function CrowdsaleBody() {
         style={{ width: `${(tokensSoldNumber / maxTokensNumber) * 100}%` }}
       ></div>
     </div>
-    <p className="text-white mt-2 text-xs" style={{
+    <p className="text-white mobile-text-white mt-2 text-xs" style={{
       position: 'absolute',
       top: '970px',
       left: '450px',
@@ -218,7 +218,7 @@ function CrowdsaleBody() {
   
   {/* Right Frame: Single Row Data & Actions */}
   <div className="crowdsale-data" style={{ height: '400px', backgroundColor: 'black', position: 'absolute', top: '-10px', left: '40vw'}}>
-    <div className="data-item text-white text-base" 
+    <div className="data-item mobile-text-buy text-white text-base" 
     style={{
       position: 'absolute',
       width: '500px',
@@ -226,7 +226,7 @@ function CrowdsaleBody() {
     }}>
       <strong>Price:</strong> {price} ETH
     </div>
-    <div className="data-item text-white text-base"
+    <div className="data-item mobile-text-buy text-white text-base"
     style={{
       position: 'absolute',
       width: '500px',
@@ -234,7 +234,7 @@ function CrowdsaleBody() {
     }}>
       <strong>Status:</strong> {statusText}
     </div>
-    <div className="data-item text-white text-base"
+    <div className="data-item mobile-text-buy text-white text-base"
     style={{
       position: 'absolute',
       width: '500px',
@@ -242,7 +242,7 @@ function CrowdsaleBody() {
     }}>
       <strong>Goal:</strong> {fundingGoal} ETH
     </div>
-    <div className="data-item text-white text-base"
+    <div className="data-item mobile-text-buy text-white text-base"
     style={{
       position: 'absolute',
       width: '500px',
@@ -250,7 +250,7 @@ function CrowdsaleBody() {
     }}>
       Join the pre-sale for the token that will drive the hospitality industry for years to come!!
     </div>
-    <div className="buy-button"
+    <div className="buy-button mobile-text-buy"
     style={{
       position: 'absolute',
       top: '1040px',
