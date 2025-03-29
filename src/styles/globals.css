@@ -1004,7 +1004,7 @@ nav li:first-child {
   .mobile-text-buy {
     transform: translate(85vw, -25vh);
     font-size: 1.0rem;
-    width: 35vw;
+    width: 5vw;
   }
   .mobile-buy {
     width: 80vw;
