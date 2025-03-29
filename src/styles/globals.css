@@ -1002,7 +1002,7 @@ nav li:first-child {
     transform: translate(-55vw, -35vh);
   }
   .mobile-text-buy {
-    transform: translate(105vw, -35vh);
+    transform: translate(85vw, -35vh);
     font-size: 1.5rem;
   }
   .mobile-buy {
