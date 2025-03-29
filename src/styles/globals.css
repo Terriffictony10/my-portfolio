@@ -979,7 +979,7 @@ nav li:first-child {
 /* Hide all content on mobile devices with width less than 600px */
 @media screen and (max-width: 600px) {
   .index-title {
-  transform: translateX(-100vw);
+  transform: translateX(-50vw);
   font-size: 3.0rem !important;
     }
   .account-info-navbar {
@@ -1002,7 +1002,7 @@ nav li:first-child {
     transform: translate(-55vw, -35vh);
   }
   .mobile-text-buy {
-    transform: translate(125vw, -35vh);
+    transform: translate(125vw, -55vh);
     font-size: 1.5rem;
   }
   .mobile-buy {
