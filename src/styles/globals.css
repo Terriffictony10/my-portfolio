@@ -989,7 +989,7 @@ nav li:first-child {
     maxWidth: 400px !important;
     }
   .warp-background {
-    width: 100vw !important;
+    width: 200vw !important;
   }  
   .video {
     width: 100vw;
