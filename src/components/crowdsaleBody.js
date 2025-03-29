@@ -112,7 +112,6 @@ function CrowdsaleBody() {
           const balance = await token.balanceOf(address);
           setAccountBalance(ethers.formatUnits(balance, 18));
           const priceVal = ethers.formatUnits(await crowdsaleContract.price(), 18);
-         const priceVal = ethers.formatUnits(await crowdsaleContract.price(), 18);
           await new Promise(resolve => setTimeout(resolve, 1000));
           setPrice(priceVal);
 
