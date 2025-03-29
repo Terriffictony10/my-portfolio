@@ -83,75 +83,108 @@ function CrowdsaleBody() {
   let errorCode;
 
   useEffect(() => {
-    let timeoutId;
-    async function loadBlockchainData() {
+  let timeoutId;
+  let cancelled = false;
 
-      if (!isConnected || !ethersSigner || !ethersProvider) {
-      // Retry after a short delay
+  async function loadBlockchainData() {
+    // If not connected yet, try again shortly.
+    if (!isConnected || !ethersSigner || !ethersProvider) {
       timeoutId = setTimeout(loadBlockchainData, 500);
       return;
     }
-      if (isConnected && ethersSigner && ethersProvider) {
-        try {
-          const address = await ethersSigner.getAddress();
-          setAccount(address);
-          setProvider(ethersSigner.provider);
-          const mynetwork = await ethersSigner.provider.getNetwork();
-          const chainId = mynetwork.chainId;
-          const token = new ethers.Contract(
-            config[chainId].token.address,
-            TOKEN_ABI,
-            ethersSigner
-          );
-          const crowdsaleContract = new ethers.Contract(
-            config[chainId].crowdsale.address,
-            CROWDSALE_ABI,
-            ethersSigner
-          );
-          setCrowdsale(crowdsaleContract);
-          const balance = await token.balanceOf(address);
-          setAccountBalance(ethers.formatUnits(balance, 18));
-          const priceVal = ethers.formatUnits(await crowdsaleContract.price(), 18);
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          setPrice(priceVal);
 
-          const maxTokensVal = ethers.formatUnits(await crowdsaleContract.maxTokens(), 18);
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          setMaxTokens(maxTokensVal);
+    try {
+      // Get account address
+      const address = await ethersSigner.getAddress();
+      setAccount(address);
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-          const tokensSoldVal = ethers.formatUnits(await crowdsaleContract.tokensSold(), 18);
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          setTokensSold(tokensSoldVal);
+      // Set provider from signer
+      setProvider(ethersSigner.provider);
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-          const fundingGoalWei = await crowdsaleContract.fundingGoal();
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          setFundingGoal(ethers.formatUnits(fundingGoalWei, 18));
+      // Get network details and contracts
+      const mynetwork = await ethersSigner.provider.getNetwork();
+      const chainId = mynetwork.chainId;
+      
+      const token = new ethers.Contract(
+        config[chainId].token.address,
+        TOKEN_ABI,
+        ethersSigner
+      );
+      
+      const crowdsaleContract = new ethers.Contract(
+        config[chainId].crowdsale.address,
+        CROWDSALE_ABI,
+        ethersSigner
+      );
+      setCrowdsale(crowdsaleContract);
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-          const saleStartTimestamp = await crowdsaleContract.saleStart();
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          setSaleStart(Number(saleStartTimestamp));
+      // Get token balance
+      const balance = await token.balanceOf(address);
+      setAccountBalance(ethers.formatUnits(balance, 18));
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-          const saleEndTimestamp = await crowdsaleContract.saleEnd();
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          setSaleEnd(Number(saleEndTimestamp));
+      // Get and set token price
+      const priceVal = ethers.formatUnits(await crowdsaleContract.price(), 18);
+      setPrice(priceVal);
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-          const finalizedStatus = await crowdsaleContract.finalized();
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          setFinalized(finalizedStatus);
+      // Get and set max tokens
+      const maxTokensVal = ethers.formatUnits(await crowdsaleContract.maxTokens(), 18);
+      setMaxTokens(maxTokensVal);
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-          const ownerAddress = await crowdsaleContract.owner();
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          setOwner(ownerAddress);
+      // Get and set tokens sold
+      const tokensSoldVal = ethers.formatUnits(await crowdsaleContract.tokensSold(), 18);
+      setTokensSold(tokensSoldVal);
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-        } catch (error) {
-          errorCode = error;
-          console.error('Error loading blockchain data:', error);
-        }
-        setIsLoading(false);
-      }
+      // Get and set funding goal
+      const fundingGoalWei = await crowdsaleContract.fundingGoal();
+      setFundingGoal(ethers.formatUnits(fundingGoalWei, 18));
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Get and set sale start time
+      const saleStartTimestamp = await crowdsaleContract.saleStart();
+      setSaleStart(Number(saleStartTimestamp));
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Get and set sale end time
+      const saleEndTimestamp = await crowdsaleContract.saleEnd();
+      setSaleEnd(Number(saleEndTimestamp));
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Get and set finalized status
+      const finalizedStatus = await crowdsaleContract.finalized();
+      setFinalized(finalizedStatus);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Get and set owner address
+      const ownerAddress = await crowdsaleContract.owner();
+      setOwner(ownerAddress);
+
+      // At this point every line has returned its data.
+      // (If you want to stop refreshing once all data is loaded, you could return here.)
+    } catch (error) {
+      console.error('Error loading blockchain data:', error);
     }
-    loadBlockchainData();
-  }, [isConnected, ethersSigner, ethersProvider, finalized, price, fundingGoal]);
+
+    // If the component is still mounted, try again in 500ms.
+    if (!cancelled) {
+      timeoutId = setTimeout(loadBlockchainData, 500);
+    }
+  }
+
+  loadBlockchainData();
+
+  return () => {
+    cancelled = true;
+    clearTimeout(timeoutId);
+  };
+}, [isConnected, ethersSigner, ethersProvider]);
+
 
   // Update isLive based on saleStart timestamp.
   useEffect(() => {
