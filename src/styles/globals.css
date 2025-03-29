@@ -999,10 +999,10 @@ nav li:first-child {
     transform: translateX(-100vw);
   }
   .mobile-text-white {
-    transform: translate(-55vw, -50vh);
+    transform: translate(-55vw, -15vh);
   }
   .mobile-text-buy {
-    transform: translate(85vw, -50vh);
+    transform: translate(85vw, -15vh);
     font-size: 1.0rem;
   }
   .mobile-buy {
