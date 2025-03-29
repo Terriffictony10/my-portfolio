@@ -1004,14 +1004,13 @@ nav li:first-child {
   .mobile-text-buy {
     transform: translate(85vw, -25vh);
     font-size: 1.0rem;
+    width: 35vw;
   }
   .mobile-buy {
     width: 80vw;
     background-color: bisque;
   }
-  .crowdsale-data {
-    width: 30vw;
-  }
+
 }
 
 
