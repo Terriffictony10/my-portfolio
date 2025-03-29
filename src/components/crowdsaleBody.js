@@ -112,21 +112,38 @@ function CrowdsaleBody() {
           const balance = await token.balanceOf(address);
           setAccountBalance(ethers.formatUnits(balance, 18));
           const priceVal = ethers.formatUnits(await crowdsaleContract.price(), 18);
+         const priceVal = ethers.formatUnits(await crowdsaleContract.price(), 18);
+          await new Promise(resolve => setTimeout(resolve, 1000));
           setPrice(priceVal);
+
           const maxTokensVal = ethers.formatUnits(await crowdsaleContract.maxTokens(), 18);
+          await new Promise(resolve => setTimeout(resolve, 1000));
           setMaxTokens(maxTokensVal);
+
           const tokensSoldVal = ethers.formatUnits(await crowdsaleContract.tokensSold(), 18);
+          await new Promise(resolve => setTimeout(resolve, 1000));
           setTokensSold(tokensSoldVal);
+
           const fundingGoalWei = await crowdsaleContract.fundingGoal();
+          await new Promise(resolve => setTimeout(resolve, 1000));
           setFundingGoal(ethers.formatUnits(fundingGoalWei, 18));
+
           const saleStartTimestamp = await crowdsaleContract.saleStart();
+          await new Promise(resolve => setTimeout(resolve, 1000));
           setSaleStart(Number(saleStartTimestamp));
+
           const saleEndTimestamp = await crowdsaleContract.saleEnd();
+          await new Promise(resolve => setTimeout(resolve, 1000));
           setSaleEnd(Number(saleEndTimestamp));
+
           const finalizedStatus = await crowdsaleContract.finalized();
+          await new Promise(resolve => setTimeout(resolve, 1000));
           setFinalized(finalizedStatus);
+
           const ownerAddress = await crowdsaleContract.owner();
+          await new Promise(resolve => setTimeout(resolve, 1000));
           setOwner(ownerAddress);
+
         } catch (error) {
           errorCode = error;
           console.error('Error loading blockchain data:', error);
