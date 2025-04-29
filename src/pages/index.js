@@ -141,7 +141,7 @@ export default function Home() {
         feeling inadequate for not being able to meet customer needs when in reality, the issue is an outdated vein of your business systems. Decentratality aims to solve all of that, by making an industry
         standard POS system readily available through any web browser. We hope to start as a subscription service that provides subscribers with access to a web based system that uses the blockchain to model
         the asset structure of your restaurant in a way never before possible all within a web based system. If this sounds interesting, and you want to know more, check out the videos below!! </div>
-      <div className="flex items-center w-full gap-4 my-4 mx-auto">
+      <div className="flex flex-col items-center gap-4 my-4 mx-auto">
 
                   <div className="video-spot flex-1 min-w-[300px]">
                   <p style={{ fontSize: "1.4rem"}}>Tutorial</p>
