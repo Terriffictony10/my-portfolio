@@ -129,7 +129,7 @@ export default function Home() {
   }, [isConnected, ethersSigner, ethersProvider])
 
    return (
-   <div className="relative min-h-screen bg-gradient-to-b from-blue-200 to-blue-100 flex flex-col items-center" style={{ paddingBottom: '200px' }}>
+   <div className="relative min-h-screen min-w-screen bg-gradient-to-b from-blue-200 to-blue-100 flex flex-col items-center" style={{ paddingBottom: '200px' }}>
      {/* Wallet button top-right */}
       <div className="absolute top-4 right-4 z-50">
         <WalletConnector />

@@ -941,10 +941,6 @@ nav li:first-child {
 
 /* Hide all content on mobile devices with width less than 600px */
 @media screen and (max-width: 450px) {
-  .video-spot iframe {
-    height: 100px;
-    width: 170px !important;
-  }
   .index-title {
     transform: translateX(-50vw);
     font-size: 3.0rem !important;
