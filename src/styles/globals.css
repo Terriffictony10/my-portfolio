@@ -941,31 +941,7 @@ nav li:first-child {
 
 /* Hide all content on mobile devices with width less than 600px */
 @media screen and (max-width: 450px) {
-  .index-title {
-    transform: translateX(-50vw);
-    font-size: 3.0rem !important;
-  }
-  .account-info-navbar {
-    display: none;
-  }
-  .home-container {
-    maxWidth: 400px !important;
-  }
-  .warp-background {
-    width: 280vw !important;
-  }
-  .mobile-text-white {
-    transform: translate(-55vw, -25vh);
-  }
-  .mobile-text-buy {
-    transform: translate(85vw, -25vh);
-    font-size: 1.0rem;
-    width: 70vw !important;
-  }
-  .mobile-buy {
-    width: 80vw;
-    background-color: bisque;
-  }
+  
 }
 
 .mobileFont1 {
