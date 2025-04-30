@@ -942,11 +942,12 @@ nav li:first-child {
 /* Hide all content on mobile devices with width less than 600px */
 @media screen and (max-width: 450px) {
   .mobileProgressBar{
-    width: 30px;
+    width: 90px;
   }
   .crowdsale-buy-text{
     font-size: 0.7rem;
-    transform: translateX(20px) !important;
+    transform: translateX(0px) !important;
+    width: 90px;
   }
   .crowdsale-buy-text-2{
     font-size: 0.5rem !important;
