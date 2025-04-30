@@ -134,7 +134,7 @@ export default function Home() {
       <div className="absolute top-4 right-4 z-50">
         <WalletConnector />
       </div>
-      <h1 className="text-4xl font-bold text-gray-800 mt-16">Decentratality</h1>
+      <h1 className="text-4xl font-bold text-gray-800 mt-16" style={{ paddingTop: '20px', paddingBottom: '20px' }}>Decentratality</h1>
 
      <div className="w-[70%]" style={{ border: '1px solid black' }}> Hello, have you ever worked at a hotel that is owned by a super big company, or even a restaurant owned by a family, if you have, I know that you know that
         families and super big companies are tired of loseing time and money because of outdated systems that havent been maintained or are just not reliable anymore. I have been there too,
@@ -182,13 +182,13 @@ export default function Home() {
         </div>
 
         {/* Right: details & buy form */}
-        <div className="flex-1 p-6 flex flex-col justify-center space-y-6">
+        <div className="crowdsale-buy-text-2 flex-1 p-6 flex flex-col justify-center space-y-6">
           <div>
-            <h2 className="text-xl font-semibold text-gray-800">Price</h2>
+            <h2 className=" crowdsale-buy-text-3 text-xl font-semibold text-gray-800">Price</h2>
             <p className="mt-1 text-gray-700">{price} ETH</p>
           </div>
           <div>
-            <h2 className="text-xl font-semibold text-gray-800">Status</h2>
+            <h2 className="crowdsale-buy-text-3 text-xl font-semibold text-gray-800">Status</h2>
             <p className="mt-1 text-gray-700">
               {saleStart === 0
                 ? 'Not yet scheduled'
@@ -198,7 +198,7 @@ export default function Home() {
             </p>
           </div>
           <div>
-            <h2 className="text-xl font-semibold text-gray-800">Funding Goal</h2>
+            <h2 className="crowdsale-buy-text-3 text-xl font-semibold text-gray-800">Funding Goal</h2>
             <p className="mt-1 text-gray-700">{fundingGoal} ETH</p>
           </div>
 

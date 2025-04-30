@@ -10,6 +10,7 @@ const CrowdsaleProgress = ({ maxTokens, tokensSold, fundingGoal }) => {
   return (
     <div style={{ color: "black"}}>
       <AnimatedCircularProgressBar
+      className="mobileProgressBar"
         value={tokensSoldNum}
         min={0}
         max={maxTokensNum}
@@ -19,7 +20,7 @@ const CrowdsaleProgress = ({ maxTokens, tokensSold, fundingGoal }) => {
       <p className="crowdsale-buy-text mt-2 text-xl text-black" style={{ transform: 'translateX(-50px)' }}>
         {tokensSoldNum} / {maxTokensNum} tokens sold ( {currentPercent}% )
       </p>
-      <p className="info-text mt-2 text-black" style={{ transform: 'translateX(-50px)' }}>
+      <p className=" crowdsale-buy-text info-text mt-2 text-black" style={{ transform: 'translateX(-50px)' }}>
         {((tokensSoldNum / maxTokensNum) * fundingGoalNum).toFixed(2)} ETH raised out of {fundingGoalNum} ETH
       </p>
     </div>

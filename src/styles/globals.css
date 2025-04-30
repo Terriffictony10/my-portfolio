@@ -941,7 +941,24 @@ nav li:first-child {
 
 /* Hide all content on mobile devices with width less than 600px */
 @media screen and (max-width: 450px) {
-  
+  .mobileProgressBar{
+    width: 30px;
+  }
+  .crowdsale-buy-text{
+    font-size: 0.7rem;
+    transform: translateX(20px) !important;
+  }
+  .crowdsale-buy-text-2{
+    font-size: 0.5rem !important;
+    transform: translateX(10px) !important;
+  }
+  .crowdsale-buy-text-3{
+    font-size: 0.5rem !important;
+    
+  }
+  .buy-text-input{
+    width: 110px!important;
+  }
 }
 
 .mobileFont1 {
